@@ -2,7 +2,7 @@ fluidPage(theme = shinytheme("flatly"),
   useShinydashboard(),
   useShinyjs(),
 
-  titlePanel(title = div(img(src=paste0(project_id,".PNG"), width ='120'), paste0("Benefits from Nature in ",sf_stud_geom$siteNAME," round I")), windowTitle = "Nature benefits I"),
+  titlePanel(title = div(img(src=paste0(project_id,".PNG"), width ='120'), paste0("Benefits from Nature in ",sf_stud_geom$siteNAME), h4("Session I")), windowTitle = "Nature benefits I"),
   shinyWidgets::progressBar(id = "pb", value = 0, display_pct = TRUE),
   tabsetPanel(id = "inTabset",
               tabPanel(title = "", value = "p0",
@@ -23,9 +23,9 @@ fluidPage(theme = shinytheme("flatly"),
                        bslib::value_box(
                          title = "",
                          value = "",
-                         h5("After some general questions about yourself, we ask you to map areas that give you different benefits from nature   on an interactive map of Trondheim (instructions are provided). In an optional  second session, for which you will receive a new link in a few days, you will see where the benefits from nature can be found for Trondheim municipality based on all participants’ inputs, and if you wish, you can modify and update your mapping based on the insights you got from their mapping. Each of these mapping tasks takes about 20 minutes to complete."),
+                         h5(paste0("After some general questions about yourself, we ask you to map areas that give you different benefits from nature   on an interactive map of ",sf_stud_geom$siteNAME," (instructions are provided). In an optional  second session, for which you will receive a new link in a few days, you will see where the benefits from nature can be found for ",sf_stud_geom$siteNAME," based on all participants’ inputs, and if you wish, you can modify and update your mapping based on the insights you got from their mapping")),
                          br(),
-                         h5("Each of these mapping tasks takes about 20 minutes to complete"),
+                         h5("Each of these mapping sessions takes about 30 minutes to complete"),
                          showcase = bs_icon("clock-history"),
                          theme = "white"
                        ),
@@ -76,7 +76,7 @@ fluidPage(theme = shinytheme("flatly"),
   uiOutput("tabs"),
   uiOutput("ahp_group"),
   uiOutput("ahp_single"),
-  uiOutput("ahp_dist_1"),
+  uiOutput("ahp_dist"),
   uiOutput("final")
   
 )

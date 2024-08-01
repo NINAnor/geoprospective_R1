@@ -11,7 +11,7 @@ mod_ahp_single_ui <- function(id){
   ns <- NS(id)
   tagList(
     mainPanel(
-      h3("Comparison of single Benefits from nature"),
+      h3("Prioritise benefits from Nature II"),
       br(),
       bslib::value_box(
         title= "",

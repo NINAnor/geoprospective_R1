@@ -332,9 +332,9 @@ function(input, output, session) {
   
   
   observeEvent(rv$x(),{
-    removeUI("#ahp_single_1")
+    removeUI("#ahp_single")
     updateProgressBar(session = session, id = "pb", value = 95)
-    output$ahp_single<-renderUI({
+    output$ahp_dist<-renderUI({
       tagList(
         mod_dist_impact_ui("ahp_dist_1")
         
@@ -345,7 +345,7 @@ function(input, output, session) {
   
   
   observeEvent(rv$y(),{
-    removeUI("#ahp_dist_1")
+    removeUI("#ahp_dist")
     updateProgressBar(session = session, id = "pb", value = 100)
     output$final<-renderUI({
       tagList(
@@ -354,7 +354,7 @@ function(input, output, session) {
           showcase_layout = "left center",
           theme = "success",
           showcase = bs_icon("check-square"),
-          h5("This is the end of the first round of the study, you can now close the browser. Thank you very much for your participation."),
+          h5("This is the end of the first session of the study, you can now close the browser. Thank you very much for your participation. In case you provided your email, we will contact you soon for the second session."),
        )
 
     )

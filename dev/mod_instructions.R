@@ -60,7 +60,12 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
                      circleOptions = F,
                      markerOptions = F,
                      circleMarkerOptions = F,
-                     rectangleOptions = T,
+                     rectangleOptions = drawRectangleOptions(
+                       showArea = TRUE,
+                       shapeOptions = drawShapeOptions(
+                         clickable = TRUE
+                       )
+                     ),
                      singleFeature = FALSE,
                      editOptions = editToolbarOptions(selectedPathOptions = selectedPathOptions()))%>%
       addLayersControl(baseGroups = c("Openstreet map","World image"),
@@ -104,7 +109,8 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
           br(),
           h4("For training purposes, draw a maximum of five rectangles that show areas suitable for a Sunday hike in the study area"),
           br(),
-          # h5(""),
+          h5("The minimum area of a rectangle is app. 62.5 ha or app. 70 soccer fields."),
+          h5("You will see the [ha] during you draw the rectangle. In addition, the app indicates if your last drawn polygon was too small or too big."),
           # br(),
           editModUI(ns("map_sel")),
           fluidRow(
@@ -147,11 +153,12 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
       showModal(modalDialog(
         easyClose = T,
         size = "l",
-        title = "How draw a rectangle",
-        h3("To define your areas, you can draw a maximum of five rectangles on the map."),
-        h4("-click the rectangle button at the left side of the map"),
-        h4("-click on the map where you want to place a corner of the rectangle, press and hold the left mouse key "),
-        h4("-draw your rectangle and release the mouse. You can draw as many rectangles as you want."),
+        title = "",
+        h3("How draw a rectangle"),
+        h5("To define your areas, you can draw a maximum of five rectangles on the map."),
+        h5("-click the rectangle button at the left side of the map"),
+        h5("-click on the map where you want to place a corner of the rectangle, press and hold the left mouse key "),
+        h5("-draw your rectangle and release the mouse"),
         br(),
         HTML('<iframe src="https://drive.google.com/file/d/1L-Zt4FETqCQuJmzg-Ff2qr_Vc7yn4LWr/preview" width="480" height="360" allow="autoplay"></iframe>'),
       ))
@@ -161,41 +168,148 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
       showModal(modalDialog(
         easyClose = T,
         size = "l",
-        title = "How modify or delete a rectangle",
-        h3("If necessary, you can remove rectangles as shown in the animation. Press “save areas” to confirm your answers."),
+        title = "",
+        h3("Remove rectangles"),
+        h5("If necessary, you can remove rectangles as shown in the animation. Important: press “save areas” to confirm your answers."),
+        br(),
+        h3("Modify rectangles"),
+        h5("Click on the modify button on the right. You can now move the whole rectangle or change its shape."),
         br(),
         HTML('<iframe src="https://drive.google.com/file/d/19Z-2agDpCJU87l4L7O8YRlafHPzVnliU/preview" width="480" height="360" allow="autoplay"></iframe>'),
         
              ))
     })
     
-    ## helper to draw 2 polygons
     observe({
       req(rv$edits)
       rectangles <- rv$edits()$finished
+      
+      
       n_poly<-nrow(as.data.frame(rectangles))
-      if(n_poly<1){
-
+      if(site_type == "onshore"){
+        resolution = 250^2
+      }else{
+        resolution = 500^2
+      }
+      
+      #with res of 250m grid we can sample at least 10 pts with variaton within 0.6km2
+      A_min<-resolution*10
+      #A_max<-0.05*round(as.numeric(st_area(sf_stud_geom)),0)
+      A_max<-A_min*20
+      if(n_poly == 0){
         output$overlay_result <- renderText({
           paste("<font color=\"#FF0000\"><b><li>Draw at least one rectangle<li/></b></font>")
         })
-        removeUI(
-          selector = paste0("#",ns("proc5")))
-      }else if(n_poly<=5){
-
-        output$btn1<-renderUI(
-          actionButton(ns("proc5"),"save")
-        )
-        removeUI(
-          selector = paste0("#",ns("overlay_result")))
+      } else if(n_poly==1){
+        n_within<-nrow(as.data.frame(st_within(rectangles,sf_stud_geom)))
+        if(n_within < n_poly){
+          output$overlay_result <- renderText({
+            paste("<font color=\"#FF0000\"><b>","You can`t save the rectangles:","</b> <li>Place your rectangle completely into the the study area<li/></font>")
+          })
+          # shinyalert(  title = "",
+          #              text = "Place your rectangle inside the orange borders",
+          #              type = "warning",
+          #              closeOnEsc = TRUE,
+          #              closeOnClickOutside = TRUE,
+          #              showCancelButton = F,
+          #              showConfirmButton = TRUE,
+          #              animation = "slide-from-bottom",
+          #              size = "s")
+          removeUI(
+            selector = paste0("#",ns("proc5")))
+        }else{
+          area<-round(as.numeric(st_area(rectangles)),0)
+          min_train<-min(area)
+          max_train<-max(area)
+          if(min_train<A_min & max_train<=A_max){
+            output$overlay_result <- renderText({
+              paste("<font color=\"#FF0000\"><b>","You can`t save the rectangles:","</b> <li>The area of the rectangle is too small<li/></font>")
+            })
+            removeUI(
+              selector = paste0("#",ns("proc5")))
+            
+          }else if(min_train>A_min & max_train>A_max){
+            output$overlay_result <- renderText({
+              paste("<font color=\"#FF0000\"><b>","You can`t save the rectangles:","</b> <li>The area of the rectangle is too big<li/></font>")
+            })
+            removeUI(
+              selector = paste0("#",ns("proc5")))
+            
+            
+          }else{
+            output$btn1<-renderUI(
+              actionButton(ns("proc5"),"save")
+            )
+            output$overlay_result <- renderText({
+              "Save or draw further rectangles"
+            })
+            
+          }
+          
+        }
+        
+      }else if(n_poly<=5 & n_poly>1){
+        n_within<-nrow(as.data.frame(st_within(rectangles,sf_stud_geom)))
+        n_inter<-nrow(as.data.frame(st_intersects(rectangles)))
+        q=n_inter-n_poly
+        if(q!=0 & n_within<n_poly){
+          removeUI(
+            selector = paste0("#",ns("proc5")))
+          output$overlay_result <- renderText({
+            paste("<font color=\"#FF0000\"><b>","You can`t save the rectangles:","</b><li>Place your last rectangle completely into the the study area<li/><li>Remove overlays<li/></font>")
+            
+          })
+        }else if(q==0 & n_within<n_poly){
+          removeUI(
+            selector = paste0("#",ns("proc5")))
+          output$overlay_result <- renderText({
+            paste("<font color=\"#FF0000\"><b>","You can`t save the rectangles:","</b> <li>Place your last rectangle completely into the the study area<li/></font>")
+            
+          })
+        }else if(q!=0 & n_within==n_poly){
+          removeUI(
+            selector = paste0("#",ns("proc5")))
+          output$overlay_result <- renderText({
+            paste("<font color=\"#FF0000\"><b>","You can`t save the rectangles:","</b> <li>Remove overlays from last rectangle<li/></font>")
+            
+          })
+        }else if(q==0 & n_within==n_poly){
+          area<-round(as.numeric(st_area(rectangles)),0)
+          min_train<-min(area)
+          max_train<-max(area)
+          if(min_train<A_min & max_train<=A_max){
+            output$overlay_result <- renderText({
+              paste("<font color=\"#FF0000\"><b>","You can`t save the rectangles:","</b> <li>The area of the last rectangle was too small<li/></font>")
+            })
+            removeUI(
+              selector = paste0("#",ns("proc5")))
+            
+          }else if(min_train>A_min & max_train>A_max){
+            output$overlay_result <- renderText({
+              paste("<font color=\"#FF0000\"><b>","You can`t save the rectangles:","</b> <li>The area of the last rectangle was too big<li/></font>")
+            })
+            removeUI(
+              selector = paste0("#",ns("proc5")))
+            
+            
+          }else{
+            output$btn1<-renderUI(
+              actionButton(ns("proc5"),"save")
+            )
+            output$overlay_result <- renderText({
+              "Save or draw further rectangles"
+            })
+            
+          }
+        }
       }else{
-
         output$overlay_result <- renderText({
           paste("<font color=\"#FF0000\"><b>","You can`t save the rectangles:","</b> <li>Draw a maximum of five rectangles<li/></font>")
         })
         removeUI(
           selector = paste0("#",ns("proc5")))
       }
+      
     })
     
     
@@ -214,7 +328,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
       removeUI(selector = paste0("#",ns("task_1")))
       
       shinyalert(  title = "Evaluating your rectangles",
-                   text = "As soon as you have saved all rectangles, they will appear on the map with a red number. Below you will find a slider for each rectangle with the same number.",
+                   text = "As soon as you have saved all rectangles, they will appear on the map with a red number. Below you will find a slider for each rectangle with the same number. With the slider you are now asked to rate each rectangle how well it is suited for a sunday hike.",
                    type = "info",
                    closeOnEsc = TRUE,
                    closeOnClickOutside = TRUE,

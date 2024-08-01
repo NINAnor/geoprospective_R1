@@ -56,7 +56,7 @@ mod_questionnaire_ui <- function(id){
                                    onInitialize = I('function() { this.setValue(""); }')
                                  )),
         br(),
-      fluidRow(h4("The following map shows the study area you are going to map nature benefits")),
+      fluidRow(h4("The following orange border shows the study area you are going to map nature benefits")),
       br(),
       leafletOutput(ns("map_stud")),
 
@@ -97,11 +97,13 @@ mod_questionnaire_server <- function(id, user_id, site_id, sf_stud_geom, site_ty
 
     output$cond_b1<-renderUI({
       validate(
+        need(input$age >= 18 && input$age <= 110, "Age must be between 18 and 110."),
         need(input$age, 'Provide your age'),
         need(input$gender != '', 'Select a gender'),
         need(input$edu != '', 'Select an education'),
         need(input$work != '', 'Select a working industry'),
-        need(input$length_liv != '', 'Answer how many years you live in the area')
+        need(input$length_liv != '', 'Answer how many years you live in the area'),
+        need(input$age >= input$length_liv, "You can't live longer in an area than you are old")
       )
       actionButton(ns('sub_quest'), 'submit answers', class='btn-primary')
     })

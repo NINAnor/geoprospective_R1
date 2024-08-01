@@ -11,7 +11,7 @@ mod_ahp_group_ui <- function(id){
   ns <- NS(id)
   tagList(
     mainPanel(
-      h3("Prioritisation of Benefits from Nature"),
+      h3("Prioritise benefits from Nature I"),
       bslib::value_box(
         title= "",
         value = paste0("How would you personally prioritise different groups of “Benefits from Nature” within " ,area_name, "?"),
@@ -77,8 +77,8 @@ mod_ahp_group_server <- function(id, userID, siteID, area_name){
         choices<-c(choice1,
                    choice2,choice3,choice4, "both are equally important",choice8,choice7,choice6, choice5)
         
-        id_left<-paste0(sec_comb[n,]$V1," ecosystem services")
-        id_right<-paste0(sec_comb[n,]$V2," ecosystem services")
+        id_left<-paste0(sec_comb[n,]$V1," benefits of nature")
+        id_right<-paste0(sec_comb[n,]$V2," benefits of nature")
         
         tagList(
           column(6, id_left),

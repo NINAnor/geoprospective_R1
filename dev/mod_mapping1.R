@@ -195,6 +195,10 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         value_box(
           title = "",
           value = paste0("Are you able to map areas that are well suited for ", dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang)))," according to you in the study area?"),
+          h5("(max. five rectangles)"),
+          br(),
+          h5("The minimum area of a rectangle is app 62.5ha or app. 70 soccer fields."),
+          h5("You will see the [ha] during you draw the rectangle. In addition, the app indicates if your last drawn polygon was too small or too big."),
           theme = "orange",
           showcase = bs_icon("question-octagon-fill")
         ),
@@ -223,7 +227,12 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
                      circleOptions = F,
                      markerOptions = F,
                      circleMarkerOptions = F,
-                     rectangleOptions = T,
+                     rectangleOptions = drawRectangleOptions(
+                       showArea = TRUE,
+                       shapeOptions = drawShapeOptions(
+                         clickable = TRUE
+                       )
+                     ),
                      singleFeature = FALSE,
                      editOptions = editToolbarOptions(selectedPathOptions = selectedPathOptions()))%>%
       addLayersControl(baseGroups = c("Openstreet map","World image"),
@@ -296,18 +305,20 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
           imp_lulc = as.integer(0),
           imp_own = as.integer(input$imp_own),
           imp_other = as.integer(input$imp_other),
-          training_area = as.integer(0),
+          rel_training_A = as.integer(0),
           n_poly = as.integer(0),
           blog = "NA",
           poss_mapping = "No",
           expert_trust = input$expert_map,
           mapping_order = as.numeric(order),
-          extrap_RMSE = 0,
-          extrap_accIMP = 0,
-          extrap_lulcIMP = 0,
-          extrap_natIMP = 0,
-          mapTIME_start = mapTIME_start,
-          mapTIME_end = Sys.time()
+          extrap_AUC = as.numeric(0),
+          extrap_KAPPA = as.numeric(0),
+          extrap_propC = as.numeric(0),
+          # extrap_demIMP = as.numeric(0),
+          # extrap_accIMP = as.numeric(0),
+          # extrap_lulcIMP = as.numeric(0),
+          # extrap_natIMP = as.numeric(0),
+          mapTIME_h = as.numeric((Sys.time()-mapTIME_start)/3600)
         )
         train_param<-as.data.frame(train_param)
         # insert_upload_job(table_con$project, table_con$dataset, "es_mappingR1", train_param)
@@ -337,8 +348,9 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
       }
       
       #with res of 250m grid we can sample at least 10 pts with variaton within 0.6km2
-      A_min<-resolution*sqrt(10)
-      A_max<-0.05*round(as.numeric(st_area(sf_stud_geom)),0)
+      A_min<-resolution*10
+      #A_max<-0.05*round(as.numeric(st_area(sf_stud_geom)),0)
+      A_max<-A_min*20
       if(n_poly == 0){
         output$overlay_result <- renderText({
           paste("<font color=\"#FF0000\"><b><li>Draw at least one rectangle<li/></b></font>")
@@ -595,7 +607,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
           # textOutput(ns("res_text")),
           bslib::value_box(
             title= "",
-            value = paste0("Based on your inputs, we calculated a map of areas that have a high probability to benefit from ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang)))," based on your answers."),
+            value = paste0("Based on your inputs, we calculated a map of the study area that shows the probability to benefit from ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang)))),
             showcase_layout = "left center",
             theme = "success",
             showcase = bs_icon("check-square"),
@@ -698,12 +710,6 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         ############ training pts
         update_modal_progress(0.2, text = "update data base")
         
-        # sample pts for random forest
-        # tmp_pts = st_sample(polygon, 30,type="random")
-        # tmp_pts<-st_transform(tmp_pts,st_crs(pred))
-        # pts <- do.call(rbind, st_geometry(tmp_pts)) %>% 
-        #   as_tibble() %>% setNames(c("lon","lat"))
-        # pts$SPECIES<-rep("pres",nrow(pts))
         
         if(site_type == "onshore"){
           resolution<-250*250
@@ -733,7 +739,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
             tmp_pts<-tmp_pts
           }
           # npts in this poly must be max_pts*tmp_ratio*es_value
-          tmp_pts = st_sample(polygon[i,], tmp_pts*polygon[i,]$es_value,type="random")
+          tmp_pts = st_sample(polygon[i,], round(tmp_pts*(polygon[i,]$es_value/5),0),type="random")
           tmp_pts<-st_as_sf(tmp_pts)
           tmp_pts$inside<-rep(1,nrow(tmp_pts))
           if(i==1){
@@ -754,53 +760,52 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         pts <- do.call(rbind, st_geometry(pts_in)) %>% 
           as_tibble() %>% setNames(c("lon","lat"))
         pts$SPECIES<-rep("pres",nrow(pts))
-
         
-        ##############################################
-        ## the mapping data
-        update_modal_progress(0.35, text = "update data base")
-        #############
+        
+        if(nrow(pts)>1500){
+          pts<-pts[sample(nrow(pts), 1500), ]
+        }
+        
+        
+        
+        ############ save map on gcs within studID folder
+        update_modal_progress(0.4, text = "train model")
+        SDM <- SSDM::modelling('MARS', pts, 
+                               pred_w, Xcol = 'lon', Ycol = 'lat')
+        
         train_param <-
           list(
             esID = rand_es_sel$esID,
             userID = userID,
             siteID = site_id,
-            imp_acc= as.integer(input$imp_acc*100),
+            imp_acc= as.integer(input$imp_acc),
             imp_nat= as.integer(0),
             imp_lulc = as.integer(0),
             imp_own = as.integer(input$imp_own),
             imp_other = as.integer(input$imp_other),
-            training_area = as.integer(sum(st_area(polygon))),
+            rel_training_A = as.integer(sum(st_area(polygon)))/A_roi,
             n_poly = as.integer(n_polys),
             blog = input$blog,
             poss_mapping = "Yes",
             expert_trust = "no_own_mapping",
             mapping_order = as.numeric(order),
-            extrap_RMSE = 0,
-            extrap_accIMP = 0,
-            extrap_lulcIMP = 0,
-            extrap_natIMP = 0,
-            mapTIME_start = mapTIME_start,
-            mapTIME_end = Sys.time()
+            extrap_AUC = SDM@evaluation$AUC,
+            extrap_KAPPA = SDM@evaluation$Kappa,
+            extrap_propC = SDM@evaluation$prop.correct,
+            # extrap_demIMP = SDM@variable.importance$dem,
+            # extrap_accIMP = SDM@variable.importance$acc,
+            # extrap_lulcIMP = SDM@variable.importance$lulc,
+            # extrap_natIMP = SDM@variable.importance$int,
+            mapTIME_h = as.numeric((Sys.time()-mapTIME_start)/3600)
             
           )
         train_param<-as.data.frame(train_param)
         
-        ############ maxent
-        update_modal_progress(0.4, text = "update data base")
+        update_modal_progress(0.6, text = "evaluate model & update data base")
         # write to bq
         es_mapping_tab = bq_table(project = project_id, dataset = dataset, table = 'es_mappingR1')
         bq_table_upload(x = es_mapping_tab, values = train_param, create_disposition='CREATE_IF_NEEDED', write_disposition='WRITE_APPEND')
         
-        
-        
-        ############ save map on gcs within studID folder
-        update_modal_progress(0.6, text = "train model")
-        SDM <- SSDM::modelling('RF', pts, 
-                               pred_w, Xcol = 'lon', Ycol = 'lat')
-        
-
-        update_modal_progress(0.7, text = "evaluate model")
         prediction<-SDM@projection
         
         update_modal_progress(0.8, text = "save your map")
@@ -810,13 +815,13 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         file_name <-paste0(site_id,"/3_ind_R1/",rand_es_sel$esID,"/",userID)
         gcs_upload(temp_file, bucket_name, name = file_name, predefinedAcl = "bucketLevel")
         file.remove(temp_file)
-
-      update_modal_progress(0.9, text = "draw map model")
+        
+        update_modal_progress(0.9, text = "draw map model")
       
-      prediction[prediction < 0.25] <- NA
+      prediction[prediction < 0.15] <- NA
       
       
-      bins <- c(0.1, 0.25, 0.5, 0.75, 1)
+      bins <- c(0.15, 0.25, 0.5, 0.75, 1)
       colors <- c("#0000FF", "#00FFFF", "#FFFFFF", "#FF7F7F", "#FF0000")
       labels <- c("Low", "Moderate", "High", "Very High")
       
@@ -831,7 +836,9 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
       # )
       # prediction<-prediction
       output$res_map <- renderLeaflet({
-        leaflet()%>%
+        leaflet(sf_stud_geom)%>%
+          addPolygons(color = "orange", weight = 3, smoothFactor = 0.5,
+                      opacity = 1.0, fillOpacity = 0)%>%
           addProviderTiles(providers$OpenStreetMap.Mapnik,options = tileOptions(minZoom = 8, maxZoom = 15),group = "Openstreet map")%>%
           addProviderTiles(providers$Esri.WorldImagery,options = tileOptions(minZoom = 8, maxZoom = 15),group = "World image")%>%
           addRasterImage(prediction,colors = color_palette, opacity = 0.6)%>%
@@ -839,7 +846,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
             pal = color_palette,
             values = values(prediction),
             labels= labels,
-            title = paste0("Based on your input: Areas of high probability to benefit from ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang)))),
+            title = paste0("Probability to benefit from ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang)))),
             position = "bottomright"
           )
           # addLayersControl(baseGroups = c("Openstreet map","World image"),

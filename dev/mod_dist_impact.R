@@ -12,10 +12,10 @@ mod_dist_impact_ui <- function(id){
   tagList(
     value_box(
       title = "",
-      value = "Impacts of wind energy on nature benefits",
+      value = "Impacts of wind energy on benefits of nature",
       h4("Imagine that you are visiting a certain location in the study area and that you can see and/or hear a wind turbine from there. According to you, how much are the following different benefits of nature affected by the visual, acoustic or combined impact of the wind turbine?"),
       br(),
-      h5("0 = Not affected at all, 1 = Area is compleatly unsuitable to benefit from nature"),
+      h5("0 = Not affected at all, 1 = Area is completely unsuitable to benefit from nature"),
       theme = "orange",
       showcase = bs_icon("question-octagon-fill")
     ),
@@ -51,7 +51,7 @@ mod_dist_impact_server <- function(id, userID, site_id, stud_all){
 
         tagList(
           fluidRow(
-            column(8,
+            column(4,
                    sliderInput(
                      inputId = ns(inputid),
                      label = label,
@@ -63,7 +63,7 @@ mod_dist_impact_server <- function(id, userID, site_id, stud_all){
                    )#/slider  
                    ),
             column(1),
-            column(3,
+            column(7,
                    h5(lay_descr)
                    )
           )
@@ -86,7 +86,7 @@ mod_dist_impact_server <- function(id, userID, site_id, stud_all){
 
       stud_es$userID<-rep(userID,nrow(stud_es))
       stud_es$siteID<-rep(site_id,nrow(stud_es))
-      stud_es<-stud_es%>%select(userID, siteID, esID, impact_val)
+      stud_es<-stud_es%>%dplyr::select(userID, siteID, esID, impact_val)
       colnames(stud_es)<-c("userID","siteID","esID","impact_val")
       es_mapping_tab = bq_table(project = project_id, dataset = dataset, table = 'es_impact')
       bq_table_upload(x = es_mapping_tab, values = stud_es, create_disposition='CREATE_IF_NEEDED', write_disposition='WRITE_APPEND')
