@@ -52,7 +52,7 @@ if(project_id == "eu-wendy"){
 }
 
 #site_id<-"NO06_1"
-site_id<-"TRD_TEST"
+site_id<-"ESP-CMO"
 env<-"dev" #c("dev","prod")
 var_lang<-"en"
 #how many es should be mapped by each participant from all ES?
@@ -90,7 +90,7 @@ con_admin <- dbConnect(
 # load study and site params
 site<-tbl(con_admin, "study_site")
 # site<-site%>%collect()%>%filter(projID == bqprojID & siteID == site_id)
-site<-site%>%collect()%>%filter(projID == project_id & siteID == site_id)
+site<-site%>%collect()%>%filter(projID == bqprojID & siteID == site_id)
 
 
 if (!("siteTYPE" %in% names(site))) {
