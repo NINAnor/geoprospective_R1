@@ -51,10 +51,10 @@ if(project_id == "eu-wendy"){
   bqprojID<-project_id
 }
 
-#site_id<-"NO06_1"
-site_id<-"ESP-CMO"
-env<-"dev" #c("dev","prod")
-var_lang<-"en"
+#site_id<-"NO06_1" c("ITA","ESP","GRC")
+site_id<-"GRC"
+env<-"prod" #c("dev","prod")
+var_lang<-"grk" #c("grk","en","ita","esp")
 #how many es should be mapped by each participant from all ES?
 num_tabs <- 3
 
@@ -106,7 +106,7 @@ sf_stud_geom <- sf::st_as_sf(site, wkt = "geometry" )%>%st_set_crs(4326)
 # load the ES list
 es_study<-tbl(con_admin, "es_descr")
 stud_all<-es_study%>%collect()
-stud_es<-stud_all%>%filter(esID == "recr" | esID == "nat_haz" | esID == "farm")
+stud_es<-stud_all
 
 ## a grid for the questionnaire
 grd<-st_make_grid(sf_stud_geom, cellsize = 0.05,
