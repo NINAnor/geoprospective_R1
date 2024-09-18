@@ -11,6 +11,8 @@ bq_auth(
   path = "dev/gcs_keys/eu-wendy_key.json"
 )
 
+dataset<-"wendy_prod"
+
 
 #study_area_data
 dat<-read.csv("C:/Users/reto.spielhofer/OneDrive - NINA/Documents/Projects/WENDY/4_case_studies/case_studies_geoprospective.csv")
@@ -34,15 +36,15 @@ ita_nuts<-gisco_get_nuts(year = "2021",
                          country = "ITA",
                          nuts_id = c("ITF65","ITF64","ITF63"),
                          nuts_level = "3")
-wt_ita<-dat_sf%>%filter(cntrID == "ITA")
+wt_ita<-dat_sf%>%filter(cntrID == "ITA")%>%st_buffer(0.6)
 st_crs(wt_ita) <- 4326
 
 ita_nuts_diss<-st_union(ita_nuts)%>%st_sf()
 
 
 ggplot() +
-  geom_sf(data = ita_nuts_diss, fill = "lightblue", color = "black") +  # Plot the polygon
-  geom_sf(data = wt_ita, color = "red", size = 3) +  # Plot the point on top
+  geom_sf(data = ita_nuts, fill = "lightblue", color = "black") +  # Plot the polygon
+  geom_sf(data = wt_ita, color = "red",fill=NA, size = 3) +  # Plot the point on top
   theme_minimal()
 
 ita_nuts_diss$siteAREAkm2<-as.integer(st_area(ita_nuts_diss)/1000000)
@@ -61,7 +63,7 @@ ita_nuts_diss$windfarmNAME<-"San Florio and Bagaladi Motta Montebello"
 polygons<-ita_nuts_diss%>%st_drop_geometry()
 polygons$geometry<-st_as_text(ita_nuts_diss$geometry)
 
-es_tab = bq_table(project = "eu-wendy", dataset = "wendy_dev", table = 'study_site')
+es_tab = bq_table(project = "eu-wendy", dataset = dataset, table = 'study_site')
 bq_table_upload(x = es_tab, values = polygons, create_disposition='CREATE_IF_NEEDED', write_disposition='WRITE_APPEND')
 
 
@@ -70,7 +72,7 @@ bq_table_upload(x = es_tab, values = polygons, create_disposition='CREATE_IF_NEE
 
 ###### Spain, we just consider the three northern case studies, not the
 
-wt_esp<-dat_sf%>%filter(cntrID == "ESP",windfarmNAME !="Motilla")%>%st_buffer(0.5)
+wt_esp<-dat_sf%>%filter(cntrID == "ESP",windfarmNAME !="Motilla")%>%st_buffer(0.6)
 st_crs(wt_esp) <- 4326
 bbox_wf<-st_bbox(wt_esp)%>%st_as_sfc()%>%st_sf()
 
@@ -120,7 +122,7 @@ bbox_wf$windfarmNAME<-"El Campo, Campo Olivia and Primoral"
 polygons<-bbox_wf%>%st_drop_geometry()
 polygons$geometry<-st_as_text(bbox_wf$geometry)
 
-es_tab = bq_table(project = "eu-wendy", dataset = "wendy_dev", table = 'study_site')
+es_tab = bq_table(project = "eu-wendy", dataset = dataset, table = 'study_site')
 bq_table_upload(x = es_tab, values = polygons, create_disposition='CREATE_IF_NEEDED', write_disposition='WRITE_APPEND')
 
 
@@ -170,7 +172,7 @@ grc_nuts$windfarmNAME<-"Minoan"
 polygons<-grc_nuts%>%st_drop_geometry()
 polygons$geometry<-st_as_text(grc_nuts$geometry)
 
-es_tab = bq_table(project = "eu-wendy", dataset = "wendy_dev", table = 'study_site')
+es_tab = bq_table(project = "eu-wendy", dataset = dataset, table = 'study_site')
 bq_table_upload(x = es_tab, values = polygons, create_disposition='CREATE_IF_NEEDED', write_disposition='WRITE_APPEND')
 
 
