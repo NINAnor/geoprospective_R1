@@ -305,7 +305,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
           imp_lulc = as.integer(0),
           imp_own = as.integer(input$imp_own),
           imp_other = as.integer(input$imp_other),
-          rel_training_A = as.integer(0),
+          rel_training_A = as.numeric(0),
           n_poly = as.integer(0),
           blog = "NA",
           poss_mapping = "No",
