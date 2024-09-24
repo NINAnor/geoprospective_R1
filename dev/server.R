@@ -41,74 +41,76 @@ function(input, output, session) {
         tagList(bslib::value_box(
           title= "",
           showcase_layout = "left center",
-          theme = "teal",
+          theme = "white",
           showcase = bs_icon("pencil"),
             br(),
             br(),
-            h5("To be able to contact you as soon as the second mapping session is open, we ask you to provide your email address in this first session. We will not use your email address for any other purpose and will anonymize all your data. However, if you don’t want to provide your email address you are welcome to complete just the first mapping round."),
+            h5("If you would like to be updated with the study results you can provide your email below. We won`t use your email for any other purpose"),
             textInput("email","")
 
         ),
-        actionButton("check_mail","submit"),
-        uiOutput("cond_1"))
+        # actionButton("check_mail","submit"),
+        #uiOutput("cond_1"))
+        actionButton("sub1","Start the study", style="color: black; background-color: #31c600; border-color: #31c600")
+      )#/tagList
 
-          
-        
+
+
       })#/ui
     }#/if
   })
   
   
   ## here check if user is not already present in DB
-  observeEvent(input$check_mail,{
-    #if no email is provided
-    if(input$email == ""){
-      removeUI(
-        selector = "#check_mail")
-      output$cond_1<-renderUI({
-        tagList(
-          br(),
-          actionButton("sub1","Start the study", class='btn-primary')
-        )
-      })
-    }else{
-      show_modal_spinner(
-        text = "check mail"
-      )
-      req(site_id)
-      check_tab <- bq_table(project_id, bqprojID, "user_conf")
-      if(bq_table_exists(check_tab)==T){
-        user_conf<-tbl(con_admin, "user_conf")%>%collect()
-        user_conf<-user_conf%>%filter(siteID == site_id)
-        
-        #email already present
-        if(input$email %in% user_conf$userMAIL){
-          output$cond_1<-renderUI({
-            h5("email for this study already present")
-          })
-        }else{
-          removeUI(
-            selector = "#check_mail")
-          output$cond_1<-renderUI({
-            tagList(
-              br(),
-              actionButton("sub1","Start the study", class='btn-primary')
-            )
-          })
-        }
-      }else{
-        removeUI(
-          selector = "#check_mail")
-        output$cond_1<-renderUI({
-          tagList(
-            br(),
-            actionButton("sub1","Start the study", class='btn-primary')
-          )
-        })
-      }
-      remove_modal_spinner()
-    }
-  })
+  # observeEvent(input$check_mail,{
+  #   #if no email is provided
+  #   if(input$email == ""){
+  #     removeUI(
+  #       selector = "#check_mail")
+  #     output$cond_1<-renderUI({
+  #       tagList(
+  #         br(),
+  #         actionButton("sub1","Start the study", class='btn-primary')
+  #       )
+  #     })
+  #   }else{
+  #     show_modal_spinner(
+  #       text = "check mail"
+  #     )
+  #     req(site_id)
+  #     check_tab <- bq_table(project_id, bqprojID, "user_conf")
+  #     if(bq_table_exists(check_tab)==T){
+  #       user_conf<-tbl(con_admin, "user_conf")%>%collect()
+  #       user_conf<-user_conf%>%filter(siteID == site_id)
+  #       
+  #       #email already present
+  #       if(input$email %in% user_conf$userMAIL){
+  #         output$cond_1<-renderUI({
+  #           h5("email for this study already present")
+  #         })
+  #       }else{
+  #         removeUI(
+  #           selector = "#check_mail")
+  #         output$cond_1<-renderUI({
+  #           tagList(
+  #             br(),
+  #             actionButton("sub1","Start the study", class='btn-primary')
+  #           )
+  #         })
+  #       }
+  #     }else{
+  #       removeUI(
+  #         selector = "#check_mail")
+  #       output$cond_1<-renderUI({
+  #         tagList(
+  #           br(),
+  #           actionButton("sub1","Start the study", class='btn-primary')
+  #         )
+  #       })
+  #     }
+  #     remove_modal_spinner()
+  #   }
+  # })
   
   ##create a user ID as soon as start is pressed
   userID<-eventReactive(input$sub1,{
@@ -119,7 +121,8 @@ function(input, output, session) {
   ## save user data in the DB and open the questionnaire module
   observeEvent(input$sub1,{
     show_modal_spinner(
-      text = "update data base"
+      color = "#31c600",
+      text = "load study"
     )
     req(userID)
     userID<-userID()
@@ -352,9 +355,10 @@ function(input, output, session) {
         bslib::value_box(
           title= "",
           showcase_layout = "left center",
-          theme = "success",
+          theme = value_box_theme(bg = "#4dd5ff", fg = "black"),
           showcase = bs_icon("check-square"),
           h5("This is the end of the first session of the study, you can now close the browser. Thank you very much for your participation. In case you provided your email, we will contact you soon for the second session."),
+          h5(HTML('More information about the <a href="https://wendy-project.eu" target="_blank">EU-WENDY project</a>'))
        )
 
     )

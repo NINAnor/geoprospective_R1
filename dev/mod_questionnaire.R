@@ -105,7 +105,7 @@ mod_questionnaire_server <- function(id, user_id, site_id, sf_stud_geom, site_ty
         need(input$length_liv != '', 'Answer how many years you live in the area'),
         need(input$age >= input$length_liv, "You can't live longer in an area than you are old")
       )
-      actionButton(ns('sub_quest'), 'submit answers', class='btn-primary')
+      actionButton(ns('sub_quest'), 'submit answers', style="color: black; background-color: #31c600; border-color: #31c600")
     })
     if(site_type == "onshore"){
       output$cond_map<-renderUI({
@@ -182,6 +182,7 @@ mod_questionnaire_server <- function(id, user_id, site_id, sf_stud_geom, site_ty
 
     observeEvent(input$sub_quest,{
       show_modal_spinner(
+        color = "#31c600",
         text="update data base"
       )
       rv1$u <-reactive({1})

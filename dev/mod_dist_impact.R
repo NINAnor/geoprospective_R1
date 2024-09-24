@@ -15,13 +15,14 @@ mod_dist_impact_ui <- function(id){
       value = "Impacts of wind energy on benefits of nature",
       h4("Imagine that you are visiting a certain location in the study area and that you can see and/or hear a wind turbine from there. According to you, how much are the following different benefits of nature affected by the visual, acoustic or combined impact of the wind turbine?"),
       br(),
-      h5("0 = Not affected at all, 1 = Area is completely unsuitable to benefit from nature"),
-      theme = "orange",
+      h4("Remember: Just focus on visual and/or acoustic disturbance, not on the footprint from the turbine foundation!"),
+      h5("0 = The benefit is not affected at all, 1 = Area is completely unsuitable to benefit from nature"),
+      theme = value_box_theme(bg = "#ffa626", fg = "black"),
       showcase = bs_icon("question-octagon-fill")
     ),
     br(),
     uiOutput(ns("slider_impact")),
-    actionButton(ns("conf"), "submit", class='btn-primary')
+    actionButton(ns("conf"), "submit", style="color: black; background-color: #31c600; border-color: #31c600")
     )
 }
 
@@ -41,13 +42,13 @@ mod_dist_impact_server <- function(id, userID, site_id, stud_all){
                  animation = "slide-from-bottom",
                  size = "s")
     ## change it afterwards to the correct es!!
-    stud_es<-stud_all%>%filter(esID == "recr" | esID == "nat_haz" | esID == "farm")
+    stud_es<-stud_all%>%filter(esID == "recr" | esID == "wild_hunt" | esID == "wild_col"| esID == "habitat"| esID == "sense"| esID == "aest")
     output$slider_impact<-renderUI({
       lapply(1:nrow(stud_es),function(n){
         inputid<-paste0(stud_es$esID[n],"_impact")
         es<-stud_es%>%slice(n)
         label<-paste0("Impacts of wind energy on ",es%>%dplyr::select(contains(paste0("esNAME_",var_lang))))
-        lay_descr<-es%>%dplyr::select(contains(paste0("esDESCR_",var_lang)))
+        lay_descr<-es%>%dplyr::select(contains(paste0("esDESCR_lay_",var_lang)))
 
         tagList(
           fluidRow(

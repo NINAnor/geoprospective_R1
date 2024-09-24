@@ -16,17 +16,17 @@ mod_ahp_group_ui <- function(id){
         title= "",
         value = paste0("How would you personally prioritise different groups of “Benefits from Nature” within " ,area_name, "?"),
         showcase_layout = "left center",
-        theme = "orange",
+        theme = value_box_theme(bg = "#ffa626", fg = "black"),
         showcase = bs_icon("question-octagon-fill"),
         br(),
         h4("Use the sliders to compare the importance between each group"),
         br(),
-        actionButton(ns("how_grp"),"explain me the groups")
+        actionButton(ns("how_grp"),"Explain me the groups")
       ),
       br(),
       uiOutput(ns("slider")),
       br(),
-      actionButton(ns("conf2"), "Next task", class='btn-primary')
+      actionButton(ns("conf2"), "Next task", style="color: black; background-color: #31c600; border-color: #31c600")
     )
     
   )
@@ -49,14 +49,16 @@ mod_ahp_group_server <- function(id, userID, siteID, area_name){
         title = "Three groups of Benefits from Nature",
         br(),
         h3("Provisioning"),
-        h4(""),
+        h4("These benefits are any type of direct products that can be extracted from nature, necessary and useful for human well-being. Along with food, other types of provisioning benefits include drinking water, timber, wood fuel, natural gas, oils, plants that can be made into clothes and other materials, and medicinal benefits."),
         br(),
         h3("Cultural"),
-        h4(""),
+        h4("As human interact and alter nature, the natural world has in turn altered us. It has guided our cultural, intellectual, and social development by being a constant force present in our lives. The importance of nature to the human mind can be traced back to the beginning of mankind with ancient civilizations drawing pictures of animals, plants, and weather patterns on cave walls. A cultural benefit is a non-material benefit that contributes to the development and cultural advancement of people, the societies and cultures; the building of knowledge and the spreading of ideas; creativity born from interactions with nature (music, art, architecture); and recreation."),
         br(),
         h3("Regulation"),
-        h4("")
-      ))
+        h4("Nature provides many of the basic processes that make life possible for people. Plants clean air and filter water, bacteria decompose wastes, bees pollinate flowers, and tree roots hold soil in place to prevent erosion. All these processes work together to make the planet earth clean, sustainable, functional, and resilient to change."),
+        br(),
+        h5(HTML('Adapted from<a href="https://www.nwf.org" target="_blank">the National Wildlife Federation</a>'))
+        ))
     })
     
     output$slider <- shiny::renderUI({
@@ -104,6 +106,7 @@ mod_ahp_group_server <- function(id, userID, siteID, area_name){
     ### store the values
     observeEvent(input$conf2,{
       show_modal_spinner(
+        color = "#31c600",
         text = "update data base"
       )
       val_list<-list()

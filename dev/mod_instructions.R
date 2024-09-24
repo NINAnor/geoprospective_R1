@@ -34,16 +34,12 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
     output$task_0<-renderUI({
       tagList(
         value_box(title="",
-                  h5("The landscapes in which we live consist of a mix of different land-use such as for example urban settlements and natural areas including agriculture, forestry and natural protected areas. Landscapes change continuously, shaped by our activities as well as natural processes."),
+                  h5(paste0("During the exercise you are going to use an interactive web map of ",sf_stud_geom$siteNAME,". The next section shows you how to interact with the map.")),
                   br(),
-        ),
-        value_box(title= "",
-                  h5("Both climate change and the loss of biodiversity may reduce the benefits we gain from nature, such as berry-picking, outdoor recreation or flood protection. To ensure that we can keep on benefitting from the nature surrounding us, it is important to understand how and where people actually benefit from nature."),
-                  br()
         ),
 
         br(),
-        actionButton(ns("to_task1"),"How to map")
+        actionButton(ns("to_task1"),"How to map", style="color: black; background-color: #31c600; border-color: #31c600")
       )
     })
     
@@ -110,6 +106,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
           h4("For training purposes, draw a maximum of five rectangles that show areas suitable for a Sunday hike in the study area"),
           br(),
           h5("The minimum area of a rectangle is app. 62.5 ha or app. 70 soccer fields."),
+          h5("Try to draw the rectangle as precise as possible"),
           h5("You will see the [ha] during you draw the rectangle. In addition, the app indicates if your last drawn polygon was too small or too big."),
           # br(),
           editModUI(ns("map_sel")),
@@ -124,8 +121,8 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
           uiOutput(ns("btn1"))
         )
       })
-      shinyalert(  title = "Mapping training",
-                   text = paste0("To map areas that are suitable for specific benefits from nature, you will work on an interactive map of ",sf_stud_geom$siteNAME, ". You have now the possibility to explore the map and learn how to draw rectangles."),
+      shinyalert(  title = "Training session",
+                   text = paste0("You now have the possibility to explore the map and learn how to draw rectangles. This data won`t be stored."),
                    type = "info",
                    closeOnEsc = TRUE,
                    closeOnClickOutside = TRUE,
@@ -328,7 +325,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
       removeUI(selector = paste0("#",ns("task_1")))
       
       shinyalert(  title = "Evaluating your rectangles",
-                   text = "As soon as you have saved all rectangles, they will appear on the map with a red number. Below you will find a slider for each rectangle with the same number. With the slider you are now asked to rate each rectangle how well it is suited for a sunday hike.",
+                   text = "As soon as you have saved all rectangles, they will appear on the map again with a red number. Below you will find a slider for each rectangle with a corresponding number. With the slider you are now asked to rate each rectangle how well it is suited for a Sunday hike.",
                    type = "info",
                    closeOnEsc = TRUE,
                    closeOnClickOutside = TRUE,
@@ -343,8 +340,8 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
           br(),
           value_box(
             title = "",
-            value = "How well are the rectangles suited for a sunday hike?",
-            theme = "orange",
+            value = "How well are the rectangles suited for a Sunday hike?",
+            theme = value_box_theme(bg = "#ffa626", fg = "black"),
             showcase = bs_icon("question-octagon-fill")
           ),
           br(),
@@ -354,11 +351,11 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
           br(),
           value_box(
             title = "",
-            value = "Based on your rectangles and evaluations we will calculate a map that shows the suitability to benefit from nature",
-            theme = "teal",
+            value = "Based on your rectangles and evaluations we will dynamically calculate a map that shows the suitability for a Sunday hike",
+            theme = value_box_theme(bg = "#4dd5ff", fg = "black"),
             showcase = bs_icon("hand-thumbs-up")),
           br(),
-          actionButton(ns('sub3'), 'start main part', class='btn-primary')
+          actionButton(ns('sub3'), 'start main part', style="color: black; background-color: #31c600; border-color: #31c600")
         )
 
       })
@@ -380,7 +377,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
       output$slider <- shiny::renderUI({
         ns <- session$ns
         tagList(
-          "The number in the rectangles corresponds to the number of the slider. For the particular rectangle, how suitable do you think the area is for a sunday hike? 1 = not suitable, 2 = little suitable, 3 = suitable, 4 = very suitable, 5 = extremely suitable",
+          "The number in the rectangles corresponds to the number of the slider. For the particular rectangle, how suitable do you think the area is for a Sunday hike? 1 = not suitable, 2 = little suitable, 3 = suitable, 4 = very suitable, 5 = extremely suitable",
           br(),
           br(),
           lapply(1:nrow(tbl),function(n){

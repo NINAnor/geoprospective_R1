@@ -2,7 +2,7 @@ fluidPage(theme = shinytheme("flatly"),
   useShinydashboard(),
   useShinyjs(),
 
-  titlePanel(title = div(img(src=paste0(project_id,".PNG"), width ='120'), paste0("Benefits from Nature in ",sf_stud_geom$siteNAME), h4("Session I")), windowTitle = "Nature benefits I"),
+  titlePanel(title = div(img(src=paste0(project_id,".PNG"), width ='120'), paste0("Benefits from Nature in ",sf_stud_geom$siteNAME)), windowTitle = "Nature benefits"),
   shinyWidgets::progressBar(id = "pb", value = 0, display_pct = TRUE),
   tabsetPanel(id = "inTabset",
               tabPanel(title = "", value = "p0",
@@ -11,17 +11,32 @@ fluidPage(theme = shinytheme("flatly"),
                          value = "",
                          h3("Welcome and many thanks for your interest in this study"),
                          showcase_layout = "left center",
-                         theme =  "white"
+                         theme =  "white",
                        ),
+                       value_box(title="",
+                                 h4("The landscapes in which we live consist of a mix of different land-use such as for example urban settlements and natural areas including agriculture, forestry and natural protected areas. Landscapes change continuously, shaped by our activities as well as natural processes."),
+                                 br(),
+                                 h4("Human activities and natural processes may reduce the benefits we gain from nature, such as berry-picking, outdoor recreation or flood protection. To ensure that we can keep on benefitting from the nature surrounding us, it is important to understand how and where people actually benefit from nature."),
+                                 showcase = bs_icon("book"),
+                                 theme = value_box_theme(bg = "#4dd5ff", fg = "black")
+                       ),
+
                        bslib::value_box(
                          title = "",
                          value = "",
-                         h5(paste0("With your information, you help us to understand where in the ",sf_stud_geom$siteNAME," region you and other people benefit from nature. This will be useful for those who plan and decide where development of infrastructure can best occur or should not happen to maintain our benefits from nature. In addition, you help to sustain biodiversity and increase human well-being in ", sf_stud_geom$siteNAME)),
+                         h4(paste0("With your information, you help us to understand where in the ",sf_stud_geom$siteNAME," region you and other people benefit from nature. This will be useful for those who plan and decide where development of infrastructure can best occur or should not happen to maintain our benefits from nature. In addition, you help to sustain biodiversity and increase human well-being in ", sf_stud_geom$siteNAME)),
                          showcase = bs_icon("exclamation-octagon-fill"),
-                         theme = "teal"
+                         theme = value_box_theme(bg = "#ffa626", fg = "black")
                        ),
+
+                       br(),
+                       actionButton("to_data","Next",style="color: black; background-color: #31c600; border-color: #31c600")
+
+              ),
+              tabPanel("",value="p1",
                        bslib::value_box(
                          title = "",
+                         h3("Procedure"),
                          value = "",
                          h5(paste0("After some general questions about yourself, we ask you to map areas that give you different benefits from nature   on an interactive map of ",sf_stud_geom$siteNAME," (instructions are provided). In an optional  second session, for which you will receive a new link in a few days, you will see where the benefits from nature can be found for ",sf_stud_geom$siteNAME," based on all participants’ inputs, and if you wish, you can modify and update your mapping based on the insights you got from their mapping")),
                          br(),
@@ -30,32 +45,25 @@ fluidPage(theme = shinytheme("flatly"),
                          theme = "white"
                        ),
                        br(),
-                       actionButton("to_data","Next")
-
-              ),
-              tabPanel("",value="p1",
-                       br(),
                        bslib::value_box(
                          title= "",
                          showcase_layout = "left center",
                          showcase = bs_icon("database-lock"),
-                         h3("Data protection"),
+                         h3("Data protection summary"),
                          value= "",
-                         h5("-During the following task, we will store your answers for further analysis."),
-                         h5("-Within this study we do not collect any sensitive information"),
+                         h5("- During the following task, we will store your personal data for further analysis. The data collection is based on consent."),
+                         h5("- Within this study we do not collect any sensitive information"),
                          h5("- We do not present and publish your individual data but statistics and summaries of all participants"),
-                         h5("- We rigorously anonymize data for analysis and publication"),
-                         h5("- Your email address will not be shared within any other context outside this study and will be deleted after the survey is completed  date:XY"),
-                         h5("- We reuse and share only anonymized data for within the research project WENDY"),
-                         h5("- We store the data on a google big query database owned by the Norwegian Institute of Nature research (NINA)."),
-                         h5("- You have the right to withdraw your data at any time and thus exclude it from the study."),
+                         h5("- We rigorously anonymise data for analysis and publication"),
+                         h5("- Your individual data will be deleted after the survey is completed (31/09/2025)"),
+                         h5("- We reuse and share only anonymised data for within the research project WENDY"),
+                         h5("- We store the data on a google big query database hosted in Europe and owned by the Norwegian Institute of Nature research (NINA)."),
                          br(),
                          h5("LINK TO CONSENT FORM"),
                          br(),
-                         checkboxInput("gdpr","I read and understood the form, use and storage of my data",value = F),
+                         checkboxInput("gdpr","I confirm that I have read and understood the information provided and agree to the collection and processing of my personal data as described. (If you do not want to give consent you can now close the study.)",value = F),
                          br(),
-                         
-                         theme = "white"
+                         theme = value_box_theme(bg = "#ffa626", fg = "black")
                        ),
                        br(),
                        uiOutput("cond_0")

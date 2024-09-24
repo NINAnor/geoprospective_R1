@@ -17,7 +17,7 @@ mod_ahp_single_ui <- function(id){
         title= "",
         value = "How would you personally prioritise the following single “Benefits from Nature” within the study area?",
         showcase_layout = "left center",
-        theme = "orange",
+        theme = value_box_theme(bg = "#ffa626", fg = "black"),
         showcase = bs_icon("question-octagon-fill"),
         br(),
         h4("Use the sliders to compare the importance."),
@@ -49,7 +49,7 @@ mod_ahp_single_ui <- function(id){
         column(1)
       ),
       
-      actionButton(ns("conf3"), "Next task", class='btn-primary')
+      actionButton(ns("conf3"), "Next task", style="color: black; background-color: #31c600; border-color: #31c600")
     )
     
   )
@@ -129,30 +129,13 @@ mod_ahp_single_server <- function(id, userID, siteID, es_all){
                   h6(es_id_left),
                   tags$ol(
                     tags$li(reg_full%>%filter(esID %in% es1[n,]$V1)%>%dplyr::select(contains(paste0("esDESC_lay_",var_lang)))),
-                    tags$figure(
-                      class = "centerFigure",
-                      tags$img(
-                        src = "placeholder_es.jpg",
-                        width = 300,
-                        alt = "Picture of an astragalus (bone die)"
-                      ),
-                      tags$figcaption("Image of Astragalus by Yaan, 2007")
-                    )
-                  ), easyClose = TRUE, footer = NULL),
+                       ), easyClose = TRUE, footer = NULL),
           
           bsModal(id = ns(paste0(mod_id_right,n)), title = reg_full%>%filter(esID %in% es1[n,]$V2)%>%dplyr::select(contains(paste0("esNAME_",var_lang))), trigger = ns(paste0("r_",es_id_right)),
                   h6(es_id_right),
                   tags$ol(
                     tags$li(reg_full%>%filter(esID %in% es1[n,]$V2)%>%dplyr::select(contains(paste0("esDESC_lay_",var_lang)))),
-                    tags$figure(
-                      class = "centerFigure",
-                      tags$img(
-                        src = "placeholder_es.jpg",
-                        width = 300,
-                        alt = "Picture of an astragalus (bone die)"
-                      ),
-                      tags$figcaption("Image of Astragalus by Yaan, 2007")
-                    )
+
                   ), easyClose = TRUE, footer = NULL),
           
           
@@ -202,30 +185,14 @@ mod_ahp_single_server <- function(id, userID, siteID, es_all){
                   h6(es_id_left),
                   tags$ol(
                     tags$li(cul_full%>%filter(esID %in% es2[m,]$V1)%>%dplyr::select(contains(paste0("esDESC_lay_",var_lang)))),
-                    tags$figure(
-                      class = "centerFigure",
-                      tags$img(
-                        src = "placeholder_es.jpg",
-                        width = 300,
-                        alt = "Picture of an astragalus (bone die)"
-                      ),
-                      tags$figcaption("Image of Astragalus by Yaan, 2007")
-                    )
+
                   ), easyClose = TRUE, footer = NULL),
           
           bsModal(id = ns(paste0(mod_id_right,m)), title = cul_full%>%filter(esID %in% es2[m,]$V2)%>%dplyr::select(contains(paste0("esNAME_",var_lang))), trigger = ns(paste0("r_",es_id_right)),
                   h6(es_id_right),
                   tags$ol(
                     tags$li(cul_full%>%filter(esID %in% es2[m,]$V2)%>%dplyr::select(contains(paste0("esDESC_lay_",var_lang)))),
-                    tags$figure(
-                      class = "centerFigure",
-                      tags$img(
-                        src = "placeholder_es.jpg",
-                        width = 300,
-                        alt = "Picture of an astragalus (bone die)"
-                      ),
-                      tags$figcaption("Image of Astragalus by Yaan, 2007")
-                    )
+
                   ), easyClose = TRUE, footer = NULL),
           
           
@@ -275,30 +242,14 @@ mod_ahp_single_server <- function(id, userID, siteID, es_all){
                   h6(es_id_left),
                   tags$ol(
                     tags$li(prov_full%>%filter(esID ==es_id_left)%>%dplyr::select(contains(paste0("esDESC_lay_",var_lang)))),
-                    tags$figure(
-                      class = "centerFigure",
-                      tags$img(
-                        src = "placeholder_es.jpg",
-                        width = 300,
-                        alt = "Picture of an astragalus (bone die)"
-                      ),
-                      tags$figcaption("Image of Astragalus by Yaan, 2007")
-                    )
+
                   ), easyClose = TRUE, footer = NULL),
           
           bsModal(id = ns(paste0(mod_id_right,o)), title = prov_full%>%filter(esID == es_id_right)%>%dplyr::select(contains(paste0("esNAME_",var_lang))), trigger = ns(paste0("r_",es_id_right)),
                   h6(es_id_right),
                   tags$ol(
                     tags$li(prov_full%>%filter(esID == es_id_right)%>%dplyr::select(contains(paste0("esDESC_lay_",var_lang)))),
-                    tags$figure(
-                      class = "centerFigure",
-                      tags$img(
-                        src = "placeholder_es.jpg",
-                        width = 300,
-                        alt = "Picture of an astragalus (bone die)"
-                      ),
-                      tags$figcaption("Image of Astragalus by Yaan, 2007")
-                    )
+
                   ), easyClose = TRUE, footer = NULL),
           
           
@@ -320,6 +271,7 @@ mod_ahp_single_server <- function(id, userID, siteID, es_all){
     ### store the values
     observeEvent(input$conf3,{
       show_modal_spinner(
+        color = "#31c600",
         text = "update data base"
       )
       val_list1<-list()

@@ -17,16 +17,17 @@ mod_delphi_round1_ui <- function(id){
         
       ),
       br(),
-      fluidRow(
-        column(6,
-               #uiOutput(ns("descr_es")),
-               actionButton(ns("alert"),
-                          label = "More information")),
-        column(2),
-        column(4,
-               uiOutput(ns("image_es"))
-        )
-      ),
+      actionButton(ns("alert"),
+                   label = "Explain me this nature benefit"),
+#       fluidRow(
+#         column(6,
+#                #uiOutput(ns("descr_es")),
+# ),
+#         column(2),
+#         column(4,
+#                uiOutput(ns("image_es"))
+#         )
+#       ),
       br(),
       # questions of importance
       uiOutput(ns("imp_text")),
@@ -47,7 +48,7 @@ mod_delphi_round1_ui <- function(id){
           value_box(
             title = "",
             value = "Would you trust an expert evaluation regarding suitable areas for this nature benefit?",
-            theme = "orange",
+            theme = value_box_theme(bg = "#ffa626", fg = "black"),
             showcase = bs_icon("question-octagon-fill")
           ),
           selectizeInput(ns("expert_map"),label="" ,choices = c("Yes","No"),options = list(
@@ -67,7 +68,7 @@ mod_delphi_round1_ui <- function(id){
       
       conditionalPanel(
         condition = "input.expert_map != ''", ns=ns,
-        actionButton(ns("confirm"), "Next task", class='btn-primary')
+        actionButton(ns("confirm"), "Next task", style="color: black; background-color: #31c600; border-color: #31c600")
       )
     )
   )
@@ -105,7 +106,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
     observeEvent(input$alert,{
       showModal(modalDialog(
         title = "",
-        h4(dplyr::select(rand_es_sel,contains(paste0("esDESCR_",var_lang)))),
+        h4(dplyr::select(rand_es_sel,contains(paste0("esDESC_lay_",var_lang)))),
 
       ))
     })
@@ -131,7 +132,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         value_box(
           title = "",
           value = dplyr::select(rand_es_sel,contains(paste0("esQUEST_",var_lang))),
-          theme = "orange",
+          theme = value_box_theme(bg = "#ffa626", fg = "black"),
           showcase = bs_icon("question-octagon-fill"),
           
         )
@@ -141,7 +142,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
       value_box(
         title = "",
         value = paste0("For each rectangle indicate, how well you think they are suited for ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang)))),
-        theme = "orange",
+        theme = value_box_theme(bg = "#ffa626", fg = "black"),
         showcase = bs_icon("question-octagon-fill")
       )
     ))
@@ -150,7 +151,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         value_box(
           title = "",
           value = paste0("How important is an easy access (by foot, bike, car) to your rectangles to benefit from ", dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang))),"?"),
-          theme = "orange",
+          theme = value_box_theme(bg = "#ffa626", fg = "black"),
           showcase = bs_icon("question-octagon-fill")
         )
       ))
@@ -160,7 +161,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         value_box(
           title = "",
           value = paste0("Briefly explain in some bullet points why you choosed these particular areas. What makes them suitable to benefit from ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang))) ,"?"),
-          theme = "orange",
+          theme = value_box_theme(bg = "#ffa626", fg = "black"),
           showcase = bs_icon("question-octagon-fill")
         )
       ))
@@ -170,23 +171,23 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         value_box(
           title = "",
           value = paste0("How important are the benefits of ", dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang))),"..."),
-          theme = "orange",
+          theme = value_box_theme(bg = "#ffa626", fg = "black"),
           showcase = bs_icon("question-octagon-fill")
         )
       ))
     
-    # image 
-    output$image_es<-renderUI({
-      tags$figure(
-        class = "centerFigure",
-        tags$img(
-          src = "placeholder_es.jpg",
-          width = 600,
-          alt = "A placehoder image for the ES"
-        ),
-        tags$figcaption("A placehoder image for the ES")
-      )
-    })
+    # # image 
+    # output$image_es<-renderUI({
+    #   tags$figure(
+    #     class = "centerFigure",
+    #     tags$img(
+    #       src = "placeholder_es.jpg",
+    #       width = 600,
+    #       alt = "A placehoder image for the ES"
+    #     ),
+    #     tags$figcaption("A placehoder image for the ES")
+    #   )
+    # })
     
     
     # UI rendered to ask if able to map ES
@@ -199,7 +200,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
           br(),
           h5("The minimum area of a rectangle is app 62.5ha or app. 70 soccer fields."),
           h5("You will see the [ha] during you draw the rectangle. In addition, the app indicates if your last drawn polygon was too small or too big."),
-          theme = "orange",
+          theme = value_box_theme(bg = "#ffa626", fg = "black"),
           showcase = bs_icon("question-octagon-fill")
         ),
         selectizeInput(ns("map_poss"),label="",choices = c("Yes","No"),options = list(
@@ -295,7 +296,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
     observeEvent(input$confirm,{
       
       if(input$expert_map !=""){
-        show_modal_spinner(text = "update data base")
+        show_modal_spinner(color = "#31c600",text = "update data base")
         train_param<-list(
           esID = rand_es_sel$esID,
           userID = userID,
@@ -541,7 +542,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
           br(),
           conditionalPanel(
             condition = "input.blog != ''", ns=ns,
-            actionButton(ns("submit"),"save values")
+            actionButton(ns("submit"),"save values", style="color: black; background-color: #31c600; border-color: #31c600")
           )
         )
       )
@@ -609,7 +610,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
             title= "",
             value = paste0("Based on your inputs, we calculated a map of the study area that shows the probability to benefit from ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang)))),
             showcase_layout = "left center",
-            theme = "success",
+            theme = value_box_theme(bg = "#4dd5ff", fg = "black"),
             showcase = bs_icon("check-square"),
             h5("Red colors indicate areas of higher probability, blue colors lower probability to benefit"),
           ),
@@ -855,7 +856,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
       remove_modal_progress()
       output$btn_cond<-renderUI({
         req(train_param)
-        actionButton(ns("confirm2"), "Next task", class='btn-primary')
+        actionButton(ns("confirm2"), "Next task", style="color: black; background-color: #31c600; border-color: #31c600")
       })
       
     })
