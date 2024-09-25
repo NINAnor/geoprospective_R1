@@ -45,14 +45,14 @@ function(input, output, session) {
           showcase = bs_icon("pencil"),
             br(),
             br(),
-            h5("If you would like to be updated with the study results you can provide your email below. We won`t use your email for any other purpose"),
+            h5("If you would like to participate in the second session please provide your email address below. We won`t use your email for any other purpose"),
             textInput("email","")
 
         ),
-        # actionButton("check_mail","submit"),
-        #uiOutput("cond_1"))
-        actionButton("sub1","Start the study", style="color: black; background-color: #31c600; border-color: #31c600")
-      )#/tagList
+        actionButton("check_mail","submit"),
+        uiOutput("cond_1"))
+        #actionButton("sub1","Start the study", style="color: black; background-color: #31c600; border-color: #31c600")
+      #)#/tagList
 
 
 
@@ -61,56 +61,57 @@ function(input, output, session) {
   })
   
   
-  ## here check if user is not already present in DB
-  # observeEvent(input$check_mail,{
-  #   #if no email is provided
-  #   if(input$email == ""){
-  #     removeUI(
-  #       selector = "#check_mail")
-  #     output$cond_1<-renderUI({
-  #       tagList(
-  #         br(),
-  #         actionButton("sub1","Start the study", class='btn-primary')
-  #       )
-  #     })
-  #   }else{
-  #     show_modal_spinner(
-  #       text = "check mail"
-  #     )
-  #     req(site_id)
-  #     check_tab <- bq_table(project_id, bqprojID, "user_conf")
-  #     if(bq_table_exists(check_tab)==T){
-  #       user_conf<-tbl(con_admin, "user_conf")%>%collect()
-  #       user_conf<-user_conf%>%filter(siteID == site_id)
-  #       
-  #       #email already present
-  #       if(input$email %in% user_conf$userMAIL){
-  #         output$cond_1<-renderUI({
-  #           h5("email for this study already present")
-  #         })
-  #       }else{
-  #         removeUI(
-  #           selector = "#check_mail")
-  #         output$cond_1<-renderUI({
-  #           tagList(
-  #             br(),
-  #             actionButton("sub1","Start the study", class='btn-primary')
-  #           )
-  #         })
-  #       }
-  #     }else{
-  #       removeUI(
-  #         selector = "#check_mail")
-  #       output$cond_1<-renderUI({
-  #         tagList(
-  #           br(),
-  #           actionButton("sub1","Start the study", class='btn-primary')
-  #         )
-  #       })
-  #     }
-  #     remove_modal_spinner()
-  #   }
-  # })
+  # here check if user is not already present in DB
+  observeEvent(input$check_mail,{
+    #if no email is provided
+    if(input$email == ""){
+      removeUI(
+        selector = "#check_mail")
+      output$cond_1<-renderUI({
+        tagList(
+          br(),
+          actionButton("sub1","Start the study", style="color: black; background-color: #31c600; border-color: #31c600")
+        )
+      })
+    }else{
+      show_modal_spinner(
+        color = "#31c600",
+        text = "check mail"
+      )
+      req(site_id)
+      check_tab <- bq_table(project_id, bqprojID, "user_conf")
+      if(bq_table_exists(check_tab)==T){
+        user_conf<-tbl(con_admin, "user_conf")%>%collect()
+        user_conf<-user_conf%>%filter(siteID == site_id)
+
+        #email already present
+        if(input$email %in% user_conf$userMAIL){
+          output$cond_1<-renderUI({
+            h5("email for this study already present")
+          })
+        }else{
+          removeUI(
+            selector = "#check_mail")
+          output$cond_1<-renderUI({
+            tagList(
+              br(),
+              actionButton("sub1","Start the study", style="color: black; background-color: #31c600; border-color: #31c600")
+            )
+          })
+        }
+      }else{
+        removeUI(
+          selector = "#check_mail")
+        output$cond_1<-renderUI({
+          tagList(
+            br(),
+            actionButton("sub1","Start the study", style="color: black; background-color: #31c600; border-color: #31c600")
+          )
+        })
+      }
+      remove_modal_spinner()
+    }
+  })
   
   ##create a user ID as soon as start is pressed
   userID<-eventReactive(input$sub1,{

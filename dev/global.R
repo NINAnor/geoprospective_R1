@@ -106,7 +106,7 @@ sf_stud_geom <- sf::st_as_sf(site, wkt = "geometry" )%>%st_set_crs(4326)
 # load the ES list
 es_study<-tbl(con_admin, "es_descr")
 stud_all<-es_study%>%collect()
-stud_es<-stud_all
+stud_es<-stud_all%>%filter(esID=="farm" | esID == "habitat" | esID =="mat")
 
 ## a grid for the questionnaire
 grd<-st_make_grid(sf_stud_geom, cellsize = 0.05,
