@@ -54,7 +54,7 @@ if(project_id == "eu-wendy"){
 #site_id<-"NO06_1" c("ITA","ESP","GRC")
 site_id<-"GRC"
 env<-"prod" #c("dev","prod")
-var_lang<-"grk" #c("grk","en","ita","esp")
+var_lang<-"en" #c("grk","en","ita","esp")
 #how many es should be mapped by each participant from all ES?
 num_tabs <- 3
 
