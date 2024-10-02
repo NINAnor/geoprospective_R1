@@ -18,7 +18,7 @@ fluidPage(theme = shinytheme("flatly"),
                                  br(),
                                  h4("Human activities and natural processes may reduce the benefits we gain from nature, such as berry-picking, outdoor recreation or flood protection. To ensure that we can keep on benefitting from the nature surrounding us, it is important to understand how and where people actually benefit from nature."),
                                  showcase = bs_icon("book"),
-                                 theme = value_box_theme(bg = "#4dd5ff", fg = "black")
+                                 theme = value_box_theme(bg = blue, fg = "black")
                        ),
 
                        bslib::value_box(
@@ -26,7 +26,7 @@ fluidPage(theme = shinytheme("flatly"),
                          value = "",
                          h4(paste0("With your information, you help us to understand where in the ",sf_stud_geom$siteNAME," region you and other people benefit from nature. This will be useful for those who plan and decide where development of infrastructure can best occur or should not happen to maintain our benefits from nature. In addition, you help to sustain biodiversity and increase human well-being in ", sf_stud_geom$siteNAME)),
                          showcase = bs_icon("exclamation-octagon-fill"),
-                         theme = value_box_theme(bg = "#ffa626", fg = "black")
+                         theme = value_box_theme(bg = orange, fg = "black")
                        ),
 
                        br(),
@@ -68,7 +68,7 @@ fluidPage(theme = shinytheme("flatly"),
                          br(),
                          checkboxInput("gdpr","I confirm that I have read and understood the information provided and agree to the collection and processing of my personal data as described. (If you do not want to give consent you can now close the study.)",value = F),
                          br(),
-                         theme = value_box_theme(bg = "#ffa626", fg = "black")
+                         theme = value_box_theme(bg = orange, fg = "black")
                        ),
                        br(),
                        uiOutput("cond_0")

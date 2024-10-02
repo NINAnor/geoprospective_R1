@@ -58,8 +58,15 @@ mod_questionnaire_ui <- function(id){
         br(),
       fluidRow(h4("The following orange border shows the study area you are going to map nature benefits")),
       br(),
+      tags$head(
+        tags$style(HTML("
+      .leaflet-left .leaflet-control{
+        visibility: hidden;
+      }
+    "))
+      ),
       leafletOutput(ns("map_stud")),
-
+      br(),
       uiOutput(ns("cond_map")),
       br(),
 
@@ -90,7 +97,7 @@ mod_questionnaire_server <- function(id, user_id, site_id, sf_stud_geom, site_ty
                  size = "s")
     output$map_stud<-renderLeaflet({
       leaflet(sf_stud_geom) %>%
-        addPolygons(color = "orange", weight = 3, smoothFactor = 0.5,
+        addPolygons(color = orange, weight = 3, smoothFactor = 0.5,
                     opacity = 1.0, fillOpacity = 0)%>%
         addProviderTiles(providers$OpenStreetMap.Mapnik,options = tileOptions(minZoom = 8, maxZoom = 15))
     })
@@ -182,7 +189,7 @@ mod_questionnaire_server <- function(id, user_id, site_id, sf_stud_geom, site_ty
 
     observeEvent(input$sub_quest,{
       show_modal_spinner(
-        color = "#31c600",
+        color = green,
         text="update data base"
       )
       rv1$u <-reactive({1})

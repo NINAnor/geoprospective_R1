@@ -28,6 +28,7 @@ library(shinybusy)
 library(googleCloudStorageR)
 library(raster)
 library(shinyBS)
+library(htmlwidgets)
 
 rm(list = ls())
 
@@ -50,6 +51,10 @@ if(project_id == "eu-wendy"){
 }else{
   bqprojID<-project_id
 }
+
+orange = "#ffa626"
+blue = "#53adc9"
+green = "#50b330"
 
 #site_id<-"NO06_1" c("ITA","ESP","GRC")
 site_id<-"GRC"

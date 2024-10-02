@@ -45,7 +45,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
     
 
 ## background map to modify
-    map<-leaflet(sf_stud_geom)%>%
+    map_training<-leaflet(sf_stud_geom)%>%
       addPolygons(color = "orange", weight = 3, smoothFactor = 0.5,
                   opacity = 1.0, fillOpacity = 0)%>%
       addProviderTiles(providers$OpenStreetMap.Mapnik,options = tileOptions(minZoom = 8, maxZoom = 15),group = "Openstreet map")%>%
@@ -95,7 +95,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
       removeUI(selector = paste0("#",ns("task_0")))
       rv$edits<-callModule(
         module = editMod,
-        leafmap = map,
+        leafmap = map_training,
         id = "map_sel")
       
       output$task_1<-renderUI({
@@ -105,10 +105,17 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
           br(),
           h4("For training purposes, draw a maximum of five rectangles that show areas suitable for a Sunday hike in the study area"),
           br(),
-          h5("The minimum area of a rectangle is app. 62.5 ha or app. 70 soccer fields."),
+          h5("The minimum area of a rectangle is approx. 62.5 ha or approx. 70 soccer fields."),
           h5("Try to draw the rectangle as precise as possible"),
           h5("You will see the [ha] during you draw the rectangle. In addition, the app indicates if your last drawn polygon was too small or too big."),
           # br(),
+          tags$head(
+            tags$style(HTML("
+      .leaflet-left .leaflet-control {
+        visibility: visible; /* Make controls visible */
+      }
+    "))
+          ),
           editModUI(ns("map_sel")),
           fluidRow(
             actionButton(ns("help0"),"How to use the map?"),
@@ -341,7 +348,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
           value_box(
             title = "",
             value = "How well are the rectangles suited for a Sunday hike?",
-            theme = value_box_theme(bg = "#ffa626", fg = "black"),
+            theme = value_box_theme(bg = orange, fg = "black"),
             showcase = bs_icon("question-octagon-fill")
           ),
           br(),
@@ -352,7 +359,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
           value_box(
             title = "",
             value = "Based on your rectangles and evaluations we will dynamically calculate a map that shows the suitability for a Sunday hike",
-            theme = value_box_theme(bg = "#4dd5ff", fg = "black"),
+            theme = value_box_theme(bg = blue, fg = "black"),
             showcase = bs_icon("hand-thumbs-up")),
           br(),
           actionButton(ns('sub3'), 'start main part', style="color: black; background-color: #31c600; border-color: #31c600")

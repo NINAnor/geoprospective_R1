@@ -17,7 +17,7 @@ mod_dist_impact_ui <- function(id){
       br(),
       h4("Remember: Just focus on visual and/or acoustic disturbance, not on the footprint from the turbine foundation!"),
       h5("0 = The benefit is not affected at all, 1 = Area is completely unsuitable to benefit from nature"),
-      theme = value_box_theme(bg = "#ffa626", fg = "black"),
+      theme = value_box_theme(bg = orange, fg = "black"),
       showcase = bs_icon("question-octagon-fill")
     ),
     br(),

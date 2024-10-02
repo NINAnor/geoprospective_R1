@@ -17,7 +17,7 @@ mod_ahp_single_ui <- function(id){
         title= "",
         value = "How would you personally prioritise the following single “Benefits from Nature” within the study area?",
         showcase_layout = "left center",
-        theme = value_box_theme(bg = "#ffa626", fg = "black"),
+        theme = value_box_theme(bg = orange, fg = "black"),
         showcase = bs_icon("question-octagon-fill"),
         br(),
         h4("Use the sliders to compare the importance."),
@@ -271,7 +271,7 @@ mod_ahp_single_server <- function(id, userID, siteID, es_all){
     ### store the values
     observeEvent(input$conf3,{
       show_modal_spinner(
-        color = "#31c600",
+        color = green,
         text = "update data base"
       )
       val_list1<-list()

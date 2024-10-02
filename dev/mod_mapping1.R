@@ -9,6 +9,7 @@
 #' @importFrom shiny NS tagList
 mod_delphi_round1_ui <- function(id){
   ns <- NS(id)
+
   tagList(
     mainPanel(
       value_box(
@@ -48,7 +49,7 @@ mod_delphi_round1_ui <- function(id){
           value_box(
             title = "",
             value = "Would you trust an expert evaluation regarding suitable areas for this nature benefit?",
-            theme = value_box_theme(bg = "#ffa626", fg = "black"),
+            theme = value_box_theme(bg = orange, fg = "black"),
             showcase = bs_icon("question-octagon-fill")
           ),
           selectizeInput(ns("expert_map"),label="" ,choices = c("Yes","No"),options = list(
@@ -132,7 +133,11 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         value_box(
           title = "",
           value = dplyr::select(rand_es_sel,contains(paste0("esQUEST_",var_lang))),
-          theme = value_box_theme(bg = "#ffa626", fg = "black"),
+          h5("(draw max. five rectangles)"),
+          br(),
+          h5("The minimum area of a rectangle is app 62.5ha or app. 70 soccer fields."),
+          h5("You will see the [ha] during you draw the rectangle. In addition, the app indicates if your last drawn polygon is too small or too big."),
+          theme = value_box_theme(bg = orange, fg = "black"),
           showcase = bs_icon("question-octagon-fill"),
           
         )
@@ -142,7 +147,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
       value_box(
         title = "",
         value = paste0("For each rectangle indicate, how well you think they are suited for ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang)))),
-        theme = value_box_theme(bg = "#ffa626", fg = "black"),
+        theme = value_box_theme(bg = orange, fg = "black"),
         showcase = bs_icon("question-octagon-fill")
       )
     ))
@@ -151,7 +156,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         value_box(
           title = "",
           value = paste0("How important is an easy access (by foot, bike, car) to your rectangles to benefit from ", dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang))),"?"),
-          theme = value_box_theme(bg = "#ffa626", fg = "black"),
+          theme = value_box_theme(bg = orange, fg = "black"),
           showcase = bs_icon("question-octagon-fill")
         )
       ))
@@ -161,7 +166,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         value_box(
           title = "",
           value = paste0("Briefly explain in some bullet points why you choosed these particular areas. What makes them suitable to benefit from ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang))) ,"?"),
-          theme = value_box_theme(bg = "#ffa626", fg = "black"),
+          theme = value_box_theme(bg = orange, fg = "black"),
           showcase = bs_icon("question-octagon-fill")
         )
       ))
@@ -171,7 +176,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         value_box(
           title = "",
           value = paste0("How important are the benefits of ", dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang))),"..."),
-          theme = value_box_theme(bg = "#ffa626", fg = "black"),
+          theme = value_box_theme(bg = orange, fg = "black"),
           showcase = bs_icon("question-octagon-fill")
         )
       ))
@@ -196,11 +201,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         value_box(
           title = "",
           value = paste0("Are you able to map areas that are well suited for ", dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang)))," according to you in the study area?"),
-          h5("(max. five rectangles)"),
-          br(),
-          h5("The minimum area of a rectangle is app 62.5ha or app. 70 soccer fields."),
-          h5("You will see the [ha] during you draw the rectangle. In addition, the app indicates if your last drawn polygon was too small or too big."),
-          theme = value_box_theme(bg = "#ffa626", fg = "black"),
+          theme = value_box_theme(bg = orange, fg = "black"),
           showcase = bs_icon("question-octagon-fill")
         ),
         selectizeInput(ns("map_poss"),label="",choices = c("Yes","No"),options = list(
@@ -296,7 +297,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
     observeEvent(input$confirm,{
       
       if(input$expert_map !=""){
-        show_modal_spinner(color = "#31c600",text = "update data base")
+        show_modal_spinner(color = green,text = "update data base")
         train_param<-list(
           esID = rand_es_sel$esID,
           userID = userID,
@@ -435,14 +436,14 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
           max_train<-max(area)
           if(min_train<A_min & max_train<=A_max){
             output$overlay_result <- renderText({
-              paste("<font color=\"#FF0000\"><b>","You can`t save the rectangles:","</b> <li>The area of the last rectangle was too small<li/></font>")
+              paste("<font color=\"#FF0000\"><b>","You can`t save the rectangles:","</b> <li>The area of the last rectangle is too small<li/></font>")
             })
             removeUI(
               selector = paste0("#",ns("savepoly")))
             
           }else if(min_train>A_min & max_train>A_max){
             output$overlay_result <- renderText({
-              paste("<font color=\"#FF0000\"><b>","You can`t save the rectangles:","</b> <li>The area of the last rectangle was too big<li/></font>")
+              paste("<font color=\"#FF0000\"><b>","You can`t save the rectangles:","</b> <li>The area of the last rectangle is too big<li/></font>")
             })
             removeUI(
               selector = paste0("#",ns("savepoly")))
@@ -610,7 +611,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
             title= "",
             value = paste0("Based on your inputs, we calculated a map of the study area that shows the probability to benefit from ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang)))),
             showcase_layout = "left center",
-            theme = value_box_theme(bg = "#4dd5ff", fg = "black"),
+            theme = value_box_theme(bg = blue, fg = "black"),
             showcase = bs_icon("check-square"),
             h5("Red colors indicate areas of higher probability, blue colors lower probability to benefit"),
           ),

@@ -106,7 +106,7 @@ mod_ahp_group_server <- function(id, userID, siteID, area_name){
     ### store the values
     observeEvent(input$conf2,{
       show_modal_spinner(
-        color = "#31c600",
+        color = green,
         text = "update data base"
       )
       val_list<-list()

@@ -75,7 +75,7 @@ function(input, output, session) {
       })
     }else{
       show_modal_spinner(
-        color = "#31c600",
+        color = green,
         text = "check mail"
       )
       req(site_id)
@@ -122,7 +122,7 @@ function(input, output, session) {
   ## save user data in the DB and open the questionnaire module
   observeEvent(input$sub1,{
     show_modal_spinner(
-      color = "#31c600",
+      color = green,
       text = "load study"
     )
     req(userID)
@@ -356,7 +356,7 @@ function(input, output, session) {
         bslib::value_box(
           title= "",
           showcase_layout = "left center",
-          theme = value_box_theme(bg = "#4dd5ff", fg = "black"),
+          theme = value_box_theme(bg = blue, fg = "black"),
           showcase = bs_icon("check-square"),
           h5("This is the end of the first session of the study, you can now close the browser. Thank you very much for your participation. In case you provided your email, we will contact you soon for the second session."),
           h5(HTML('More information about the <a href="https://wendy-project.eu" target="_blank">EU-WENDY project</a>'))
