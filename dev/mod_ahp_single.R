@@ -126,13 +126,13 @@ mod_ahp_single_server <- function(id, userID, siteID, es_all){
         
         tagList(
           bsModal(id = ns(paste0(mod_id_left,n)), title = reg_full%>%filter(esID %in% es1[n,]$V1)%>%dplyr::select(contains(paste0("esNAME_",var_lang))), trigger = ns(paste0("l_",es_id_left)),
-                  h6(es_id_left),
+                  
                   tags$ol(
                     tags$li(reg_full%>%filter(esID %in% es1[n,]$V1)%>%dplyr::select(contains(paste0("esDESC_lay_",var_lang)))),
                        ), easyClose = TRUE, footer = NULL),
           
           bsModal(id = ns(paste0(mod_id_right,n)), title = reg_full%>%filter(esID %in% es1[n,]$V2)%>%dplyr::select(contains(paste0("esNAME_",var_lang))), trigger = ns(paste0("r_",es_id_right)),
-                  h6(es_id_right),
+                  
                   tags$ol(
                     tags$li(reg_full%>%filter(esID %in% es1[n,]$V2)%>%dplyr::select(contains(paste0("esDESC_lay_",var_lang)))),
 
@@ -182,14 +182,14 @@ mod_ahp_single_server <- function(id, userID, siteID, es_all){
         
         tagList(
           bsModal(id = ns(paste0(mod_id_left,m)), title = cul_full%>%filter(esID %in% es2[m,]$V1)%>%dplyr::select(contains(paste0("esNAME_",var_lang))), trigger = ns(paste0("l_",es_id_left)),
-                  h6(es_id_left),
+                  
                   tags$ol(
                     tags$li(cul_full%>%filter(esID %in% es2[m,]$V1)%>%dplyr::select(contains(paste0("esDESC_lay_",var_lang)))),
 
                   ), easyClose = TRUE, footer = NULL),
           
           bsModal(id = ns(paste0(mod_id_right,m)), title = cul_full%>%filter(esID %in% es2[m,]$V2)%>%dplyr::select(contains(paste0("esNAME_",var_lang))), trigger = ns(paste0("r_",es_id_right)),
-                  h6(es_id_right),
+                  
                   tags$ol(
                     tags$li(cul_full%>%filter(esID %in% es2[m,]$V2)%>%dplyr::select(contains(paste0("esDESC_lay_",var_lang)))),
 
@@ -239,14 +239,14 @@ mod_ahp_single_server <- function(id, userID, siteID, es_all){
         
         tagList(
           bsModal(id = ns(paste0(mod_id_left,o)), title = prov_full%>%filter(esID ==es_id_left)%>%dplyr::select(contains(paste0("esNAME_",var_lang))), trigger = ns(paste0("l_",es_id_left)),
-                  h6(es_id_left),
+                  
                   tags$ol(
                     tags$li(prov_full%>%filter(esID ==es_id_left)%>%dplyr::select(contains(paste0("esDESC_lay_",var_lang)))),
 
                   ), easyClose = TRUE, footer = NULL),
           
           bsModal(id = ns(paste0(mod_id_right,o)), title = prov_full%>%filter(esID == es_id_right)%>%dplyr::select(contains(paste0("esNAME_",var_lang))), trigger = ns(paste0("r_",es_id_right)),
-                  h6(es_id_right),
+                  
                   tags$ol(
                     tags$li(prov_full%>%filter(esID == es_id_right)%>%dplyr::select(contains(paste0("esDESC_lay_",var_lang)))),
 

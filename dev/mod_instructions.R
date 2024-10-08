@@ -34,7 +34,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
     output$task_0<-renderUI({
       tagList(
         value_box(title="",
-                  h5(paste0("During the exercise you are going to use an interactive web map of ",sf_stud_geom$siteNAME,". The next section shows you how to interact with the map.")),
+                  h5(paste0("During the study you are going to use an interactive web map of ",sf_stud_geom$siteNAME,". The next section shows you how to interact with the map.")),
                   br(),
         ),
 
