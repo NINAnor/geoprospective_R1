@@ -16,7 +16,7 @@ mod_ahp_group_ui <- function(id){
         title= "",
         value = paste0("How would you personally prioritise different groups of “Benefits from Nature” within " ,area_name, "?"),
         showcase_layout = "left center",
-        theme = value_box_theme(bg = "#ffa626", fg = "black"),
+        theme = value_box_theme(bg = orange, fg = "black"),
         showcase = bs_icon("question-octagon-fill"),
         br(),
         h4("Use the sliders to compare the importance between each group"),

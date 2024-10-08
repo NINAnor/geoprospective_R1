@@ -20,22 +20,14 @@ mod_delphi_round1_ui <- function(id){
       br(),
       actionButton(ns("alert"),
                    label = "Explain me this nature benefit"),
-#       fluidRow(
-#         column(6,
-#                #uiOutput(ns("descr_es")),
-# ),
-#         column(2),
-#         column(4,
-#                uiOutput(ns("image_es"))
-#         )
-#       ),
+
       br(),
       # questions of importance
       uiOutput(ns("imp_text")),
       sliderInput(ns("imp_own"), "... for you personally in the study area?",
                   min = 0, max = 5, value = 3),
 
-      sliderInput(ns("imp_other"), "...for the society in general in the study area?",
+      sliderInput(ns("imp_other"), "...for the whole society in general in the study area?",
                   min = 0, max = 5, value = 3),
 
       br(),
@@ -135,7 +127,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
           value = dplyr::select(rand_es_sel,contains(paste0("esQUEST_",var_lang))),
           h5("(draw max. five rectangles)"),
           br(),
-          h5("The minimum area of a rectangle is app 62.5ha or app. 70 soccer fields."),
+          h5("The minimum area of a rectangle is 62.5ha or approximately 70 soccer fields."),
           h5("You will see the [ha] during you draw the rectangle. In addition, the app indicates if your last drawn polygon is too small or too big."),
           theme = value_box_theme(bg = orange, fg = "black"),
           showcase = bs_icon("question-octagon-fill"),
@@ -580,7 +572,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
       output$slider <- shiny::renderUI({
         ns <- session$ns
         tagList(
-          paste0("The number in the rectangles corresponds to the number of the slider. For the particular rectangle, how suitable do you think the area is for ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang))),"? 1 = not suitable, 2 = little suitable, 3 = suitable, 4 = very suitable, 5 = extremely suitable "),
+          paste0("The number for each rectangle in the map corresponds to the number of the slider. For each individual rectangle, how suitable do you think the area is for ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang))),"? 1 = not suitable, 2 = little suitable, 3 = suitable, 4 = very suitable, 5 = extremely suitable "),
           br(),
           br(),
           lapply(1:nrow(tbl),function(n){

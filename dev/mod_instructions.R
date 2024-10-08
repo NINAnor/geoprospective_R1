@@ -105,9 +105,9 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
           br(),
           h4("For training purposes, draw a maximum of five rectangles that show areas suitable for a Sunday hike in the study area"),
           br(),
-          h5("The minimum area of a rectangle is approx. 62.5 ha or approx. 70 soccer fields."),
+          h5("The minimum area of a rectangle is 62.5 ha or 70 soccer fields."),
           h5("Try to draw the rectangle as precise as possible"),
-          h5("You will see the [ha] during you draw the rectangle. In addition, the app indicates if your last drawn polygon was too small or too big."),
+          h5("You will see the [ha] during you draw the rectangle. In addition, the app indicates if your last drawn rectangle was too small or too big."),
           # br(),
           tags$head(
             tags$style(HTML("
@@ -208,7 +208,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
         n_within<-nrow(as.data.frame(st_within(rectangles,sf_stud_geom)))
         if(n_within < n_poly){
           output$overlay_result <- renderText({
-            paste("<font color=\"#FF0000\"><b>","You can`t save the rectangles:","</b> <li>Place your rectangle completely into the the study area<li/></font>")
+            paste("<font color=\"#FF0000\"><b>","You can`t save the rectangles:","</b> <li>Place your rectangle completely within the study area<li/></font>")
           })
           # shinyalert(  title = "",
           #              text = "Place your rectangle inside the orange borders",
@@ -384,13 +384,13 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
       output$slider <- shiny::renderUI({
         ns <- session$ns
         tagList(
-          "The number in the rectangles corresponds to the number of the slider. For the particular rectangle, how suitable do you think the area is for a Sunday hike? 1 = not suitable, 2 = little suitable, 3 = suitable, 4 = very suitable, 5 = extremely suitable",
+          "The number of each rectangle in the map corresponds to the number of the slider. For each individual rectangle, how suitable do you think the area is for a Sunday hike? 1 = not suitable, 2 = little suitable, 3 = suitable, 4 = very suitable, 5 = extremely suitable",
           br(),
           br(),
           lapply(1:nrow(tbl),function(n){
             polynr <- tbl[n,]$`_leaflet_id`
             id<-paste0("id_",polynr)
-            lable<-paste0("Polygon Nr in map: ",polynr)
+            lable<-paste0("Rectangle Nr. in map: ",polynr)
             sliderInput(ns(id),lable, min = 1, max = 5, step = 1, value = 3)
           })
         )

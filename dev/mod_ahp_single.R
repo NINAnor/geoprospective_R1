@@ -63,7 +63,7 @@ mod_ahp_single_server <- function(id, userID, siteID, es_all){
     ns <- session$ns
     
     shinyalert(  title = "Priorities single benefits from Nature",
-                 text = "From the mapping part you are already familiar with some Benefits from Nature. Within this last task you are asked to compare the importance of all Benefits from Nature. In case you need more information about a nature benefit, just click the link above the slider.",
+                 text = "From the mapping part you are already familiar with some Benefits from Nature. Within this task you are asked to compare the importance of all Benefits from Nature. In case you need more information about a nature benefit, just click the link above the slider.",
                  type = "info",
                  closeOnEsc = TRUE,
                  closeOnClickOutside = TRUE,
