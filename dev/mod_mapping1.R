@@ -125,7 +125,8 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         value_box(
           title = "",
           value = dplyr::select(rand_es_sel,contains(paste0("esQUEST_",var_lang))),
-          h5("(draw max. five rectangles)"),
+          h5("Draw and modify rectangles inside the orange bounds of the study area."),
+          h5("Draw a maximum of five rectangles"),
           br(),
           h5("The minimum area of a rectangle is 62.5ha or approximately 70 soccer fields."),
           h5("You will see the [ha] during you draw the rectangle. In addition, the app indicates if your last drawn polygon is too small or too big."),
@@ -659,7 +660,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
     ### gather poly
     # prediction<-eventReactive(input$submit, {
     observeEvent(input$submit, {
-      show_modal_progress_line(text = "fetch data")
+      show_modal_progress_line(text = "fetch data", color = green)
       req(mapTIME_end)
       mapTIME_end<-mapTIME_end()
       
@@ -810,7 +811,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         gcs_upload(temp_file, bucket_name, name = file_name, predefinedAcl = "bucketLevel")
         file.remove(temp_file)
         
-        update_modal_progress(0.9, text = "draw map model")
+        update_modal_progress(0.9, text = "draw map")
       
       prediction[prediction < 0.15] <- NA
       
