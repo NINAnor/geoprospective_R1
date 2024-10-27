@@ -573,7 +573,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
       output$slider <- shiny::renderUI({
         ns <- session$ns
         tagList(
-          paste0("The number for each rectangle in the map corresponds to the number of the slider. For each individual rectangle, how suitable do you think the area is for ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang))),"? 1 = not suitable, 2 = little suitable, 3 = suitable, 4 = very suitable, 5 = extremely suitable "),
+          paste0("The number for each rectangle in the map corresponds to the number of the slider. For each individual rectangle, how suitable do you think the area is for ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang))),"? 1 = not suitable, 2 = little suitable, 3 = suitable, 4 = very suitable, 5 = very suitable "),
           br(),
           br(),
           lapply(1:nrow(tbl),function(n){

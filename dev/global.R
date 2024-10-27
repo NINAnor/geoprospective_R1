@@ -42,6 +42,7 @@ source("mod_dist_impact.R")
 
 
 
+
 #### Global settings
 
 project_id<-"eu-wendy"
@@ -117,3 +118,16 @@ stud_es<-stud_all%>%filter(esID=="farm" | esID == "habitat" | esID =="mat")
 ## a grid for the questionnaire
 grd<-st_make_grid(sf_stud_geom, cellsize = 0.05,
                   offset = st_bbox(sf_stud_geom)[1:2],  what = "polygons")
+
+if(site_type == "onshore"){
+  resolution = 250^2
+}else{
+  resolution = 500^2
+}
+
+#with res of 250m grid we can sample at least 10 pts with variaton within 0.6km2
+A_min<-0.7
+#A_max<-0.05*round(as.numeric(st_area(sf_stud_geom)),0)
+A_max<-A_min*20
+
+max_rectangles = 5

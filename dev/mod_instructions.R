@@ -188,8 +188,16 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
       req(rv$edits)
       rectangles <- rv$edits()$finished
       
+      # if(is.null(rectangles) | rectangles == ""){
+      #   n_poly<-0
+      # }else{
+      #   n_poly<-nrow(as.data.frame(rectangles))
+      # } 
       
       n_poly<-nrow(as.data.frame(rectangles))
+      
+      
+      
       if(site_type == "onshore"){
         resolution = 250^2
       }else{
