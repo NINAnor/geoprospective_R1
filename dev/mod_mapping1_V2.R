@@ -1,0 +1,1089 @@
+#' delphi_round1 UI Function
+#'
+#' @description A shiny Module.
+#'
+#' @param id,input,output,session Internal parameters for {shiny}.
+#'
+#' @noRd
+#'
+#' @importFrom shiny NS tagList
+mod_delphi_round1_ui <- function(id){
+  ns <- NS(id)
+  
+  tagList(
+    mainPanel(
+      value_box(
+        title = "",
+        value = uiOutput(ns("title_es"))
+        
+      ),
+      br(),
+      actionButton(ns("alert"),
+                   label = "Explain me this nature benefit"),
+      
+      br(),
+      # questions of importance
+      uiOutput(ns("imp_text")),
+      sliderInput(ns("imp_own"), "... for you personally in the study area?",
+                  min = 0, max = 5, value = 3),
+      
+      sliderInput(ns("imp_other"), "...for the whole society in general in the study area?",
+                  min = 0, max = 5, value = 3),
+      
+      br(),
+      # are you able to map the ES?
+      uiOutput(ns("map_poss")),
+      br(),
+      # if ES not mappable
+      conditionalPanel(
+        condition = "input.map_poss == 'No'", ns = ns ,
+        tagList(
+          value_box(
+            title = "",
+            value = "Would you trust an expert evaluation regarding suitable areas for this nature benefit?",
+            theme = value_box_theme(bg = orange, fg = "black"),
+            showcase = bs_icon("question-octagon-fill")
+          ),
+          selectizeInput(ns("expert_map"),label="" ,choices = c("Yes","No"),options = list(
+            placeholder = 'Please select an option below',
+            onInitialize = I('function() { this.setValue(""); }')))%>%
+            
+            shinyInput_label_embed(
+              icon("info") %>%
+                bs_embed_tooltip(title = "An expert evaluation could be either a physical model, including various indicators or expert judgements based on their knowledge",placement = "right")
+            ),
+          use_bs_tooltip()
+        )
+        
+        
+        # actionButton(ns("submit2"),"save")
+      ),
+      
+      conditionalPanel(
+        condition = "input.expert_map != ''", ns=ns,
+        actionButton(ns("confirm"), "Next task", style="color: black; background-color: #31c600; border-color: #31c600")
+      )
+    )
+  )
+}
+
+callback <- c(
+  '$("#remove").on("click", function(){',
+  '  table.rows(".selected").remove().draw();',
+  '});'
+)
+
+#' delphi_round1 Server Functions
+#'
+#' @noRd
+mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userID, site_id, site_type, var_lang, pred){
+  moduleServer( id, function(input, output, session){
+    ns <- session$ns
+    mapTIME_start <-Sys.time()
+    
+    order<-as.numeric(order)
+    rand_es_sel<-rand_es_sel[order,]
+    ## the band names of the predictor variables (might be adjusted in the future if predictors can be selected according to project)
+    
+    ### visualization parameter for img, mean
+    # cols   <- c("#e80909", "#fc8803", "#d8e03f", "#c4f25a","#81ab1f")
+    # maxentviz = list(bands= 'probability',min= 0, max= 1, palette= cols)
+    rv1<-reactiveValues(
+      u = reactive({})
+    )
+    a<-paste0("esNAME_",var_lang)
+    ## descriptives of ecosystem services
+    output$title_es<-renderUI(h3(dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang)))))
+    #output$descr_es<-renderUI(h4(dplyr::select(rand_es_sel,contains(paste0("esDESCR_",var_lang)))))
+    
+    observeEvent(input$alert,{
+      showModal(modalDialog(
+        title = "",
+        h4(dplyr::select(rand_es_sel,contains(paste0("esDESC_lay_",var_lang)))),
+        
+      ))
+    })
+    
+    
+    # output$res_text<-renderText(paste0("The map indicates areas well suited for ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang)))," based on your answers."))
+    # output$es_quest_where<-renderUI(h5(paste0("Please draw one or several rectangles that show areas you think that are well suited for ", dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang))),"?")))
+    # output$res_text<-renderUI(
+    #   tagList(
+    #     bslib::value_box(
+    #       title= "",
+    #       value = paste0("The map indicates areas well suited for ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang)))," based on your answers."),
+    #       showcase_layout = "left center",
+    #       theme = "success",
+    #       showcase = bs_icon("check-square"),
+    #       h5("Red colors indicate areas of higher suitability, blue colors lower suitability"),
+    #     )
+    #   )
+    # )
+    
+    output$es_quest_where<-renderUI(
+      tagList(
+        value_box(
+          title = "",
+          value = dplyr::select(rand_es_sel,contains(paste0("esQUEST_",var_lang))),
+          h5("Draw and modify rectangles inside the orange bounds of the study area."),
+          h5("Draw a maximum of five rectangles"),
+          br(),
+          h5("The minimum area of a rectangle is 62.5ha or approximately 70 soccer fields."),
+          h5("You will see the [ha] during you draw the rectangle. In addition, the app indicates if your last drawn polygon is too small or too big."),
+          theme = value_box_theme(bg = orange, fg = "black"),
+          showcase = bs_icon("question-octagon-fill"),
+          
+        )
+      )
+    )
+    output$es_quest_how<-renderUI(tagList(
+      value_box(
+        title = "",
+        value = paste0("For each rectangle indicate, how well you think they are suited for ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang)))),
+        theme = value_box_theme(bg = orange, fg = "black"),
+        showcase = bs_icon("question-octagon-fill")
+      )
+    ))
+    output$imp_accText<-renderUI(
+      tagList(
+        value_box(
+          title = "",
+          value = paste0("How important is an easy access (by foot, bike, car) to your rectangles to benefit from ", dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang))),"?"),
+          theme = value_box_theme(bg = orange, fg = "black"),
+          showcase = bs_icon("question-octagon-fill")
+        )
+      ))
+    
+    output$blog_descr<-renderUI(
+      tagList(
+        value_box(
+          title = "",
+          value = paste0("Briefly explain in some bullet points why you choosed these particular areas. What makes them suitable to benefit from ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang))) ,"?"),
+          theme = value_box_theme(bg = orange, fg = "black"),
+          showcase = bs_icon("question-octagon-fill")
+        )
+      ))
+    
+    output$imp_text<-renderUI(
+      tagList(
+        value_box(
+          title = "",
+          value = paste0("How important are the benefits of ", dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang))),"..."),
+          theme = value_box_theme(bg = orange, fg = "black"),
+          showcase = bs_icon("question-octagon-fill")
+        )
+      ))
+
+    
+    
+    # UI rendered to ask if able to map ES
+    output$map_poss<-renderUI({
+      tagList(
+        value_box(
+          title = "",
+          value = paste0("Are you able to map areas that are well suited for ", dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang)))," according to you in the study area?"),
+          theme = value_box_theme(bg = orange, fg = "black"),
+          showcase = bs_icon("question-octagon-fill")
+        ),
+        selectizeInput(ns("map_poss"),label="",choices = c("Yes","No"),options = list(
+          placeholder = 'Please select an option below',
+          onInitialize = I('function() { this.setValue(""); }')
+        ))
+        
+      )
+      
+    })
+    
+    drawn_polygons <- reactiveVal(st_sf(
+      leaflet_id = integer(1),  # Two rows (features)
+      time_stamp = as.POSIXct("1970-01-01 00:00:00", tz = "UTC"),
+      valid = FALSE,
+      geometry = st_sfc(st_polygon(),crs = 4326)# Empty POLYGON geometry
+    )) 
+    
+    final_saved_polygons <- reactiveVal(NULL) #
+    
+    # Function to add the drawing toolbar with only editing and removing options
+    add_edit_toolbar <- function(map) {
+      map %>%
+        addDrawToolbar(
+          targetGroup = "drawn",
+          polylineOptions = FALSE,
+          polygonOptions = FALSE,
+          circleOptions = FALSE,
+          markerOptions = FALSE,
+          circleMarkerOptions = FALSE,
+          rectangleOptions = FALSE,  # Disable drawing new rectangles
+          editOptions = list(edit = TRUE, remove = TRUE)  # Keep edit/remove options enabled
+        )
+    }
+    
+    # Function to add the full drawing toolbar (including rectangle drawing)
+    add_full_toolbar <- function(map) {
+      map %>%
+        addDrawToolbar(
+          targetGroup = "drawn",
+          polylineOptions = FALSE,
+          polygonOptions = FALSE,
+          circleOptions = FALSE,
+          markerOptions = FALSE,
+          circleMarkerOptions = FALSE,
+          rectangleOptions = drawRectangleOptions(
+            showArea = TRUE,
+            shapeOptions = drawShapeOptions(
+              clickable = TRUE
+            )
+          ),  # Enable drawing new rectangles
+          editOptions = list(edit = TRUE, remove = TRUE, clearAll = FALSE)# Keep edit/remove options enabled
+        )
+    }
+    
+    output$map <- renderLeaflet({
+      leaflet(sf_stud_geom) %>%
+        addProviderTiles("OpenStreetMap.Mapnik") %>%
+        add_full_toolbar(.) %>%
+        addLayersControl(
+          overlayGroups = c("drawn"),
+          options = layersControlOptions(collapsed = FALSE)
+        ) %>%
+        # Add study area to the map
+        addPolygons(color = "orange", weight = 3, smoothFactor = 0.5,
+                    opacity = 1.0, fillOpacity = 0)
+    })
+    
+    
+
+    
+    # second for results
+    # map_res<-leaflet(sf_stud_geom)%>%
+    #   addProviderTiles(providers$OpenStreetMap.Mapnik,options = tileOptions(minZoom = 8, maxZoom = 15),group = "Openstreet map")%>%
+    #   addProviderTiles(providers$Esri.WorldImagery,options = tileOptions(minZoom = 8, maxZoom = 15),group = "World image")%>%
+    #   addDrawToolbar(targetGroup='drawPoly',
+    #                  polylineOptions = F,
+    #                  polygonOptions = F,
+    #                  circleOptions = F,
+    #                  markerOptions = F,
+    #                  circleMarkerOptions = F,
+    #                  rectangleOptions = F,
+    #                  singleFeature = FALSE,
+    #                  editOptions = editToolbarOptions(selectedPathOptions = selectedPathOptions()))%>%
+    #   addLayersControl(baseGroups = c("Openstreet map","World image"),
+    #                    options = layersControlOptions(collapsed = FALSE))
+    
+
+    
+    ## call the edit map module from the mapedit package
+    #edits<-mapedit::editMap(map, targetLayerId = "poly_r1", record = T,sf = T,editor = c("leaflet.extras", "leafpm"))
+    
+    observeEvent(input$map_poss,{
+      if(input$map_poss == "Yes"){
+
+        insertUI(selector =paste0("#",ns("map_poss")),
+                 where = "afterEnd",
+                 ui=tagList(
+                   uiOutput(ns("es_quest_where")),
+                   br(),
+                   leafletOutput(ns("map")),
+                   uiOutput(ns("rating"))
+                   
+                 )
+        )
+        
+        update_polygon_area_and_check <- function(polygon_sf, modified) {
+          #print("-----------")
+          
+          if(site_type == "onshore"){
+            resolution = 250^2
+          }else{
+            resolution = 500^2
+          }
+          
+          #with res of 250m grid we can sample at least 10 pts with variaton within 0.6km2
+          A_min<-0.7
+          #A_max<-0.05*round(as.numeric(st_area(sf_stud_geom)),0)
+          A_max<-A_min*20
+          
+          max_rectangles = 5
+          
+          
+          area_km2 <- st_area(st_transform(polygon_sf, 3857)) / 1e6 # Transform to meters first
+          area_km2 <- as.numeric(area_km2)
+          #print(polygon_sf)
+          
+          leaf_id<-polygon_sf$leaflet_id
+          #print(paste0("the new one", leaf_id))
+          
+          # Get the existing polygons
+          existing_polygons <- drawn_polygons()
+          #print(existing_polygons)
+          #print(paste0("This comes in before adding the newly drawn/edited polygon after checking (zero removed): ",nrow(existing_polygons%>%filter(leaflet_id != 0))))
+          #feature <- input$map_draw_new_feature
+          # if(leaf_id %in% existing_polygons$leaflet_id){
+          #   existing_polygons<-existing_polygons%>%filter(leaflet_id != leaf_id)
+          # }
+          #
+          
+          #when modified adjust existing pols before intersection check
+          if(modified == TRUE){
+            #print("yes i am modified")
+            #existing_polygons<-existing_polygons%>%filter(leaflet_id != leaf_id)
+            existing_polygons <- existing_polygons %>%
+              group_by(leaflet_id) %>%
+              filter(leaflet_id != leaf_id & time_stamp == max(time_stamp)) %>%
+              ungroup()
+            
+          }else{
+            #print("just drawn not modified")
+          }
+          
+          
+          # Check for intersection but not consider the empty starting polygon
+          intersects <- FALSE
+          if (nrow(existing_polygons%>%filter(leaflet_id != 0)) > 0) {
+            #print("fourth")
+            # Union of existing polygons to create a single geometry
+            existing_union <- st_union(existing_polygons)
+            intersects <- st_intersects(polygon_sf, existing_union, sparse = FALSE)[1]
+          }
+          
+
+          
+          #print(intersects)
+          # Check if the polygon is completely within the study area
+          within_study_area <- st_within(polygon_sf, sf_stud_geom, sparse = FALSE)[1]
+          
+          if (area_km2 < A_max && !intersects && within_study_area) {
+            #print("fifth")
+            # Display success popup alert for valid polygon
+            polygon_sf$valid = TRUE
+            cleaned_pols<-st_sf(rbind(existing_polygons,polygon_sf))%>%filter(leaflet_id != 0)
+            
+            #print(paste0("The cleaned poly to be added: ",nrow(cleaned_pols)))
+            
+            drawn_polygons(cleaned_pols)
+            #drawn_polygons(rbind(drawn_polygons(), cleaned_pols))
+            #print(paste0("and this should be the sum +1draw, +0 mod, -1 del of original and new values:" ,nrow(drawn_polygons())))
+            
+            shinyalert(
+              title = "Valid rectangle!",
+              text = paste("The area is", round(area_km2, 2), "km²."),
+              type = "success",
+              showCancelButton = TRUE,
+              cancelButtonText = "Draw further rectangles or make edits",
+              confirmButtonText = "Done with mapping",
+              closeOnClickOutside = FALSE,
+              callbackR = function(confirm) {
+                if (confirm) {
+   
+                  update_final_map()  # Update the final map with annotations
+                  update_rectangle_ids()  # Update the rectangle ID display
+
+                } else {
+                  # Save the polygon and allow further drawing when "Proceed" is clicked
+                  #drawn_polygons(c(drawn_polygons(), polygon_sf))  # Update the reactive value
+                  drawn_polygons(cleaned_pols)
+
+                  
+                  if (nrow(cleaned_pols) == max_rectangles) {
+                    # Disable drawing if the max has been reached
+                    leafletProxy("map") %>%
+                      removeDrawToolbar() %>%
+                      add_edit_toolbar(.)
+                    
+                    shinyalert(
+                      title = "Maximum rectangles reached!",
+                      text = "You cannot draw more than 5 rectangles.",
+                      type = "warning",
+                      showCancelButton = TRUE,
+                      confirmButtonText = "Done with mapping",
+                      cancelButtonText = "Make edits",
+                      closeOnClickOutside = FALSE,
+                      callbackR = function(confirm) {
+                        if (confirm) {
+                          # Save and proceed
+                          # cleaned_pols<-st_sf(rbind(existing_polygons,polygon_sf))%>%filter(leaflet_id != 0)
+                          #
+                          drawn_polygons(cleaned_pols)
+                          update_rectangle_ids()
+                          update_final_map()
+                        } else {
+                          # Allow editing polygons
+                          leafletProxy("map") %>%
+                            removeDrawToolbar() %>%
+                            add_edit_toolbar(.)
+                        }
+                      }
+                    )
+                  }else{
+                    leafletProxy("map") %>%
+                      removeDrawToolbar() %>%
+                      add_full_toolbar(.)
+                  }
+                }
+              }
+            )
+            
+            
+          } else if (intersects) {
+            #       
+            shinyalert(
+              title = "No overlay!",
+              text = "This rectangle overlays with another rectangle. Please modify or delete your last drawn rectangle.",
+              type = "error",
+              showCancelButton = FALSE,
+              confirmButtonText = "Edit rectangles",
+              closeOnClickOutside = FALSE,
+              callbackR = function(confirm) {
+                if (confirm) {
+                  ## update the reactive value with the intersection polygon... yes that's wrong but like this either first or second polygon can be modified
+                  cleaned_pols<-st_sf(rbind(existing_polygons,polygon_sf))%>%filter(leaflet_id != 0)
+                  drawn_polygons(cleaned_pols)
+                  
+                  leafletProxy("map") %>%
+                    removeDrawToolbar() %>%
+                    add_edit_toolbar(.)
+                  
+                }
+              })
+            
+            
+          } else if (!within_study_area) {
+            # Display error popup alert for out of study area
+            shinyalert(
+              title = "Out of Study Area!",
+              text = "The rectangle must be completely within the defined study area.",
+              type = "error"
+            )
+            
+            
+            # Disable drawing but keep edit/remove active
+            leafletProxy("map") %>%
+              removeDrawToolbar() %>%
+              add_edit_toolbar(.)
+            
+          } else {
+            # Display error popup alert for large area
+            shinyalert(
+              title = "Too large!",
+              text = paste("Rectangle area is", round(area_km2, 2), "km². Must be smaller than 100 km²."),
+              type = "error"
+            )
+            
+            
+            # Disable drawing but keep edit/remove active
+            leafletProxy("map") %>%
+              removeDrawToolbar() %>%
+              add_edit_toolbar(.)
+          }
+          
+        }
+        
+        # Observe draw events (when a new feature is created)
+        observeEvent(input$map_draw_new_feature, {
+          feature <- input$map_draw_new_feature
+          #print(feature$properties$layerId)
+          if (feature$geometry$type == "Polygon") {
+            coords <- feature$geometry$coordinates[[1]]
+            
+            # Convert coordinates to sf object (polygon)
+            polygon <- st_polygon(list(matrix(unlist(coords), ncol = 2, byrow = TRUE)))
+            polygon_sf <- st_sfc(polygon, crs = 4326)
+            
+            tmp_leaflet_id <- as.integer(feature$properties$`_leaflet_id`)
+            #print(tmp_leaflet_id)
+            polygon_sf <- st_sf(leaflet_id = tmp_leaflet_id, time_stamp = Sys.time(), valid = FALSE, geometry = polygon_sf)
+            # Update the area and check for intersections with the large fct
+            update_polygon_area_and_check(polygon_sf, modified =  F)
+          }
+        })
+        
+        
+        # Observe edit events (when a feature is modified)
+        observeEvent(input$map_draw_edited_features, {
+          edited_features <- input$map_draw_edited_features$features
+          ## and the "old polygons" from which the respective modified ids must be removed and replaced
+          
+          #a<-existing_polygons
+          
+          #print(existing_polygons)
+          #print(a$properties$`_leaflet_id`)
+          #print(edited_features)
+          if (length(edited_features) > 0) {
+            #print("first")
+            for (feature in edited_features) {
+              #edited_ids<-feature$properties$`_leaflet_id`
+              #print("second")
+              if (feature$geometry$type == "Polygon") {
+                #print("third")
+                coords <- feature$geometry$coordinates[[1]]
+                
+                # Convert coordinates to sf object (polygon)
+                polygon <- st_polygon(list(matrix(unlist(coords), ncol = 2, byrow = TRUE)))
+                polygon_sf <- st_sfc(polygon, crs = 4326)
+                
+                edited_ids <- as.integer(feature$properties$`_leaflet_id`)
+                #print(edited_ids)
+                polygon_sf <- st_sf(leaflet_id = edited_ids, time_stamp = Sys.time(), valid = FALSE, geometry = polygon_sf)
+                
+                # Update the area and check for intersections
+                update_polygon_area_and_check(polygon_sf, modified = T)
+              }
+            }## / close for
+            
+          }
+        })
+        
+        
+        # Observe delete events (when a feature is deleted)
+        observeEvent(input$map_draw_deleted_features, {
+          deleted_features <- input$map_draw_deleted_features$features
+          #print("---- deleted features::")
+          #print(deleted_features)
+          
+          existing_polygons <- drawn_polygons()
+          #print("---- existing features::")
+          #print(existing_polygons)
+          
+          #print(paste0("N del features: ", length(deleted_features)))
+          
+          
+          if (length(deleted_features) > 0) {
+            # When a polygon is deleted, re-enable the drawing toolbar
+            leafletProxy("map") %>%
+              removeDrawToolbar() %>%
+              add_full_toolbar(.)
+            
+            leaflet_ids <- numeric(length(deleted_features))
+            
+            # Loop through the features to access _leaflet_id
+            for (i in seq_along(deleted_features)) {
+              leaflet_ids[i] <- deleted_features[[i]]$properties$`_leaflet_id`
+            }
+            
+            # Print the populated _leaflet_id vector
+            #print(leaflet_ids)
+            
+            
+            updated_poly <- existing_polygons%>%filter(!leaflet_id %in% leaflet_ids)
+            # Optionally, show a message that the polygon was deleted
+            
+            
+            # Update the drawn polygons reactive value
+            # existing_polygons <- drawn_polygons()
+            #updated_poly <- existing_polygons%>%filter(!leaflet_id %in% del_ids) # Remove rectangle(s)
+            drawn_polygons(updated_poly)
+            updated_poly<-drawn_polygons()
+            
+            
+            # print(paste0("existing N poly after del: ",nrow(updated_poly)))
+            #print(paste0("existing N poly before del: ",nrow(existing_polygons)))
+            
+            
+            if(nrow(updated_poly)==0){
+              shinyalert(
+                title = "Polygon Deleted",
+                text = "The polygon has been deleted.",
+                type = "info",
+                showCancelButton = F,
+                confirmButtonText = "Draw at least one rectangle",
+                #cancelButtonText = "Draw at least one rectangle",
+                closeOnClickOutside = FALSE,
+                callbackR = function(confirm) {
+                  # clear drawn polygons since there is nothing else
+                  drawn_polygons(st_sf(
+                    leaflet_id = integer(1),  # Two rows (features)
+                    time_stamp = as.POSIXct("1970-01-01 00:00:00", tz = "UTC"),
+                    valid = FALSE,
+                    geometry = st_sfc(st_polygon(),crs = 4326)# Empty POLYGON geometry
+                  ))
+                  #print(drawn_polygons)
+                  
+                }
+              )
+            }else{
+              shinyalert(
+                title = "Polygon Deleted",
+                text = "The polygon has been deleted. You can draw a new one.",
+                type = "info",
+                showCancelButton = TRUE,
+                confirmButtonText = "Done with mapping",
+                cancelButtonText = "Draw further rectangles or make edits",
+                closeOnClickOutside = FALSE,
+                callbackR = function(confirm) {
+                  if (confirm) {
+                    # Save and proceed
+                    
+                    drawn_polygons(updated_poly)
+
+                    update_final_map()
+                  } else {
+                    drawn_polygons(updated_poly)
+                    # Allow editing polygons
+                    leafletProxy("map") %>%
+                      removeDrawToolbar() %>%
+                      add_full_toolbar(.)
+                  }
+                }
+              )
+            }
+            # Update the reactive value
+            #print(nrow(new_polygons))
+            
+            # Update the max rectangles counter after deletion
+            # output$max_rectangles_info <- renderText({
+            #   current_count <- length(new_polygons)  # Count after deletion
+            #   paste("Rectangles Drawn: ", current_count, "/", max_rectangles)
+            # })
+          }
+          
+          #feature <- input$map_draw_new_feature
+          #existing_polygons<-existing_polygons%>%filter(leaflet_id != leaf_id)
+        })
+        
+        
+      }#/if yes
+    })#/map_poss
+    
+    ## if mapping not possible: (save results has to be added!)
+    observeEvent(input$confirm,{
+      
+      if(input$expert_map !=""){
+        show_modal_spinner(color = green,text = "update data base")
+        train_param<-list(
+          esID = rand_es_sel$esID,
+          userID = userID,
+          siteID = site_id,
+          imp_acc= as.integer(0),
+          imp_nat= as.integer(0),
+          imp_lulc = as.integer(0),
+          imp_own = as.integer(input$imp_own),
+          imp_other = as.integer(input$imp_other),
+          rel_training_A = as.numeric(0),
+          n_poly = as.integer(0),
+          blog = "NA",
+          poss_mapping = "No",
+          expert_trust = input$expert_map,
+          mapping_order = as.numeric(order),
+          extrap_AUC = as.numeric(0),
+          extrap_KAPPA = as.numeric(0),
+          extrap_propC = as.numeric(0),
+          # extrap_demIMP = as.numeric(0),
+          # extrap_accIMP = as.numeric(0),
+          # extrap_lulcIMP = as.numeric(0),
+          # extrap_natIMP = as.numeric(0),
+          mapTIME_h = as.numeric((Sys.time()-mapTIME_start)/3600)
+        )
+        train_param<-as.data.frame(train_param)
+        # insert_upload_job(table_con$project, table_con$dataset, "es_mappingR1", train_param)
+        es_mapping_tab = bq_table(project = project_id, dataset = dataset, table = 'es_mappingR1')
+        bq_table_upload(x = es_mapping_tab, values = train_param, create_disposition='CREATE_IF_NEEDED', write_disposition='WRITE_APPEND')
+        
+        removeUI(
+          selector = paste0("#",ns("expert_map"))
+        )
+        remove_modal_spinner()
+      }
+      
+      
+    })
+    
+
+    #remove mapping question as soon as decided
+    observeEvent(input$map_poss,{
+      if(input$map_poss !=""){
+        removeUI(
+          selector = paste0("#",ns("map_poss"))
+        )
+        # removeUI(
+        #   selector = paste0("#",ns("imp_own"),"-label"))
+        # removeUI(
+        #   selector = paste0("#",ns("imp_own")))
+        removeUI(
+          selector =  paste0("div:has(> #",ns("imp_own"),")")
+        )
+        # removeUI(
+        #   selector = paste0("#",ns("imp_other"),"-label"))
+        # removeUI(
+        #   selector = paste0("#",ns("imp_other")))
+        
+        removeUI(
+          selector =  paste0("div:has(> #",ns("imp_other"),")")
+        )
+        removeUI(
+          selector = paste0("#",ns("imp_text")))
+        
+      }
+    })
+    
+    ### confirm the drawings and render the sliders with the leaflet map
+    
+    update_final_map <- function() {
+      
+      drawn_sf <- drawn_polygons()  # Retrieve the stored polygons
+      output$rating<-renderUI( tagList(
+          uiOutput(ns("es_quest_how")),
+          br(),
+          leafletOutput(ns("map_res")),
+          br(),
+          uiOutput(ns("slider_container")),
+          br(),
+          uiOutput(ns("imp_accText")),
+          sliderInput(ns("imp_acc"), "0 = not important - 1 = very important",
+                      min = 0, max = 1, step = 0.1, value = 0.5)%>%
+            shinyInput_label_embed(
+              icon("info") %>%
+                bs_embed_tooltip(title = "Ask yourself how important an easy access to the area is necessary to use or profit from this nature benefit. Is it important for you to be able to reach your areas without effort? 1 = not important at all, 5 = very important",placement = "right")),
+          use_bs_tooltip(),
+          br(),
+          uiOutput(ns("blog_descr")),
+          textInput(ns("blog"), label = "")%>%
+            shinyInput_label_embed(
+              icon("info") %>%
+                bs_embed_tooltip(title = "Explain briefly the features or factors why you have chosen these areas. You can do that in single expressions or a blog-like statement. Use short sentences up to max 250 characters in total.",placement = "right")),
+          use_bs_tooltip() ,
+          br(),
+          conditionalPanel(
+            condition = "input.blog != ''", ns=ns,
+            actionButton(ns("submit"),"save values", style="color: black; background-color: #31c600; border-color: #31c600")
+          )
+        )
+      )
+      
+      removeUI(
+        selector = paste0("#",ns("map")))
+      
+      removeUI(
+        selector = paste0("#",ns("es_quest_where")))
+      
+      output$map_res <- renderLeaflet({
+        leaflet() %>%
+          addProviderTiles("OpenStreetMap.Mapnik") %>%
+          #addPolygons(data = st_as_sf(study_area), color = "blue", weight = 2, fillOpacity = 0.1, group = "Study Area") %>%
+          addPolygons(data = drawn_sf, color = "green", weight = 2, fillOpacity = 0.4, group = "drawn") %>%
+          addLabelOnlyMarkers(
+            lng = st_coordinates(st_centroid(drawn_sf))[, 1], 
+            lat = st_coordinates(st_centroid(drawn_sf))[, 2], 
+            label = paste("ID:", seq_along(drawn_sf$geometry)), 
+            labelOptions = labelOptions(noHide = TRUE, direction = 'top', textOnly = TRUE, style = list('color' = 'red'))
+          )
+      })
+      
+
+    }
+    
+    
+
+    
+    # Function to update the rectangle IDs display
+    update_rectangle_ids <- function() {
+      ids <- paste("Rectangle IDs:", seq_along(drawn_polygons()), collapse = ", ")
+      # You can display this somewhere in the UI if needed
+    }
+    
+    output$slider_container <- renderUI({
+      drawn_sf <- drawn_polygons() 
+      lapply(seq_along(drawn_sf$geometry), function(i) {
+        sliderInput(
+          inputId = ns(paste0("slider_", i)),
+          label = paste("Rectangle ID:", i),
+          min = 1, max = 5, value = 3  # Default value set to 3, can be customized
+        )
+      })
+    })
+    
+    ############
+    
+    
+
+    
+    
+    ## keep mapping time
+    mapTIME_end <-eventReactive(input$submit,{
+      mapTIME_end <-Sys.time()
+    })
+    ## remove map UI and sliders show result
+    observeEvent(input$submit, {
+      
+      insertUI(
+        selector = paste0("#",ns("submit")),
+        where = "afterEnd",
+        ui = tagList(
+          # textOutput(ns("res_text")),
+          bslib::value_box(
+            title= "",
+            value = paste0("Based on your inputs, we calculated a map of the study area that shows the probability to benefit from ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang)))),
+            showcase_layout = "left center",
+            theme = value_box_theme(bg = blue, fg = "black"),
+            showcase = bs_icon("check-square"),
+            h5("Red colors indicate areas of higher probability, blue colors lower probability to benefit"),
+          ),
+          br(),
+          leafletOutput(ns("res_map")),
+          br(),
+          uiOutput(ns("btn_cond"))
+          
+        )
+      ) ## insert ui
+      
+      removeUI(
+        selector = paste0("#",ns("map_res"))
+      )
+      removeUI(
+        selector =  paste0("div:has(> #",ns("imp_acc"),")")
+      )
+      removeUI(
+        selector = paste0("#",ns("imp_accText")))
+      removeUI(
+        selector = paste0("#",ns("es_quest_how"))
+      )
+      removeUI(
+        selector = paste0("#",ns("slider_container"))
+      )
+      removeUI(
+        selector = paste0("#",ns("blog_descr"))
+      )
+      removeUI(
+        selector = paste0("#",ns("blog"))
+      )
+      removeUI(
+        selector =  paste0("div:has(> #",ns("blog"),")")
+      )
+      removeUI(
+        selector =  paste0("div:has(> #",ns("select"),")")
+      )
+      removeUI(
+        selector = paste0("#",ns("submit"))
+      )
+      removeUI(
+        selector =  paste0("div:has(> #",ns("pull-right"),")")
+      )
+      removeUI(
+        selector = paste0("div:has(>> #",ns("blog"),")")
+      )
+      
+      
+    })
+    
+    ### predict probability of ES with RF but save polys, ratings, esid and userID on bq
+    
+    ### gather poly
+    # prediction<-eventReactive(input$submit, {
+    observeEvent(input$submit, {
+      show_modal_progress_line(text = "fetch data", color = green)
+      req(mapTIME_end)
+      mapTIME_end<-mapTIME_end()
+      
+      polygon <- drawn_polygons()
+      #print(drawn_sf)
+      
+      # Collect slider values and ensure they are numeric
+      slider_values <- sapply(1:nrow(polygon), function(i) {
+        slider_val <- input[[paste0("slider_", i)]]
+        if (is.null(slider_val)) {
+          return(NA)  # Return NA if the slider value is not set
+        }
+        return(slider_val)  # Return the slider value
+      })
+      
+      # Check if all slider values are numeric before proceeding
+      # if (any(is.na(slider_values))) {
+      #   shinyalert("Error", "Some slider values are invalid. Please check your input.", type = "error")
+      #   return()
+      # }
+      
+      # Add the slider values as a new column to the drawn_sf object
+      #drawn_sf <- st_sf(geometry = drawn_sf, slider_value = slider_values)
+      polygon$es_value <- slider_values
+      
+      
+
+      polygon$esID <- rep(rand_es_sel$esID,nrow(polygon))
+      polygon$userID <- rep(userID,nrow(polygon))
+      polygon$siteID <- rep(site_id,nrow(polygon))
+      polygon$delphi_round<-rep(1, nrow(polygon))
+      update_modal_progress(0.1, text = "update data base")
+      n_polys <-nrow(polygon)
+      polygon<-st_as_sf(polygon)
+      train_area<-as.numeric(sum(st_area(polygon)))
+      
+      #create new polygon object with wkt as geometry
+      polygons<-polygon%>%st_drop_geometry()
+      polygons$geometry<-st_as_text(polygon$geometry)
+      update_modal_progress(0.15, text = "update data base")
+      #save it on bq
+      poly_table = bq_table(project = project_id, dataset = dataset, table = 'ind_polys_R1')
+      #bq_table_upload(x = poly_table, values = polygons, create_disposition='CREATE_IF_NEEDED', write_disposition='WRITE_APPEND')
+      
+      
+      ################### not for the moment, just upload polygons to bq
+      ############ training pts
+      update_modal_progress(0.2, text = "update data base")
+      
+      
+      if(site_type == "onshore"){
+        resolution<-250*250
+      }else{
+        resolution<-500*500
+      }
+      # 
+      # 
+      # ## N background (outside poly points) according to area of extrapolation
+      A_roi<-as.numeric(sf_stud_geom$siteAREAkm2*10^6)
+      # 
+      # # max pts for efficient extrapolation each cell
+      all_back_pts<- round(A_roi/resolution,0)
+      # 
+      # ## although zooming on the map while drawing is limited, we assure that at least 10pts are within a poly
+      min_in_pts<-10
+      
+      # # inside pts are area + es value weighted
+      for (i in 1:nrow(polygon)) {
+        A_tmp <- as.numeric(st_area(polygon[i,]))
+        tmp_ratio<-A_tmp/A_roi
+        tmp_pts<-round(all_back_pts*tmp_ratio,0)
+        
+        if(tmp_pts<=min_in_pts){
+          tmp_pts<-min_in_pts
+        }else{
+          tmp_pts<-tmp_pts
+        }
+        # npts in this poly must be max_pts*tmp_ratio*es_value
+        tmp_pts = st_sample(polygon[i,], round(tmp_pts*(polygon[i,]$es_value/5),0),type="random")
+        tmp_pts<-st_as_sf(tmp_pts)
+        tmp_pts$inside<-rep(1,nrow(tmp_pts))
+        if(i==1){
+          pts_in<-tmp_pts
+        }else{
+          pts_in<-rbind(pts_in,tmp_pts)
+        }
+        
+      }
+      # weight predictors
+      pred<-load_var(path=pred)
+      # pred_w<-stack(pred$dem*1, pred$eii*1, pred$acc*as.numeric(input$imp_acc))
+      pred_w<-raster::stack(pred$dem*1, pred$lulc*1, pred$int*1, pred$acc*as.numeric(input$imp_acc))
+      # pred_w<-c(rast(pred$acc),rast(pred$dem))
+      
+      
+      pts_in<-st_transform(pts_in,st_crs(pred))
+      pts <- do.call(rbind, st_geometry(pts_in)) %>% 
+        as_tibble() %>% setNames(c("lon","lat"))
+      pts$SPECIES<-rep("pres",nrow(pts))
+      
+      
+      if(nrow(pts)>1500){
+        pts<-pts[sample(nrow(pts), 1500), ]
+      }
+      
+      
+      
+      ############ save map on gcs within studID folder
+      update_modal_progress(0.4, text = "train model")
+      SDM <- SSDM::modelling('MARS', pts, 
+                             pred_w, Xcol = 'lon', Ycol = 'lat')
+      
+      train_param <-
+        list(
+          esID = rand_es_sel$esID,
+          userID = userID,
+          siteID = site_id,
+          imp_acc= as.integer(input$imp_acc),
+          imp_nat= as.integer(0),
+          imp_lulc = as.integer(0),
+          imp_own = as.integer(input$imp_own),
+          imp_other = as.integer(input$imp_other),
+          rel_training_A = as.integer(sum(st_area(polygon)))/A_roi,
+          n_poly = as.integer(n_polys),
+          blog = input$blog,
+          poss_mapping = "Yes",
+          expert_trust = "no_own_mapping",
+          mapping_order = as.numeric(order),
+          extrap_AUC = SDM@evaluation$AUC,
+          extrap_KAPPA = SDM@evaluation$Kappa,
+          extrap_propC = SDM@evaluation$prop.correct,
+          # extrap_demIMP = SDM@variable.importance$dem,
+          # extrap_accIMP = SDM@variable.importance$acc,
+          # extrap_lulcIMP = SDM@variable.importance$lulc,
+          # extrap_natIMP = SDM@variable.importance$int,
+          mapTIME_h = as.numeric((Sys.time()-mapTIME_start)/3600)
+          
+        )
+      train_param<-as.data.frame(train_param)
+      
+      update_modal_progress(0.6, text = "evaluate model & update data base")
+      # write to bq
+      es_mapping_tab = bq_table(project = project_id, dataset = dataset, table = 'es_mappingR1')
+      bq_table_upload(x = es_mapping_tab, values = train_param, create_disposition='CREATE_IF_NEEDED', write_disposition='WRITE_APPEND')
+      
+      prediction<-SDM@projection
+      
+      update_modal_progress(0.8, text = "save your map")
+      temp_file <- tempfile(fileext = paste0(rand_es_sel$esID,"_",userID,".tif"))
+      writeRaster(prediction, filename = temp_file, format = "GTiff")
+      
+      file_name <-paste0(site_id,"/3_ind_R1/",rand_es_sel$esID,"/",userID)
+      gcs_upload(temp_file, bucket_name, name = file_name, predefinedAcl = "bucketLevel")
+      file.remove(temp_file)
+      
+      update_modal_progress(0.9, text = "draw map")
+      
+      prediction[prediction < 0.15] <- NA
+      
+      
+      bins <- c(0.15, 0.25, 0.5, 0.75, 1)
+      colors <- c("#0000FF", "#00FFFF", "#FFFFFF", "#FF7F7F", "#FF0000")
+      labels <- c("Low", "Moderate", "High", "Very High")
+      
+      # Create color palette function
+      color_palette <- colorBin(palette = colors, domain = values(prediction), bins = bins, na.color = "transparent")
+      
+      
+      # color_palette <- colorNumeric(
+      #   palette = colorRampPalette(c("blue", "green", "yellow", "red"))(100),
+      #   domain = values(prediction),
+      #   na.color = "transparent"
+      # )
+      # prediction<-prediction
+      output$res_map <- renderLeaflet({
+        leaflet(sf_stud_geom)%>%
+          addPolygons(color = "orange", weight = 3, smoothFactor = 0.5,
+                      opacity = 1.0, fillOpacity = 0)%>%
+          addProviderTiles(providers$OpenStreetMap.Mapnik,options = tileOptions(minZoom = 8, maxZoom = 15),group = "Openstreet map")%>%
+          addProviderTiles(providers$Esri.WorldImagery,options = tileOptions(minZoom = 8, maxZoom = 15),group = "World image")%>%
+          addRasterImage(prediction,colors = color_palette, opacity = 0.6)%>%
+          addLegend(
+            pal = color_palette,
+            values = values(prediction),
+            labels= labels,
+            title = paste0("Probability to benefit from ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang)))),
+            position = "bottomright"
+          )
+        # addLayersControl(baseGroups = c("Openstreet map","World image"),
+        #                  options = layersControlOptions(collapsed = T))
+      })
+      remove_modal_progress()
+      output$btn_cond<-renderUI({
+        req(train_param)
+        actionButton(ns("confirm2"), "Next task", style="color: black; background-color: #31c600; border-color: #31c600")
+      })
+      
+    })
+    
+    
+    #modify reactive value to trigger cond
+    observeEvent(input$confirm2,{
+      # removeNotification(id="note1")
+      rv1$u <-reactive({1})
+    })
+    # play back the value of the confirm button to be used in the main app
+    cond <- reactive({rv1$u()})
+    
+    return(cond)
+  })
+}
+
+## To be copied in the UI
+# mod_delphi_round1_ui("delphi_round1_1")
+
+## To be copied in the server
+# mod_delphi_round1_server("delphi_round1_1")
