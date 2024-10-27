@@ -83,19 +83,14 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
     
     order<-as.numeric(order)
     rand_es_sel<-rand_es_sel[order,]
-    ## the band names of the predictor variables (might be adjusted in the future if predictors can be selected according to project)
-    
-    ### visualization parameter for img, mean
-    # cols   <- c("#e80909", "#fc8803", "#d8e03f", "#c4f25a","#81ab1f")
-    # maxentviz = list(bands= 'probability',min= 0, max= 1, palette= cols)
+
     rv1<-reactiveValues(
       u = reactive({})
     )
     a<-paste0("esNAME_",var_lang)
     ## descriptives of ecosystem services
     output$title_es<-renderUI(h3(dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang)))))
-    #output$descr_es<-renderUI(h4(dplyr::select(rand_es_sel,contains(paste0("esDESCR_",var_lang)))))
-    
+
     observeEvent(input$alert,{
       showModal(modalDialog(
         title = "",
@@ -103,23 +98,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         
       ))
     })
-    
-    
-    # output$res_text<-renderText(paste0("The map indicates areas well suited for ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang)))," based on your answers."))
-    # output$es_quest_where<-renderUI(h5(paste0("Please draw one or several rectangles that show areas you think that are well suited for ", dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang))),"?")))
-    # output$res_text<-renderUI(
-    #   tagList(
-    #     bslib::value_box(
-    #       title= "",
-    #       value = paste0("The map indicates areas well suited for ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang)))," based on your answers."),
-    #       showcase_layout = "left center",
-    #       theme = "success",
-    #       showcase = bs_icon("check-square"),
-    #       h5("Red colors indicate areas of higher suitability, blue colors lower suitability"),
-    #     )
-    #   )
-    # )
-    
+
     output$es_quest_where<-renderUI(
       tagList(
         value_box(
@@ -240,7 +219,8 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
     
     output$map <- renderLeaflet({
       leaflet(sf_stud_geom) %>%
-        addProviderTiles("OpenStreetMap.Mapnik") %>%
+        addProviderTiles(providers$OpenStreetMap.Mapnik,options = tileOptions(minZoom = 8, maxZoom = 15),group = "Openstreet map")%>%
+        addProviderTiles(providers$Esri.WorldImagery,options = tileOptions(minZoom = 8, maxZoom = 15),group = "World image")%>%
         add_full_toolbar(.) %>%
         addLayersControl(
           overlayGroups = c("drawn"),
@@ -248,27 +228,10 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         ) %>%
         # Add study area to the map
         addPolygons(color = "orange", weight = 3, smoothFactor = 0.5,
-                    opacity = 1.0, fillOpacity = 0)
+                    opacity = 1.0, fillOpacity = 0)%>%
+          addLayersControl(baseGroups = c("Openstreet map","World image"),
+                           options = layersControlOptions(collapsed = FALSE))
     })
-    
-    
-
-    
-    # second for results
-    # map_res<-leaflet(sf_stud_geom)%>%
-    #   addProviderTiles(providers$OpenStreetMap.Mapnik,options = tileOptions(minZoom = 8, maxZoom = 15),group = "Openstreet map")%>%
-    #   addProviderTiles(providers$Esri.WorldImagery,options = tileOptions(minZoom = 8, maxZoom = 15),group = "World image")%>%
-    #   addDrawToolbar(targetGroup='drawPoly',
-    #                  polylineOptions = F,
-    #                  polygonOptions = F,
-    #                  circleOptions = F,
-    #                  markerOptions = F,
-    #                  circleMarkerOptions = F,
-    #                  rectangleOptions = F,
-    #                  singleFeature = FALSE,
-    #                  editOptions = editToolbarOptions(selectedPathOptions = selectedPathOptions()))%>%
-    #   addLayersControl(baseGroups = c("Openstreet map","World image"),
-    #                    options = layersControlOptions(collapsed = FALSE))
     
 
     
@@ -290,38 +253,16 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         )
         
         update_polygon_area_and_check <- function(polygon_sf, modified) {
-          #print("-----------")
-          
-          if(site_type == "onshore"){
-            resolution = 250^2
-          }else{
-            resolution = 500^2
-          }
-          
-          #with res of 250m grid we can sample at least 10 pts with variaton within 0.6km2
-          A_min<-0.7
-          #A_max<-0.05*round(as.numeric(st_area(sf_stud_geom)),0)
-          A_max<-A_min*20
-          
-          max_rectangles = 5
-          
-          
+
           area_km2 <- st_area(st_transform(polygon_sf, 3857)) / 1e6 # Transform to meters first
           area_km2 <- as.numeric(area_km2)
-          #print(polygon_sf)
+
           
           leaf_id<-polygon_sf$leaflet_id
-          #print(paste0("the new one", leaf_id))
-          
+
           # Get the existing polygons
           existing_polygons <- drawn_polygons()
-          #print(existing_polygons)
-          #print(paste0("This comes in before adding the newly drawn/edited polygon after checking (zero removed): ",nrow(existing_polygons%>%filter(leaflet_id != 0))))
-          #feature <- input$map_draw_new_feature
-          # if(leaf_id %in% existing_polygons$leaflet_id){
-          #   existing_polygons<-existing_polygons%>%filter(leaflet_id != leaf_id)
-          # }
-          #
+
           
           #when modified adjust existing pols before intersection check
           if(modified == TRUE){
@@ -352,17 +293,11 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
           # Check if the polygon is completely within the study area
           within_study_area <- st_within(polygon_sf, sf_stud_geom, sparse = FALSE)[1]
           
-          if (area_km2 < A_max && !intersects && within_study_area) {
-            #print("fifth")
+          if (area_km2 > A_min && area_km2 < A_max && !intersects && within_study_area) {
             # Display success popup alert for valid polygon
             polygon_sf$valid = TRUE
             cleaned_pols<-st_sf(rbind(existing_polygons,polygon_sf))%>%filter(leaflet_id != 0)
-            
-            #print(paste0("The cleaned poly to be added: ",nrow(cleaned_pols)))
-            
             drawn_polygons(cleaned_pols)
-            #drawn_polygons(rbind(drawn_polygons(), cleaned_pols))
-            #print(paste0("and this should be the sum +1draw, +0 mod, -1 del of original and new values:" ,nrow(drawn_polygons())))
             
             shinyalert(
               title = "Valid rectangle!",
@@ -380,7 +315,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
 
                 } else {
                   # Save the polygon and allow further drawing when "Proceed" is clicked
-                  #drawn_polygons(c(drawn_polygons(), polygon_sf))  # Update the reactive value
+
                   drawn_polygons(cleaned_pols)
 
                   
@@ -401,8 +336,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
                       callbackR = function(confirm) {
                         if (confirm) {
                           # Save and proceed
-                          # cleaned_pols<-st_sf(rbind(existing_polygons,polygon_sf))%>%filter(leaflet_id != 0)
-                          #
+
                           drawn_polygons(cleaned_pols)
                           update_rectangle_ids()
                           update_final_map()
@@ -461,11 +395,23 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
               removeDrawToolbar() %>%
               add_edit_toolbar(.)
             
-          } else {
+          } else if (area_km2 > A_max) {
             # Display error popup alert for large area
             shinyalert(
               title = "Too large!",
-              text = paste("Rectangle area is", round(area_km2, 2), "km². Must be smaller than 100 km²."),
+              text = paste0("Rectangle area is", round(area_km2, 2), "km². Must be smaller than ",A_max, " km²."),
+              type = "error"
+            )
+            
+            
+            # Disable drawing but keep edit/remove active
+            leafletProxy("map") %>%
+              removeDrawToolbar() %>%
+              add_edit_toolbar(.)
+          } else {
+            shinyalert(
+              title = "Too small!",
+              text = paste0("Rectangle area is", round(area_km2, 2), "km². Must be larger than than ", A_min, " km²."),
               type = "error"
             )
             
@@ -501,31 +447,18 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         # Observe edit events (when a feature is modified)
         observeEvent(input$map_draw_edited_features, {
           edited_features <- input$map_draw_edited_features$features
-          ## and the "old polygons" from which the respective modified ids must be removed and replaced
-          
-          #a<-existing_polygons
-          
-          #print(existing_polygons)
-          #print(a$properties$`_leaflet_id`)
-          #print(edited_features)
           if (length(edited_features) > 0) {
-            #print("first")
+
             for (feature in edited_features) {
-              #edited_ids<-feature$properties$`_leaflet_id`
-              #print("second")
+
               if (feature$geometry$type == "Polygon") {
-                #print("third")
+
                 coords <- feature$geometry$coordinates[[1]]
-                
-                # Convert coordinates to sf object (polygon)
                 polygon <- st_polygon(list(matrix(unlist(coords), ncol = 2, byrow = TRUE)))
                 polygon_sf <- st_sfc(polygon, crs = 4326)
                 
                 edited_ids <- as.integer(feature$properties$`_leaflet_id`)
-                #print(edited_ids)
                 polygon_sf <- st_sf(leaflet_id = edited_ids, time_stamp = Sys.time(), valid = FALSE, geometry = polygon_sf)
-                
-                # Update the area and check for intersections
                 update_polygon_area_and_check(polygon_sf, modified = T)
               }
             }## / close for
@@ -537,18 +470,10 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         # Observe delete events (when a feature is deleted)
         observeEvent(input$map_draw_deleted_features, {
           deleted_features <- input$map_draw_deleted_features$features
-          #print("---- deleted features::")
-          #print(deleted_features)
-          
+
           existing_polygons <- drawn_polygons()
-          #print("---- existing features::")
-          #print(existing_polygons)
-          
-          #print(paste0("N del features: ", length(deleted_features)))
-          
-          
+
           if (length(deleted_features) > 0) {
-            # When a polygon is deleted, re-enable the drawing toolbar
             leafletProxy("map") %>%
               removeDrawToolbar() %>%
               add_full_toolbar(.)
@@ -560,25 +485,10 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
               leaflet_ids[i] <- deleted_features[[i]]$properties$`_leaflet_id`
             }
             
-            # Print the populated _leaflet_id vector
-            #print(leaflet_ids)
-            
-            
             updated_poly <- existing_polygons%>%filter(!leaflet_id %in% leaflet_ids)
-            # Optionally, show a message that the polygon was deleted
-            
-            
-            # Update the drawn polygons reactive value
-            # existing_polygons <- drawn_polygons()
-            #updated_poly <- existing_polygons%>%filter(!leaflet_id %in% del_ids) # Remove rectangle(s)
             drawn_polygons(updated_poly)
             updated_poly<-drawn_polygons()
-            
-            
-            # print(paste0("existing N poly after del: ",nrow(updated_poly)))
-            #print(paste0("existing N poly before del: ",nrow(existing_polygons)))
-            
-            
+
             if(nrow(updated_poly)==0){
               shinyalert(
                 title = "Polygon Deleted",
@@ -596,8 +506,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
                     valid = FALSE,
                     geometry = st_sfc(st_polygon(),crs = 4326)# Empty POLYGON geometry
                   ))
-                  #print(drawn_polygons)
-                  
+
                 }
               )
             }else{
@@ -639,8 +548,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
           #feature <- input$map_draw_new_feature
           #existing_polygons<-existing_polygons%>%filter(leaflet_id != leaf_id)
         })
-        
-        
+
       }#/if yes
     })#/map_poss
     
@@ -694,18 +602,10 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         removeUI(
           selector = paste0("#",ns("map_poss"))
         )
-        # removeUI(
-        #   selector = paste0("#",ns("imp_own"),"-label"))
-        # removeUI(
-        #   selector = paste0("#",ns("imp_own")))
         removeUI(
           selector =  paste0("div:has(> #",ns("imp_own"),")")
         )
-        # removeUI(
-        #   selector = paste0("#",ns("imp_other"),"-label"))
-        # removeUI(
-        #   selector = paste0("#",ns("imp_other")))
-        
+
         removeUI(
           selector =  paste0("div:has(> #",ns("imp_other"),")")
         )
@@ -720,7 +620,8 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
     update_final_map <- function() {
       
       drawn_sf <- drawn_polygons()  # Retrieve the stored polygons
-      output$rating<-renderUI( tagList(
+      output$rating<-renderUI( 
+        tagList(
           uiOutput(ns("es_quest_how")),
           br(),
           leafletOutput(ns("map_res")),
@@ -757,23 +658,21 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
       
       output$map_res <- renderLeaflet({
         leaflet() %>%
-          addProviderTiles("OpenStreetMap.Mapnik") %>%
-          #addPolygons(data = st_as_sf(study_area), color = "blue", weight = 2, fillOpacity = 0.1, group = "Study Area") %>%
+          addProviderTiles(providers$OpenStreetMap.Mapnik,options = tileOptions(minZoom = 8, maxZoom = 15),group = "Openstreet map")%>%
+          addProviderTiles(providers$Esri.WorldImagery,options = tileOptions(minZoom = 8, maxZoom = 15),group = "World image")%>%
           addPolygons(data = drawn_sf, color = "green", weight = 2, fillOpacity = 0.4, group = "drawn") %>%
           addLabelOnlyMarkers(
             lng = st_coordinates(st_centroid(drawn_sf))[, 1], 
             lat = st_coordinates(st_centroid(drawn_sf))[, 2], 
             label = paste("ID:", seq_along(drawn_sf$geometry)), 
             labelOptions = labelOptions(noHide = TRUE, direction = 'top', textOnly = TRUE, style = list('color' = 'red'))
-          )
+          )%>%
+          addLayersControl(baseGroups = c("Openstreet map","World image"),
+                           options = layersControlOptions(collapsed = FALSE))
+
       })
-      
+    }#/final_map function
 
-    }
-    
-    
-
-    
     # Function to update the rectangle IDs display
     update_rectangle_ids <- function() {
       ids <- paste("Rectangle IDs:", seq_along(drawn_polygons()), collapse = ", ")
@@ -782,13 +681,19 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
     
     output$slider_container <- renderUI({
       drawn_sf <- drawn_polygons() 
-      lapply(seq_along(drawn_sf$geometry), function(i) {
-        sliderInput(
-          inputId = ns(paste0("slider_", i)),
-          label = paste("Rectangle ID:", i),
-          min = 1, max = 5, value = 3  # Default value set to 3, can be customized
-        )
-      })
+      tagList(
+        paste0("The number for each rectangle in the map corresponds to the number of the slider. For each individual rectangle, how suitable do you think the area is for ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang))),"? 1 = not suitable, 2 = little suitable, 3 = suitable, 4 = very suitable, 5 = very suitable "),
+        br(),
+        lapply(seq_along(drawn_sf$geometry), function(i) {
+          sliderInput(
+            inputId = ns(paste0("slider_", i)),
+            label = paste("Rectangle ID:", i),
+            min = 1, max = 5, value = 3  # Default value set to 3, can be customized
+          )
+        })
+        
+      )
+
     })
     
     ############
@@ -803,12 +708,10 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
     })
     ## remove map UI and sliders show result
     observeEvent(input$submit, {
-      
       insertUI(
         selector = paste0("#",ns("submit")),
         where = "afterEnd",
         ui = tagList(
-          # textOutput(ns("res_text")),
           bslib::value_box(
             title= "",
             value = paste0("Based on your inputs, we calculated a map of the study area that shows the probability to benefit from ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang)))),
@@ -863,10 +766,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
       
       
     })
-    
-    ### predict probability of ES with RF but save polys, ratings, esid and userID on bq
-    
-    ### gather poly
+
     # prediction<-eventReactive(input$submit, {
     observeEvent(input$submit, {
       show_modal_progress_line(text = "fetch data", color = green)
@@ -885,18 +785,8 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         return(slider_val)  # Return the slider value
       })
       
-      # Check if all slider values are numeric before proceeding
-      # if (any(is.na(slider_values))) {
-      #   shinyalert("Error", "Some slider values are invalid. Please check your input.", type = "error")
-      #   return()
-      # }
-      
-      # Add the slider values as a new column to the drawn_sf object
-      #drawn_sf <- st_sf(geometry = drawn_sf, slider_value = slider_values)
       polygon$es_value <- slider_values
       
-      
-
       polygon$esID <- rep(rand_es_sel$esID,nrow(polygon))
       polygon$userID <- rep(userID,nrow(polygon))
       polygon$siteID <- rep(site_id,nrow(polygon))
@@ -912,20 +802,13 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
       update_modal_progress(0.15, text = "update data base")
       #save it on bq
       poly_table = bq_table(project = project_id, dataset = dataset, table = 'ind_polys_R1')
-      #bq_table_upload(x = poly_table, values = polygons, create_disposition='CREATE_IF_NEEDED', write_disposition='WRITE_APPEND')
+      bq_table_upload(x = poly_table, values = polygons, create_disposition='CREATE_IF_NEEDED', write_disposition='WRITE_APPEND')
       
       
       ################### not for the moment, just upload polygons to bq
       ############ training pts
       update_modal_progress(0.2, text = "update data base")
-      
-      
-      if(site_type == "onshore"){
-        resolution<-250*250
-      }else{
-        resolution<-500*500
-      }
-      # 
+
       # 
       # ## N background (outside poly points) according to area of extrapolation
       A_roi<-as.numeric(sf_stud_geom$siteAREAkm2*10^6)
@@ -1037,13 +920,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
       # Create color palette function
       color_palette <- colorBin(palette = colors, domain = values(prediction), bins = bins, na.color = "transparent")
       
-      
-      # color_palette <- colorNumeric(
-      #   palette = colorRampPalette(c("blue", "green", "yellow", "red"))(100),
-      #   domain = values(prediction),
-      #   na.color = "transparent"
-      # )
-      # prediction<-prediction
+
       output$res_map <- renderLeaflet({
         leaflet(sf_stud_geom)%>%
           addPolygons(color = "orange", weight = 3, smoothFactor = 0.5,
