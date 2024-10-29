@@ -236,7 +236,7 @@ function(input, output, session) {
 
     # num_tabs<-num_tabs()
     shinyalert(  title = "Mapping benefits of nature",
-                 text = "After this training session you will now try to map different benefits from nature",
+                 text = "After the training session you will now try to map different benefits from nature",
                  type = "info",
                  closeOnEsc = TRUE,
                  closeOnClickOutside = TRUE,

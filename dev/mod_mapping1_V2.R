@@ -234,9 +234,11 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
     })
     
 
-    
-    ## call the edit map module from the mapedit package
-    #edits<-mapedit::editMap(map, targetLayerId = "poly_r1", record = T,sf = T,editor = c("leaflet.extras", "leafpm"))
+    observeEvent(input$confirm,{
+      # removeNotification(id="note1")
+      rv1$u <-reactive({1})
+    })
+
     
     observeEvent(input$map_poss,{
       if(input$map_poss == "Yes"){
@@ -254,8 +256,8 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         
         update_polygon_area_and_check <- function(polygon_sf, modified) {
 
-          area_km2 <- st_area(st_transform(polygon_sf, 3857)) / 1e6 # Transform to meters first
-          area_km2 <- as.numeric(area_km2)
+          area_ha <- st_area(st_transform(polygon_sf, 3857)) / 10000 # Transform to ha
+          area_ha <- as.numeric(area_ha)
 
           
           leaf_id<-polygon_sf$leaflet_id
@@ -293,7 +295,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
           # Check if the polygon is completely within the study area
           within_study_area <- st_within(polygon_sf, sf_stud_geom, sparse = FALSE)[1]
           
-          if (area_km2 > A_min && area_km2 < A_max && !intersects && within_study_area) {
+          if (area_ha > A_min && area_ha < A_max && !intersects && within_study_area) {
             # Display success popup alert for valid polygon
             polygon_sf$valid = TRUE
             cleaned_pols<-st_sf(rbind(existing_polygons,polygon_sf))%>%filter(leaflet_id != 0)
@@ -301,11 +303,11 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
             
             shinyalert(
               title = "Valid rectangle!",
-              text = paste("The area is", round(area_km2, 2), "km²."),
+              text = paste("The area is", round(area_ha, 2), "ha."),
               type = "success",
               showCancelButton = TRUE,
               cancelButtonText = "Draw further rectangles or make edits",
-              confirmButtonText = "Done with mapping",
+              confirmButtonText = "Finish mapping - evaluate areas",
               closeOnClickOutside = FALSE,
               callbackR = function(confirm) {
                 if (confirm) {
@@ -330,7 +332,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
                       text = "You cannot draw more than 5 rectangles.",
                       type = "warning",
                       showCancelButton = TRUE,
-                      confirmButtonText = "Done with mapping",
+                      confirmButtonText = "Finish mapping - evaluate areas",
                       cancelButtonText = "Make edits",
                       closeOnClickOutside = FALSE,
                       callbackR = function(confirm) {
@@ -395,11 +397,11 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
               removeDrawToolbar() %>%
               add_edit_toolbar(.)
             
-          } else if (area_km2 > A_max) {
+          } else if (area_ha > A_max) {
             # Display error popup alert for large area
             shinyalert(
               title = "Too large!",
-              text = paste0("Rectangle area is", round(area_km2, 2), "km². Must be smaller than ",A_max, " km²."),
+              text = paste0("Rectangle area is", round(area_ha, 2), "ha. Must be smaller than ",A_max, " ha."),
               type = "error"
             )
             
@@ -411,7 +413,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
           } else {
             shinyalert(
               title = "Too small!",
-              text = paste0("Rectangle area is", round(area_km2, 2), "km². Must be larger than than ", A_min, " km²."),
+              text = paste0("Rectangle area is", round(area_ha, 2), "ha. Must be larger than than ", A_min, " ha."),
               type = "error"
             )
             
@@ -515,7 +517,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
                 text = "The polygon has been deleted. You can draw a new one.",
                 type = "info",
                 showCancelButton = TRUE,
-                confirmButtonText = "Done with mapping",
+                confirmButtonText = "Finish mapping - evaluate areas",
                 cancelButtonText = "Draw further rectangles or make edits",
                 closeOnClickOutside = FALSE,
                 callbackR = function(confirm) {
@@ -552,7 +554,8 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
       }#/if yes
     })#/map_poss
     
-    ## if mapping not possible: (save results has to be added!)
+    
+    ## if mapping not possible: (save results )
     observeEvent(input$confirm,{
       
       if(input$expert_map !=""){
@@ -594,6 +597,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
       
       
     })
+
     
 
     #remove mapping question as soon as decided
@@ -696,11 +700,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
 
     })
     
-    ############
-    
-    
-
-    
+    ############ And the final extrapolation of the rectangles:
     
     ## keep mapping time
     mapTIME_end <-eventReactive(input$submit,{

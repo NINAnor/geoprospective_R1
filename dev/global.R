@@ -35,7 +35,8 @@ rm(list = ls())
 source("mod_questionnaire.R")
 #source("mod_mapping1.R")
 source("mod_mapping1_V2.R")
-source("mod_instructions.R")
+#source("mod_instructions.R")
+source("mod_instructions_V2.R")
 source("mod_ahp_group.R")
 source("mod_ahp_single.R")
 source("mod_dist_impact.R")
@@ -59,11 +60,11 @@ blue = "#53adc9"
 green = "#50b330"
 
 #site_id<-"NO06_1" c("ITA","ESP","GRC")
-site_id<-"ITA"
-env<-"dev" #c("dev","prod")
-var_lang<-"en" #c("grk","en","ita","esp")
+site_id<-"GRC"
+env<-"prod" #c("dev","prod")
+var_lang<-"grk" #c("grk","en","ita","esp")
 #how many es should be mapped by each participant from all ES?
-num_tabs <- 3
+num_tabs <- 4
 
 ### gcs bucket and bq settings
 cred_path<-paste0("gcs_keys/",project_id,"_key.json")
@@ -113,7 +114,8 @@ sf_stud_geom <- sf::st_as_sf(site, wkt = "geometry" )%>%st_set_crs(4326)
 # load the ES list
 es_study<-tbl(con_admin, "es_descr")
 stud_all<-es_study%>%collect()
-stud_es<-stud_all%>%filter(esID=="farm" | esID == "habitat" | esID =="mat")
+# stud_es<-stud_all%>%filter(esID=="farm" | esID == "habitat" | esID =="mat")
+stud_es<-stud_all%>%filter(type == site$siteTYPE)
 
 ## a grid for the questionnaire
 grd<-st_make_grid(sf_stud_geom, cellsize = 0.05,
@@ -126,7 +128,7 @@ if(site_type == "onshore"){
 }
 
 #with res of 250m grid we can sample at least 10 pts with variaton within 0.6km2
-A_min<-0.7
+A_min<-65
 #A_max<-0.05*round(as.numeric(st_area(sf_stud_geom)),0)
 A_max<-A_min*20
 
