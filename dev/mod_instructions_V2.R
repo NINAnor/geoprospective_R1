@@ -42,6 +42,15 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
         actionButton(ns("to_task1"),"How to map", style="color: black; background-color: #31c600; border-color: #31c600")
       )
     })
+    
+    output$es_quest_how<-renderUI(tagList(
+      value_box(
+        title = "",
+        value = paste0("For each rectangle indicate, how well you think they are suited for a sunday hike?"),
+        theme = value_box_theme(bg = orange, fg = "black"),
+        showcase = bs_icon("question-octagon-fill")
+      )
+    ))
 
     
     # Function to add the drawing toolbar with only editing and removing options
@@ -109,7 +118,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
           # useShinyalert(force = TRUE),
           h3("Training session"),
           br(),
-          h4("For training purposes, draw a maximum of five rectangles that show areas suitable for a Sunday hike in the study area"),
+          h4("For training purposes, draw a maximum of five rectangles that show areas suitable for a sunday hike in the study area"),
           br(),
           h5("The minimum area of a rectangle is 60 ha or 70 soccer fields."),
           h5("The maximum area of a rectangle is approximately 1200 ha."),
@@ -129,8 +138,8 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
             actionButton(ns("help2"),"How to delete and modify a rectangle?")
           ),
           br(),
-          leafletOutput(ns("map"), height = 500),
-          uiOutput(ns("rating")),
+          leafletOutput(ns("map"), height = 500)
+          #uiOutput(ns("rating")),
 
         )
       })
@@ -622,6 +631,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
     
     
     update_final_map <- function() {
+      removeUI(selector = paste0("#",ns("task_1")))
         shinyalert(  title = "Evaluating your rectangles",
                      text = "As soon as you have saved all rectangles, they will appear on the map again with a red number. Below you will find a slider for each rectangle with a corresponding number. With the slider you are now asked to rate each rectangle how well it is suited for a Sunday hike.",
                      type = "info",
@@ -633,7 +643,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
                      size = "l")
       
       drawn_sf <- drawn_polygons()  # Retrieve the stored polygons
-      output$rating<-renderUI( 
+      output$task_2<-renderUI( 
         tagList(
           uiOutput(ns("es_quest_how")),
           br(),

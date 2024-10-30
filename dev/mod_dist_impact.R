@@ -45,37 +45,6 @@ mod_dist_impact_server <- function(id, userID, site_id, stud_all){
     ## change it afterwards to the correct es!!
     stud_es<-stud_all%>%filter(esID == "recr" | esID == "wild_hunt" | esID == "wild_col"| esID == "habitat"| esID == "sense"| esID == "aest")
     
-    
-    # output$slider_impact<-renderUI({
-    #   lapply(1:nrow(stud_es),function(n){
-    #     inputid<-paste0(stud_es$esID[n],"_impact")
-    #     es<-stud_es%>%slice(n)
-    #     label<-paste0("Impacts of wind energy on ",es%>%dplyr::select(contains(paste0("esNAME_",var_lang))))
-    #     lay_descr<-es%>%dplyr::select(contains(paste0("esDESCR_lay_",var_lang)))
-    # 
-    #     tagList(
-    #       fluidRow(
-    #         column(4,
-    #                sliderInput(
-    #                  inputId = ns(inputid),
-    #                  label = label,
-    #                  min = 0,
-    #                  max = 1,
-    #                  value =.5,
-    #                  step = .1,
-    #                  ticks = T
-    #                )#/slider  
-    #                ),
-    #         column(1),
-    #         column(7,
-    #                h5(lay_descr)
-    #                )
-    #       )
-    #     )
-    # 
-    #   })#/lapply
-    # })#/slider
-
     ####
     output$slider_impact <- renderUI({
       lapply(1:nrow(stud_es), function(n) {
@@ -96,17 +65,22 @@ mod_dist_impact_server <- function(id, userID, site_id, stud_all){
           ),
           column(
             width = 4,
-            actionButton(inputId = ns(paste0("modal_button_", n)), label = "Show Details")
+            tagList(
+              bsModal(id = ns(paste0("mod_",es$esID)), 
+                      title = es%>%dplyr::select(contains(paste0("esNAME_",var_lang))), 
+                      trigger = ns(paste0("l_",es$esID)),
+                      h4(es%>%dplyr::select(contains(paste0("esDESC_lay_",var_lang)))),
+                      
+                      easyClose = TRUE, footer = NULL),
+
+              actionLink(inputId = ns(paste0("l_",es$esID)), 
+                         label = paste0("Explain me: ",es%>%dplyr::select(contains(paste0("esNAME_",var_lang)))))),
           ),
-          # Define bsModal for each row with column information
-          bsModal(
-            id = ns(paste0("modal_", n)),
-            title = "",
-            trigger = ns(paste0("modal_button_", n)),
-            size = "medium",
-            h4(es%>%dplyr::select(contains(paste0("esDESCR_lay_",var_lang)))),
-            verbatimTextOutput(paste0("modal_text_", n))
-          )
+
+          
+          
+          
+          
         )
       })
     })
