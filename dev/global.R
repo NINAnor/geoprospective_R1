@@ -11,9 +11,7 @@ library(leaflet.extras)
 library(leaflet.extras2)
 library(leafem)
 library(leafpop)
-library(mapview)
 library(dplyr)
-library(mapedit)
 library(sf)
 library(SSDM)
 library(stringi)
@@ -29,13 +27,12 @@ library(googleCloudStorageR)
 library(raster)
 library(shinyBS)
 library(htmlwidgets)
+library(mapedit)
 
 rm(list = ls())
 
 source("mod_questionnaire.R")
-#source("mod_mapping1.R")
 source("mod_mapping1_V2.R")
-#source("mod_instructions.R")
 source("mod_instructions_V2.R")
 source("mod_ahp_group.R")
 source("mod_ahp_single.R")
@@ -60,9 +57,9 @@ blue = "#53adc9"
 green = "#50b330"
 
 #site_id<-"NO06_1" c("ITA","ESP","GRC")
-site_id<-"GRC"
-env<-"prod" #c("dev","prod")
-var_lang<-"grk" #c("grk","en","ita","esp")
+site_id<-"ESP"
+env<-"dev" #c("dev","prod")
+var_lang<-"en" #c("grk","en","ita","esp")
 #how many es should be mapped by each participant from all ES?
 num_tabs <- 4
 
