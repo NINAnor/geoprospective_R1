@@ -24,6 +24,7 @@ mod_delphi_round1_ui <- function(id){
       br(),
       # questions of importance
       uiOutput(ns("imp_text")),
+      br(),
       sliderInput(ns("imp_own"), "... for you personally in the study area?",
                   min = 0, max = 5, value = 3),
       
@@ -128,6 +129,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         value_box(
           title = "",
           value = paste0("How important is an easy access (by foot, bike, car) to your rectangles to benefit from ", dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang))),"?"),
+          h5("0 = not important at all - 5 = very important"),
           theme = value_box_theme(bg = orange, fg = "black"),
           showcase = bs_icon("question-octagon-fill")
         )
@@ -137,7 +139,8 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
       tagList(
         value_box(
           title = "",
-          value = paste0("Briefly explain in some bullet points why you choosed these particular areas. What makes them suitable to benefit from ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang))) ,"?"),
+          value = paste0("Briefly explain to other study participants why your selected areas are good to benefit from ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang)))),
+          h5("Do this in a short (max 250 characters), blog-like statement"),
           theme = value_box_theme(bg = orange, fg = "black"),
           showcase = bs_icon("question-octagon-fill")
         )
@@ -148,6 +151,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         value_box(
           title = "",
           value = paste0("How important are the benefits of ", dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang))),"..."),
+          h5("0 = not important at all - 5 = very important"),
           theme = value_box_theme(bg = orange, fg = "black"),
           showcase = bs_icon("question-octagon-fill")
         )
@@ -633,8 +637,8 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
           uiOutput(ns("slider_container")),
           br(),
           uiOutput(ns("imp_accText")),
-          sliderInput(ns("imp_acc"), "0 = not important - 1 = very important",
-                      min = 0, max = 1, step = 0.1, value = 0.5)%>%
+          sliderInput(ns("imp_acc"), "",
+                      min = 0, max = 5, value = 3)%>%
             shinyInput_label_embed(
               icon("info") %>%
                 bs_embed_tooltip(title = "Ask yourself how important an easy access to the area is necessary to use or profit from this nature benefit. Is it important for you to be able to reach your areas without effort? 1 = not important at all, 5 = very important",placement = "right")),
@@ -644,15 +648,25 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
           textInput(ns("blog"), label = "")%>%
             shinyInput_label_embed(
               icon("info") %>%
-                bs_embed_tooltip(title = "Explain briefly the features or factors why you have chosen these areas. You can do that in single expressions or a blog-like statement. Use short sentences up to max 250 characters in total.",placement = "right")),
+                bs_embed_tooltip(title = "Make it clear to other people why your areas are important. Please do this in a short blog-like statement.",placement = "right")),
           use_bs_tooltip() ,
           br(),
-          conditionalPanel(
-            condition = "input.blog != ''", ns=ns,
-            actionButton(ns("submit"),"save values", style="color: black; background-color: #31c600; border-color: #31c600")
-          )
+          uiOutput(ns("cond_1"))
+          # conditionalPanel(
+          #   condition = "input.blog != ''", ns=ns,
+          #   actionButton(ns("submit"),"save values", style="color: black; background-color: #31c600; border-color: #31c600")
+          # )
         )
       )
+      
+      ############
+      output$cond_1<-renderUI({
+        validate(
+          need(input$blog != '', 'Provide an explanation why your areas are important'),
+        )
+        actionButton(ns('submit'), 'proceed', style="color: black; background-color: #31c600; border-color: #31c600")
+      })
+      ############
       
       removeUI(
         selector = paste0("#",ns("map")))
@@ -686,13 +700,20 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
     output$slider_container <- renderUI({
       drawn_sf <- drawn_polygons() 
       tagList(
-        paste0("The number for each rectangle in the map corresponds to the number of the slider. For each individual rectangle, how suitable do you think the area is for ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang))),"? 1 = not suitable, 2 = little suitable, 3 = suitable, 4 = very suitable, 5 = very suitable "),
+        value_box(
+          title = "",
+          value = paste0("For each individual rectangle, how suitable do you think the area is for ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang))),"?"),
+          h5("The number for each rectangle in the map corresponds to the number of the slider"),
+          h5("0 = little suitable, 5 = very suitable"),
+          theme = value_box_theme(bg = orange, fg = "black"),
+          showcase = bs_icon("question-octagon-fill")
+        ),
         br(),
         lapply(seq_along(drawn_sf$geometry), function(i) {
           sliderInput(
             inputId = ns(paste0("slider_", i)),
             label = paste("Rectangle ID:", i),
-            min = 1, max = 5, value = 3  # Default value set to 3, can be customized
+            min = 0, max = 5, value = 3  # Default value set to 3, can be customized
           )
         })
         
@@ -831,7 +852,9 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
           tmp_pts<-tmp_pts
         }
         # npts in this poly must be max_pts*tmp_ratio*es_value
-        tmp_pts = st_sample(polygon[i,], round(tmp_pts*(polygon[i,]$es_value/5),0),type="random")
+        #+1 its 0-5 scale
+        tmp_es_val<-((1+polygon[i,]$es_value)/5)
+        tmp_pts = st_sample(polygon[i,], round(tmp_pts*tmp_es_val,0),type="random")
         tmp_pts<-st_as_sf(tmp_pts)
         tmp_pts$inside<-rep(1,nrow(tmp_pts))
         if(i==1){
@@ -844,7 +867,8 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
       # weight predictors
       pred<-load_var(path=pred)
       # pred_w<-stack(pred$dem*1, pred$eii*1, pred$acc*as.numeric(input$imp_acc))
-      pred_w<-raster::stack(pred$dem*1, pred$lulc*1, pred$int*1, pred$acc*as.numeric(input$imp_acc))
+      weight_access <- as.numeric(as.numeric(input$imp_acc)/5)
+      pred_w<-raster::stack(pred$dem*1, pred$lulc*1, pred$int*1, pred$acc*weight_access)
       # pred_w<-c(rast(pred$acc),rast(pred$dem))
       
       
