@@ -49,9 +49,8 @@ function(input, output, session) {
             textInput("email","")
 
         ),
-        actionButton("check_mail","submit"),
+        actionButton("check_mail", "Start the study",style="color: black; background-color: #31c600; border-color: #31c600"),
         uiOutput("cond_1"))
-        #actionButton("sub1","Start the study", style="color: black; background-color: #31c600; border-color: #31c600")
       #)#/tagList
 
 
