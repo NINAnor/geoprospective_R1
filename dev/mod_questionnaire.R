@@ -208,13 +208,13 @@ mod_questionnaire_server <- function(id, user_id, site_id, sf_stud_geom, site_ty
         }else{
           liv_in_area <- "no"
           length_liv <-as.integer(0)
-          user_lat <- 999
-          user_lng <- 999
+          user_lat <- as.numeric(999.1)
+          user_lng <- as.numeric(999.1)
         }}else{
         liv_in_area<- "offshore"
         length_liv <-as.integer(0)
-        user_lat <- 999.1
-        user_lng <- 999.1
+        user_lat <- as.numeric(999.1)
+        user_lng <- as.numeric(999.1)
       }
 
 

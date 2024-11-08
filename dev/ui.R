@@ -2,7 +2,7 @@ fluidPage(theme = shinytheme("flatly"),
   useShinydashboard(),
   useShinyjs(),
 
-  titlePanel(title = div(img(src=paste0(project_id,".PNG"), width ='120'), paste0("Benefits from Nature in ",sf_stud_geom$siteNAME, " session I")), windowTitle = "Nature benefits I"),
+  titlePanel(title = div(img(src=paste0(project_id,".png"), width ='120'), paste0("Benefits from Nature in ",sf_stud_geom$siteNAME, " session I")), windowTitle = "Nature benefits I"),
   shinyWidgets::progressBar(id = "pb", value = 0, display_pct = TRUE),
   tabsetPanel(id = "inTabset",
               tabPanel(title = "", value = "p0",

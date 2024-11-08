@@ -686,13 +686,13 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
     output$slider_container <- renderUI({
       drawn_sf <- drawn_polygons() 
       tagList(
-        paste0("The number for each rectangle in the map corresponds to the number of the slider. For each individual rectangle, how suitable do you think the area is for a sunday hike? 1 = not suitable, 2 = little suitable, 3 = suitable, 4 = very suitable, 5 = very suitable "),
+        paste0("The number for each rectangle in the map corresponds to the number of the slider. For each individual rectangle, how suitable do you think the area is for a sunday hike? 0 = little suitable, 5 = very suitable "),
         br(),
         lapply(seq_along(drawn_sf$geometry), function(i) {
           sliderInput(
             inputId = ns(paste0("slider_", i)),
             label = paste("Rectangle ID:", i),
-            min = 1, max = 5, value = 3  # Default value set to 3, can be customized
+            min = 0, max = 5, value = 3  # Default value set to 3, can be customized
           )
         })
         
