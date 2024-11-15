@@ -478,6 +478,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
     # Observe draw events (when a new feature is created)
     observeEvent(input$map_draw_new_feature, {
       feature <- input$map_draw_new_feature
+      print(feature)
       #print(feature$properties$layerId)
       if (feature$geometry$type == "Polygon") {
         coords <- feature$geometry$coordinates[[1]]
@@ -519,7 +520,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
             polygon_sf <- st_sfc(polygon, crs = 4326)
             
             edited_ids <- as.integer(feature$properties$`_leaflet_id`)
-            #print(edited_ids)
+            print(edited_ids)
             polygon_sf <- st_sf(leaflet_id = edited_ids, time_stamp = Sys.time(), valid = FALSE, geometry = polygon_sf)
             
             # Update the area and check for intersections

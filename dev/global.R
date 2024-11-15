@@ -57,7 +57,7 @@ blue = "#53adc9"
 green = "#50b330"
 
 #site_id<-"NO06_1" c("ITA","ESP","GRC")
-site_id<-"GRC"
+site_id<-"ESP"
 env<-"dev" #c("dev","prod")
 var_lang<-"en" #c("grk","en","ita","esp")
 #how many es should be mapped by each participant from all ES?

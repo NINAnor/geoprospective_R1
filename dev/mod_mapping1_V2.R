@@ -878,8 +878,8 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
       pts$SPECIES<-rep("pres",nrow(pts))
       
       
-      if(nrow(pts)>1500){
-        pts<-pts[sample(nrow(pts), 1500), ]
+      if(nrow(pts)>3000){
+        pts<-pts[sample(nrow(pts), 3000), ]
       }
       
       
