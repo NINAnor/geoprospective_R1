@@ -45,7 +45,7 @@ source("mod_dist_impact.R")
 
 project_id<-"pareus"
 env<-"dev" #c("dev","prod")
-site_id<-"NO060"
+site_id<-"NO0601"
 var_lang<-"en" #c("grk","en","ita","esp")
 
 ###########################
@@ -99,7 +99,7 @@ con_admin <- dbConnect(
 # load study and site params
 site<-tbl(con_admin, "study_site")
 # site<-site%>%collect()%>%filter(projID == bqprojID & siteID == site_id)
-site<-site%>%collect()%>%filter(projID == bqprojID & siteID == site_id)
+site<-site%>%collect()%>%filter(siteID == site_id)
 
 
 if (!("siteTYPE" %in% names(site))) {
