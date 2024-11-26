@@ -56,7 +56,7 @@ mod_questionnaire_ui <- function(id){
                                    onInitialize = I('function() { this.setValue(""); }')
                                  )),
         br(),
-      fluidRow(h4("The following orange border shows the study area you are going to map nature benefits")),
+      fluidRow(h4("The orange border shows the study area you are going to map nature benefits")),
       br(),
       tags$head(
         tags$style(HTML("

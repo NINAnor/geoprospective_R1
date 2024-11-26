@@ -43,25 +43,29 @@ source("mod_dist_impact.R")
 
 #### Global settings
 
-project_id<-"eu-wendy"
+project_id<-"pareus"
+env<-"dev" #c("dev","prod")
+site_id<-"NO060"
+var_lang<-"en" #c("grk","en","ita","esp")
+
+###########################
+# read setting
+setting<-read.csv("setup/setup.csv")
+setting<-setting%>%filter(study_id == project_id)
+
+###
+
 
 #the wendy project is wrongly named for downloading data
-if(project_id == "eu-wendy"){
-  bqprojID<-"wendy"
-}else{
-  bqprojID<-project_id
-}
+bqprojID<-setting$bqproj_id
+wind_lca_questions<-setting$include_wind_lca
+num_tabs <- setting$num_tabs
 
+## color schema
 orange = "#ffa626"
 blue = "#53adc9"
 green = "#50b330"
 
-#site_id<-"NO06_1" c("ITA","ESP","GRC")
-site_id<-"ESP"
-env<-"dev" #c("dev","prod")
-var_lang<-"en" #c("grk","en","ita","esp")
-#how many es should be mapped by each participant from all ES?
-num_tabs <- 4
 
 ### gcs bucket and bq settings
 cred_path<-paste0("gcs_keys/",project_id,"_key.json")
@@ -112,7 +116,13 @@ sf_stud_geom <- sf::st_as_sf(site, wkt = "geometry" )%>%st_set_crs(4326)
 es_study<-tbl(con_admin, "es_descr")
 stud_all<-es_study%>%collect()
 # stud_es<-stud_all%>%filter(esID=="farm" | esID == "habitat" | esID =="mat")
-stud_es<-stud_all%>%filter(type == site$siteTYPE)
+
+if(isTRUE(wind_lca_questions)){
+  stud_es<-stud_all%>%filter(type == site$siteTYPE)
+}else{
+  stud_es<-stud_all
+}
+
 
 ## a grid for the questionnaire
 grd<-st_make_grid(sf_stud_geom, cellsize = 0.05,

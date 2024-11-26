@@ -318,14 +318,40 @@ function(input, output, session) {
   
   observeEvent(rv$x(),{
     removeUI("#ahp_single")
-    updateProgressBar(session = session, id = "pb", value = 95)
-    output$ahp_dist<-renderUI({
-      tagList(
-        mod_dist_impact_ui("ahp_dist_1")
-        
-      )
-    })
-    rv$y <- mod_dist_impact_server("ahp_dist_1", isolate(userID()), site_id, stud_all)
+    if(isTRUE(wind_lca_questions)){
+      #removeUI("#ahp_single")
+      updateProgressBar(session = session, id = "pb", value = 95)
+      output$ahp_dist<-renderUI({
+        tagList(
+          mod_dist_impact_ui("ahp_dist_1")
+          
+        )
+      })
+      rv$y <- mod_dist_impact_server("ahp_dist_1", isolate(userID()), site_id, stud_all)
+    }else{
+      
+      updateProgressBar(session = session, id = "pb", value = 100)
+      output$final<-renderUI({
+        tagList(
+          bslib::value_box(
+            title= "",
+            showcase_layout = "left center",
+            theme = value_box_theme(bg = blue, fg = "black"),
+            showcase = bs_icon("check-square"),
+            h5("This is the end of the first session of the study, you can now close the browser. Thank you very much for your participation. In case you provided your email, we will contact you soon for the second session."),
+            h5(HTML(paste0(
+              'More information about the <a href="', 
+              setting$project.url, 
+              '">', 
+              setting$project_name, 
+              ' project</a>'
+            )))
+          )
+          
+        )
+      })
+    }
+
   })
   
   
