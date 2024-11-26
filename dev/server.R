@@ -27,16 +27,14 @@ function(input, output, session) {
   })
   
   observeEvent(input$gdpr,{
-      # output$alertUI<-renderUI(h4("-click the rectangle button"))
-    
     if(input$gdpr == TRUE){
-
-      
+      #render an alert
 
       #remove checkbox and render email
       removeUI(
         selector = "div:has(>> #gdpr)"
       )
+
       output$cond_0<-renderUI({
         tagList(bslib::value_box(
           title= "",
@@ -49,167 +47,151 @@ function(input, output, session) {
             textInput("email","")
 
         ),
-        actionButton("check_mail", "Start the study",style="color: black; background-color: #31c600; border-color: #31c600"),
-        uiOutput("cond_1"))
+        actionButton("sub1", "Start the study", style="color: black; background-color: #31c600; border-color: #31c600"),
+        #uiOutput("cond_1")
+        )
       #)#/tagList
 
 
 
       })#/ui
-    }#/if
+    } #/if
   })
   
   
   # here check if user is not already present in DB
-  observeEvent(input$check_mail,{
-    #if no email is provided
+  valid_mail<- eventReactive(input$sub1,{
     if(input$email == ""){
-      removeUI(
-        selector = "#check_mail")
-      output$cond_1<-renderUI({
-        tagList(
-          br(),
-          actionButton("sub1","Start the study", style="color: black; background-color: #31c600; border-color: #31c600")
-        )
-      })
+      valid_mail<-T
     }else{
+      # print("check mail")
       show_modal_spinner(
         color = green,
-        text = "check mail"
+        text = "check your mail"
       )
-      req(site_id)
-      check_tab <- bq_table(project_id, bqprojID, "user_conf")
-      if(bq_table_exists(check_tab)==T){
-        user_conf<-tbl(con_admin, "user_conf")%>%collect()
-        user_conf<-user_conf%>%filter(siteID == site_id)
+      check_tab <- bq_table(project_id, dataset, "user_conf")
+      if(bq_table_exists(check_tab)){
 
-        #email already present
-        if(input$email %in% user_conf$userMAIL){
-          output$cond_1<-renderUI({
-            h5("email for this study already present")
-          })
-        }else{
-          removeUI(
-            selector = "#check_mail")
-          output$cond_1<-renderUI({
-            tagList(
-              br(),
-              actionButton("sub1","Start the study", style="color: black; background-color: #31c600; border-color: #31c600")
-            )
-          })
-        }
+        user_conf<-tbl(con_admin, "user_conf")%>%collect()%>%filter(siteID == site_id)
+
+          if(input$email %in% user_conf$userMAIL){
+            #print("check mail3 user present")
+            valid_mail<-F
+            
+          }else{
+            #print("check mail3 user not pres")
+            valid_mail<-T
+          }
+      
       }else{
-        removeUI(
-          selector = "#check_mail")
-        output$cond_1<-renderUI({
-          tagList(
-            br(),
-            actionButton("sub1","Start the study", style="color: black; background-color: #31c600; border-color: #31c600")
-          )
-        })
+        valid_mail<-T
       }
       remove_modal_spinner()
     }
+    valid_mail<-valid_mail
   })
   
-  ##create a user ID as soon as start is pressed
   userID<-eventReactive(input$sub1,{
+    req(valid_mail)
     nchar<-round(runif(1,8,13),0)
+    print(userID)
     userID<-stri_rand_strings(1, nchar, pattern = "[A-Za-z0-9]")
   })
   
-  ## save user data in the DB and open the questionnaire module
+  
   observeEvent(input$sub1,{
-    show_modal_spinner(
-      color = green,
-      text = "load study"
-    )
     req(userID)
+    req(valid_mail)
+    valid_mail<-valid_mail()
     userID<-userID()
     
-    ## save user_conf
-    user_conf_df<-data.frame(
-      userID = userID,
-      userMAIL = input$email,
-      userTLOG = Sys.time(),
-      siteID = site_id,
-      projID = project_id
-    )
-
-    #upload bq
-    user_conf_tab = bq_table(project = project_id, dataset = dataset, table = 'user_conf')
-    bq_table_upload(x = user_conf_tab, values = user_conf_df, create_disposition='CREATE_IF_NEEDED', write_disposition='WRITE_APPEND')
-    updateProgressBar(session = session, id = "pb", value = 5)
-    remove_modal_spinner()
-    
-    #download predictors if not already in the app folder:
-    path<-paste0("env_var_",site_id)
-    if(!dir.exists(paths = path)){
-      show_modal_spinner(text = "fetch geodata from server")
-      dir.create(file.path(path))
-      ## download the prepared env data from gcs
+    if(valid_mail == T){
+      show_modal_spinner(
+        color = green,
+        text = "Access study and load data"
+      )
       
-      lulc<-paste0("gs://",bucket_name,"/",site_id,"/2_env_var/lulc.tif")
-      gcs_get_object(lulc, saveToDisk = paste0(path,"/lulc.tif"),overwrite = T)
+      updateTabsetPanel(session, "inTabset",
+                        selected = "p3")
+      hideTab(inputId = "inTabset",
+              target = "p1")
       
-      dem<-paste0("gs://",bucket_name,"/",site_id,"/2_env_var/dem.tif")
-      gcs_get_object(dem, saveToDisk = paste0(path,"/dem.tif"),overwrite = T)
+      user_conf_df<-data.frame(
+        userID = userID,
+        userMAIL = input$email,
+        userTLOG = Sys.time(),
+        siteID = site_id,
+        projID = project_id
+      )
       
-      acc<-paste0("gs://",bucket_name,"/",site_id,"/2_env_var/acc.tif")
-      gcs_get_object(acc, saveToDisk = paste0(path,"/acc.tif"),overwrite = T)
-      
-      int<-paste0("gs://",bucket_name,"/",site_id,"/2_env_var/int.tif")
-      gcs_get_object(int, saveToDisk = paste0(path,"/int.tif"),overwrite = T)
+      #upload bq
+      user_conf_tab = bq_table(project = project_id, dataset = dataset, table = 'user_conf')
+      bq_table_upload(x = user_conf_tab, values = user_conf_df, create_disposition='CREATE_IF_NEEDED', write_disposition='WRITE_APPEND')
+      updateProgressBar(session = session, id = "pb", value = 5)
       
       
-      ## align raster
-      lulc<-terra::rast(paste0(path,"/lulc.tif"))%>%terra::project(crs("+init=epsg:4326"))
-      dem<-terra::rast(paste0(path,"/dem.tif"))%>%terra::project(crs("+init=epsg:4326"))
-      acc<-terra::rast(paste0(path,"/acc.tif"))%>%terra::project(crs("+init=epsg:4326"))
-      int<-terra::rast(paste0(path,"/int.tif"))%>%terra::project(crs("+init=epsg:4326"))
-
-      
-      lulc<-terra::resample(lulc,dem)
-      acc<-terra::resample(acc,dem)
-      int<-terra::resample(int,dem)
-      
-      terra::writeRaster(dem,paste0(path,"/dem.tif"),overwrite=T)
-      terra::writeRaster(lulc,paste0(path,"/lulc.tif"),overwrite=T)
-      terra::writeRaster(acc,paste0(path,"/acc.tif"),overwrite=T)
-      terra::writeRaster(int,paste0(path,"/int.tif"),overwrite=T)
+      #download predictors if not already in the app folder:
+      path<-paste0("env_var_",site_id)
+      if(!dir.exists(paths = path)){
+        show_modal_spinner(text = "fetch geodata from server", color = green)
+        dir.create(file.path(path))
+        ## download the prepared env data from gcs
+        
+        lulc<-paste0("gs://",bucket_name,"/",site_id,"/2_env_var/lulc.tif")
+        gcs_get_object(lulc, saveToDisk = paste0(path,"/lulc.tif"),overwrite = T)
+        
+        dem<-paste0("gs://",bucket_name,"/",site_id,"/2_env_var/dem.tif")
+        gcs_get_object(dem, saveToDisk = paste0(path,"/dem.tif"),overwrite = T)
+        
+        acc<-paste0("gs://",bucket_name,"/",site_id,"/2_env_var/acc.tif")
+        gcs_get_object(acc, saveToDisk = paste0(path,"/acc.tif"),overwrite = T)
+        
+        int<-paste0("gs://",bucket_name,"/",site_id,"/2_env_var/int.tif")
+        gcs_get_object(int, saveToDisk = paste0(path,"/int.tif"),overwrite = T)
+        
+        
+        ## align raster
+        lulc<-terra::rast(paste0(path,"/lulc.tif"))%>%terra::project(crs("+init=epsg:4326"))
+        dem<-terra::rast(paste0(path,"/dem.tif"))%>%terra::project(crs("+init=epsg:4326"))
+        acc<-terra::rast(paste0(path,"/acc.tif"))%>%terra::project(crs("+init=epsg:4326"))
+        int<-terra::rast(paste0(path,"/int.tif"))%>%terra::project(crs("+init=epsg:4326"))
+        
+        
+        lulc<-terra::resample(lulc,dem)
+        acc<-terra::resample(acc,dem)
+        int<-terra::resample(int,dem)
+        
+        terra::writeRaster(dem,paste0(path,"/dem.tif"),overwrite=T)
+        terra::writeRaster(lulc,paste0(path,"/lulc.tif"),overwrite=T)
+        terra::writeRaster(acc,paste0(path,"/acc.tif"),overwrite=T)
+        terra::writeRaster(int,paste0(path,"/int.tif"),overwrite=T)
+        
+      }
       remove_modal_spinner()
+      
+      
+
+      showTab(inputId = "inTabset", target = "p3")
+      rv$u<-mod_questionnaire_server("questionnaire",userID, site_id, sf_stud_geom, site_type, con_admin, grd)
+    }else{
+      shinyalert(
+        title = "Email already present",
+        text = "You can't use the same email address several times",
+        type = "error",
+        closeOnEsc = TRUE,
+        closeOnClickOutside = TRUE,
+        showCancelButton = FALSE,
+        showConfirmButton = TRUE,
+        animation = "slide-from-bottom",
+        size = "s"
+      )
+      
     }
     
   })
   
   
-  observeEvent(input$sub1,{
-    userID<-userID()
-    updateTabsetPanel(session, "inTabset",
-                      selected = "p3")
-    hideTab(inputId = "inTabset",
-            target = "p1")
-    showTab(inputId = "inTabset", target = "p3")
-    rv$u<-mod_questionnaire_server("questionnaire",userID, site_id, sf_stud_geom, site_type, con_admin, grd)
-  })
-  ## chreate a randomized order of ES
-  # stud_es<-eventReactive(rv$u(),{
-  #   stud_es<-stud_es[sample(nrow(stud_es)),]
-  # })
-  
-  ### instructions
-  # training module
-  # observeEvent(rv$u(),{
-  #   userID<-userID()
-  #   # num_tabs<-num_tabs()
-  #   updateTabsetPanel(session, "inTabset",
-  #                     selected = "p4")
-  #   hideTab(inputId = "inTabset",
-  #           target = "p3")
-  #   showTab(inputId = "inTabset", target = "p4")
-  #   rv$v<-mod_instructions_server("training_1",sf_stud_geom,userID,site_id)
-  # })
-  
+
   observeEvent(rv$u(),{
     updateProgressBar(session = session, id = "pb", value = 15)
     userID<-userID()
