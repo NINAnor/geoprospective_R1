@@ -67,7 +67,7 @@ fluidPage(theme = shinytheme("flatly"),
                          h5(HTML(paste0(
                            ' <a href="', 
                            setting$gdpr_link, 
-                           '">GDPR</a>'
+                           '" target="_blank">GDPRs</a>'
                          ))),
                          br(),
                          checkboxInput("gdpr","I confirm that I have read and understood the information provided and agree to the collection and processing of my personal data as described. (If you do not want to give consent you can now close the study.)",value = F),
