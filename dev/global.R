@@ -43,9 +43,9 @@ source("mod_dist_impact.R")
 
 #### Global settings
 
-project_id<-"pareus"
+project_id<-"eu-wendy"
 env<-"dev" #c("dev","prod")
-site_id<-"NO0601"
+site_id<-"GRC"
 var_lang<-"en" #c("grk","en","ita","esp")
 
 ###########################
@@ -119,9 +119,12 @@ stud_all<-es_study%>%collect()
 
 if(isTRUE(wind_lca_questions)){
   stud_es<-stud_all%>%filter(type == site$siteTYPE)
+  
 }else{
   stud_es<-stud_all
 }
+
+stud_es<-stud_es%>%filter(esID=="farm" | esID == "habitat" | esID =="mat")
 
 
 ## a grid for the questionnaire

@@ -34,7 +34,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
     output$task_0<-renderUI({
       tagList(
         value_box(title="",
-                  h5(paste0("During the study you are going to use an interactive web map of ",sf_stud_geom$siteNAME,". The next section shows you how to interact with the map.")),
+                  h5(paste0("During the study you are going to use an interactive web map of ",sf_stud_geom$siteNAME,". The next section shows you how to use the map and how to indicate areas you benefit from nature.")),
                   br(),
         ),
         
@@ -118,12 +118,27 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
           # useShinyalert(force = TRUE),
           h3("Training session"),
           br(),
-          h4("For training purposes, draw a maximum of five rectangles that show areas suitable for a sunday hike in the study area"),
+          value_box(
+            title = "",
+            value ="",
+            h4(HTML("For training purposes, draw a <b>maximum</b> of five rectangles that show areas suitable for a Sunday hike in the study area")),
+            theme = value_box_theme(bg = orange, fg = "black"),
+            showcase = bs_icon("question-octagon-fill"),
+            showcase_layout = "left center"
+          ),
           br(),
-          h5("The minimum area of a rectangle is 60 ha or 70 soccer fields."),
-          h5("The maximum area of a rectangle is approximately 1200 ha."),
-          h5("Try to draw the rectangle as precise as possible"),
-          h5("You will see the [ha] during you draw the rectangle. In addition, the app indicates if your last drawn rectangle was too small or too big."),
+          h5(HTML("
+          <ul>
+            <li>
+              Start drawing rectangles on the map, using the rectangle button.
+              <br>
+              <img src='draw_btn.jpg' alt='Map drawing' style='width:40px;'>
+            </li>
+          </ul>
+        ")),
+          h5(HTML("<ul><li>The minimum area of a rectangle is 62.5 ha or 70 soccer fields.</li></ul>")),
+          h5(HTML("<ul><li>Try to draw the rectangle as precise as possible.</li></ul>")),
+          h5(HTML("<ul><li>You will see the [ha] during you draw the rectangle and if your drawn rectangle is valid or not to proceed.</li></ul>")),
           # br(),
           tags$head(
             tags$style(HTML("
@@ -132,6 +147,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
       }
     "))
           ),
+          br(),
           fluidRow(
             actionButton(ns("help0"),"How to use the map?"),
             actionButton(ns("help1"),"How to draw a rectangle?"),
