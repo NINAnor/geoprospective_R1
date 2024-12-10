@@ -20,8 +20,10 @@ mod_questionnaire_ui <- function(id){
                        min=18,
                        max=110,
                        step=1),
+        uiOutput(ns("cond_b0")),
+        br(),
 
-          selectizeInput(ns("gender"),
+        selectizeInput(ns("gender"),
                          "What is your gender?",
                          choices = c("Female" ="female",
                                      "Male" = "male",
@@ -32,7 +34,10 @@ mod_questionnaire_ui <- function(id){
                            onInitialize = I('function() { this.setValue(""); }')
                          )
           ),
-          selectizeInput(ns("edu"),
+      uiOutput(ns("cond_b1")),
+      br(),
+      
+      selectizeInput(ns("edu"),
                          "What is the highest level of education you have fulfilled?",
                          choices = c("Primary school (up to age of 12)" = "prim",
                                      "Secondary school (up to age of 16) " ="sec",
@@ -44,7 +49,10 @@ mod_questionnaire_ui <- function(id){
                            onInitialize = I('function() { this.setValue(""); }'))
                          
           ),
-                  selectizeInput(ns("work"),
+      uiOutput(ns("cond_b2")),
+      br(),
+      
+      selectizeInput(ns("work"),
                                  "In which economic sector do you currently work?",
                                  choices = c("Primary sector (Farming, logging, fishing, forestry and mining)" = "first",
                                              "Secondary sector (Manufacturing, Construction, Repraring)"= "second",
@@ -55,7 +63,9 @@ mod_questionnaire_ui <- function(id){
                                    placeholder = 'Please select an option below',
                                    onInitialize = I('function() { this.setValue(""); }')
                                  )),
-        br(),
+      uiOutput(ns("cond_b3")),
+      br(),
+      br(),
       fluidRow(h4("The orange border shows the study area you are going to map nature benefits")),
       br(),
       tags$head(
@@ -70,7 +80,7 @@ mod_questionnaire_ui <- function(id){
       uiOutput(ns("cond_map")),
       br(),
 
-      uiOutput(ns("cond_b1"))
+      uiOutput(ns("cond_b5"))
     ) #/main panel
   )
 }
@@ -101,15 +111,43 @@ mod_questionnaire_server <- function(id, user_id, site_id, sf_stud_geom, site_ty
                     opacity = 1.0, fillOpacity = 0)%>%
         addProviderTiles(providers$OpenStreetMap.Mapnik,options = tileOptions(minZoom = 8, maxZoom = 15))
     })
-
+    
+    output$cond_b0<-renderUI({
+      validate(
+        need(input$age >= 18 && input$age <= 110, "Provide your age - Age must be between 18 and 110."),
+      )
+    })
+    
     output$cond_b1<-renderUI({
       validate(
-        need(input$age >= 18 && input$age <= 110, "Age must be between 18 and 110."),
-        need(input$age, 'Provide your age'),
-        need(input$gender != '', 'Select a gender'),
-        need(input$edu != '', 'Select an education'),
-        need(input$work != '', 'Select a working industry'),
-        need(input$length_liv != '', 'Answer how many years you live in the area'),
+        need(input$gender != '', 'Select a gender')
+      )
+    })
+    
+    output$cond_b2<-renderUI({
+      validate(
+        need(input$edu != '', 'Select an education')
+      )
+    })
+    output$cond_b3<-renderUI({
+      validate(
+        need(input$work != '', 'Select a working industry')
+      )
+    })
+    output$cond_b4<-renderUI({
+      validate(
+        need(input$length_liv != '', 'Provide a number of years you live in the area'),
+      )
+    })
+
+    output$cond_b5<-renderUI({
+      validate(
+        need(input$age >= 18 && input$age <= 110, ""),
+        need(input$age, ''),
+        need(input$gender != '', ''),
+        need(input$edu != '', ''),
+        need(input$work != '', ''),
+        need(input$length_liv != '', ''),
         need(input$age >= input$length_liv, "You can't live longer in an area than you are old")
       )
       actionButton(ns('sub_quest'), 'submit answers', style="color: black; background-color: #31c600; border-color: #31c600")
@@ -129,6 +167,7 @@ mod_questionnaire_server <- function(id, user_id, site_id, sf_stud_geom, site_ty
                 bs_embed_tooltip(title = "If you don't live in the area select 0 years.",placement = "right")
             ),
           use_bs_tooltip(),
+          uiOutput(ns("cond_b4")),
           uiOutput(ns("cond2"))
         )
       })
