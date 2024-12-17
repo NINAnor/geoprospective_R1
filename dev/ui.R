@@ -1,7 +1,30 @@
+# UI.R
+# Copyright (C) 2024 Reto Spielhofer; Norwegian Institute for Nature Research (NINA)
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+
 fluidPage(theme = shinytheme("flatly"),
   useShinydashboard(),
   useShinyjs(),
-
+  tags$head(
+    tags$style(HTML("
+      body {
+        padding-bottom: 100px; /* Adjust this value to match the footer height */
+      }
+    "))
+  ),
   titlePanel(title = div(img(src=paste0(project_id,".png"), width ='120'), paste0("Benefits from Nature in ",sf_stud_geom$siteNAME, " session I")), windowTitle = "Nature benefits I"),
   shinyWidgets::progressBar(id = "pb", value = 0, display_pct = TRUE),
   tabsetPanel(id = "inTabset",
@@ -94,6 +117,18 @@ fluidPage(theme = shinytheme("flatly"),
   uiOutput("ahp_group"),
   uiOutput("ahp_single"),
   uiOutput("ahp_dist"),
-  uiOutput("final")
-  
+  uiOutput("final"),
+  tags$footer(
+    style = "position:fixed; bottom:0; left:0; width:100%; 
+             background-color:#f8f9fa; color:#333; padding:10px; text-align:center;
+             border-top:1px solid #ddd; z-index: 1000;",
+    HTML("
+      <p>Licensed under <a href='https://www.gnu.org/licenses/gpl-3.0.txt' target='_blank'>GNU General Public License v3.0</a>.</p>
+    "),
+    div(
+      style = "display: flex; justify-content: center; align-items: center;",
+      img(src = "NINA_logo.png", height = "45px", style = "margin-right:10px;"),
+      span("NINA © 2024 Geoprospective")
+    )
+  )
 )
