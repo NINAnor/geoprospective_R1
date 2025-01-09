@@ -56,7 +56,7 @@ mod_questionnaire_ui <- function(id){
                          choices = c("Primary school (up to age of 12)" = "prim",
                                      "Secondary school (up to age of 16) " ="sec",
                                      "High school (up to the age of 19)" = "tertiary",
-                                     "Higher edication" = "high",
+                                     "Higher education" = "high",
                                      "Prefer not to say"="no_answ"),
                          options = list(
                            placeholder = 'Please select an option below',
@@ -69,7 +69,7 @@ mod_questionnaire_ui <- function(id){
       selectizeInput(ns("work"),
                                  "In which economic sector do you currently work?",
                                  choices = c("Primary sector (Farming, logging, fishing, forestry and mining)" = "first",
-                                             "Secondary sector (Manufacturing, Construction, Repraring)"= "second",
+                                             "Secondary sector (Manufacturing, Construction, Reparing)"= "second",
                                              "Tertiary sector (Trading, Finance, Administration)"= "third",
                                              "Quaternary sector (Media, research and development, education, design)" =  "fourth",
                                              "Prefer not to say" = "no_w"),
