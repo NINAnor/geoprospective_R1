@@ -20,8 +20,10 @@ fluidPage(theme = shinytheme("flatly"),
   useShinyjs(),
   tags$head(
     tags$style(HTML("
+
       body {
         padding-bottom: 100px; /* Adjust this value to match the footer height */
+        font-size: 18px;
       }
     "))
   ),
@@ -62,13 +64,13 @@ fluidPage(theme = shinytheme("flatly"),
                          h3("Procedure"),
                          value = "",
                          br(),
-                         h5(HTML("<b>The whole study consists of two sessions</b>")),
+                         h4(HTML("<b>The whole study consists of two sessions</b>")),
                          br(),
-                         h5(paste0("In this first session you are going to answer some general questions about yourself. We then ask you to map areas that give you different benefits from nature on an interactive map of ",sf_stud_geom$siteNAME," (instructions are provided). The first round closes with some comparison between nature values.")),
+                         h4(paste0("In this first session you are going to answer some general questions about yourself. We then ask you to map areas that give you different benefits from nature on an interactive map of ",sf_stud_geom$siteNAME," (instructions are provided). The first round closes with some comparison between nature values.")),
                          br(),
-                         h5(paste0("In an optional second session, for which you will receive a new link in a few days, you will see where the benefits from nature can be found for ",sf_stud_geom$siteNAME," based on all participants’ anonymized inputs. We will then ask you to modify and update your mapping of nature values based on the insights you got from the other participants.")),
+                         h4(paste0("In an optional second session, for which you will receive a new link in a few days, you will see where the benefits from nature can be found for ",sf_stud_geom$siteNAME," based on all participants’ anonymized inputs. We will then ask you to modify and update your mapping of nature values based on the insights you got from the other participants.")),
                          br(),
-                         h5("Each of these mapping sessions takes about 30-45 minutes to complete"),
+                         h4("Each of these mapping sessions takes about 30-45 minutes to complete"),
                          showcase = bs_icon("clock-history"),
                          theme = "white"
                        ),
@@ -79,13 +81,13 @@ fluidPage(theme = shinytheme("flatly"),
                          showcase = bs_icon("database-lock"),
                          h3("Data protection summary"),
                          value= "",
-                         h5("- During the following task, we will store your personal data for further analysis. The data collection is based on consent."),
-                         h5("- Within this study we do not collect any sensitive information"),
-                         h5("- We do not present and publish your individual data but statistics and summaries of all participants"),
-                         h5("- We rigorously anonymise data for analysis and publication"),
-                         h5(paste0("- Your individual data will be deleted after the study is completed on the ", setting$compl_dat)),
-                         h5(paste0("- We reuse and share only anonymised data for within the research project ", setting$project_name)),
-                         h5("- We store the data on a google big query database hosted in Europe and owned by the Norwegian Institute of Nature research (NINA)."),
+                         h4("- During the following task, we will store your personal data for further analysis. The data collection is based on consent."),
+                         h4("- Within this study we do not collect any sensitive information"),
+                         h4("- We do not present and publish your individual data but statistics and summaries of all participants"),
+                         h4("- We rigorously anonymise data for analysis and publication"),
+                         h4(paste0("- Your individual data will be deleted after the study is completed on the ", setting$compl_dat)),
+                         h4(paste0("- We reuse and share only anonymised data for within the research project ", setting$project_name)),
+                         h4("- We store the data on a google big query database hosted in Europe and owned by the Norwegian Institute of Nature research (NINA)."),
                          br(),
                          h5(HTML(paste0(
                            ' <a href="', 

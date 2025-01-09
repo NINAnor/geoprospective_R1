@@ -147,7 +147,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
             <li>
               Start drawing rectangles on the map, using the rectangle button.
               <br>
-              <img src='draw_btn.jpg' alt='Map drawing' style='width:40px;'>
+              <img src='draw_btn.png' alt='Map drawing' style='width:40px;'>
             </li>
           </ul>
         ")),
@@ -330,32 +330,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
         intersects <- st_intersects(polygon_sf, existing_union, sparse = FALSE)[1]
       }
       
-      #intersects <- st_intersects(polygon_sf, existing_polygons, sparse = FALSE)[1]
-      #     print(intersects)
-      #     
-      #     if(intersects){
-      #       
-      #       shinyalert(
-      #         title = "No overlay!",
-      #         text = "This rectangle overlays with another rectangle. Please modify or delete your last drawn rectangle.",
-      #         type = "error",
-      #         showCancelButton = FALSE,
-      #         confirmButtonText = "Edit rectangles",
-      #         closeOnClickOutside = FALSE,
-      #         callbackR = function(confirm) {
-      #           if (confirm) {
-      #             ## update the reactive value with the intersection polygon... yes that's wrong but like this either first or second polygon can be modified
-      #             cleaned_pols<-st_sf(rbind(existing_polygons,polygon_sf))%>%filter(leaflet_id != 0)
-      #             drawn_polygons(cleaned_pols)
-      #             
-      #             leafletProxy("map") %>%
-      #               removeDrawToolbar() %>%
-      #               add_edit_toolbar(.)
-      #             
-      #           }
-      #         })
-      #     } 
-      
+
       #print(intersects)
       # Check if the polygon is completely within the study area
       within_study_area <- st_within(polygon_sf, sf_stud_geom, sparse = FALSE)[1]
@@ -367,14 +342,34 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
         cleaned_pols<-st_sf(rbind(existing_polygons,polygon_sf))%>%filter(leaflet_id != 0)
         
         #print(paste0("The cleaned poly to be added: ",nrow(cleaned_pols)))
-        
+        area_ha2<-round(area_ha,1)
         drawn_polygons(cleaned_pols)
         #drawn_polygons(rbind(drawn_polygons(), cleaned_pols))
         #print(paste0("and this should be the sum +1draw, +0 mod, -1 del of original and new values:" ,nrow(drawn_polygons())))
+
         
+        valid_text <- glue("
+          <h4>
+    
+              The selected area is <b>{area_ha2} hectares</b>.
+               </h4>
+            <h5>
+              <li>
+                You can draw further rectangles, modify or delete rectangles using the buttons on the left side of the map.
+                <br>
+                <img src='draw_btn.png' alt='Edit buttons on map' style='width:40px;'>
+              </li>
+              <li>
+              Or you can finish mapping and evaluate the areas in the next step.
+              </li>
+          </h5>
+        ")
+        
+
         shinyalert(
           title = "Valid rectangle!",
-          text = paste("The area is", round(area_ha, 2), "ha."),
+          text = HTML(valid_text),
+          html = TRUE,
           type = "success",
           showCancelButton = TRUE,
           cancelButtonText = "Draw further rectangles or make edits",
@@ -403,10 +398,27 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
                 leafletProxy("map") %>%
                   removeDrawToolbar() %>%
                   add_edit_toolbar(.)
-                
+                max_text <- glue("
+                  <h4>
+            
+                      <b>Maximum of {max_rectangles} rectangles is reached</b>.
+                    </h4>
+                    <h5>
+                      <li>
+                        Continue with the evaluation of your areas.
+                        <br>
+                      </li>
+                      <li>
+                      Or with modifying, removing rectangles using the buttons on the left side of the map.
+                      <br>
+                      <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
+                      </li>
+                  </h5>
+                ")
                 shinyalert(
                   title = "Maximum rectangles reached!",
-                  text = "You cannot draw more than 5 rectangles.",
+                  text = HTML(max_text),
+                  html = TRUE,
                   type = "warning",
                   showCancelButton = TRUE,
                   confirmButtonText = "Finish mapping - evaluate areas",
@@ -441,10 +453,25 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
         
         
       } else if (intersects) {
-        #       
+        #   
+        overlay_text <- glue("
+          <h4>
+    
+              Please remove the overlay of the last drawn rectangles.
+               </h3>
+            </h4>
+            <h5>
+              <li>
+                You must modify or delete rectangles using the buttons on the left side of the map to continue.
+                <br>
+                <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
+              </li>
+          </h5>
+        ")
         shinyalert(
           title = "No overlay!",
-          text = "This rectangle overlays with another rectangle. Please modify or delete your last drawn rectangle.",
+          text = HTML(overlay_text),
+          html = TRUE,
           type = "error",
           showCancelButton = FALSE,
           confirmButtonText = "Edit rectangles",
@@ -465,9 +492,23 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
         
       } else if (!within_study_area) {
         # Display error popup alert for out of study area
+        out_text <- glue("
+          <h4>
+    
+              Please place your rectangle inside the study area.
+            </h4>
+            <h5>
+              <li>
+                You must modify or delete the last rectangle using the buttons on the left side of the map to continue.
+                <br>
+                <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
+              </li>
+          </h5>
+        ")
         shinyalert(
           title = "Out of Study Area!",
-          text = "The rectangle must be completely within the defined study area.",
+          text = HTML(out_text),
+          html = TRUE,
           type = "error"
         )
         
@@ -478,10 +519,25 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
           add_edit_toolbar(.)
         
       } else if (area_ha > 1200) {
+        area_ha2<-round(area_ha,1)
         # Display error popup alert for large area
+        large_text <- glue("
+          <h4>
+    
+              Your polygon is too big <b>{area_ha2} hectares</b>, maximum size allowed: 1200 hectares.
+            </h4>
+            <h5>
+              <li>
+                You must modify or delete the last rectangle using the buttons on the left side of the map to continue.
+                <br>
+                <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
+              </li>
+          </h5>
+        ")
         shinyalert(
           title = "Too large!",
-          text = paste("Rectangle area is", round(area_ha, 2), "ha. Must be smaller than 1200 ha."),
+          text = HTML(large_text),
+          html = TRUE,
           type = "error"
         )
         
@@ -491,9 +547,24 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
           removeDrawToolbar() %>%
           add_edit_toolbar(.)
       } else {
+        area_ha2<-round(area_ha,1)
+        small_text <- glue("
+          <h4>
+    
+              Your polygon is too small  <b>{area_ha2} hectares</b>, minimum size allowed: 65 hectares.
+            </h4>
+            <h5>
+              <li>
+                You must modify or delete the last rectangle using the buttons on the left side of the map to continue.
+                <br>
+                <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
+              </li>
+          </h5>
+        ")
         shinyalert(
           title = "Too small!",
-          text = paste("Rectangle area is", round(area_ha, 2), "ha. Must be larger than 65 ha."),
+          text = HTML(small_text),
+          html = TRUE,
           type = "error"
         )
         
@@ -609,12 +680,24 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
         
         
         if(nrow(updated_poly)==0){
+          del_all_text <- glue("
+          <h4>
+    
+              Draw at least one rectangle on the map using the rectangle button.
+            </h4>
+            <h5>
+              <li>
+                <img src='draw_btn.png' alt='Edit buttons on map' style='width:40px;'>
+              </li>
+          </h5>
+        ")
           shinyalert(
             title = "Polygon Deleted",
-            text = "The polygon has been deleted.",
+            text = HTML(del_all_text),
+            html = T,
             type = "info",
             showCancelButton = F,
-            confirmButtonText = "Draw at least one rectangle",
+            confirmButtonText = "Draw rectangle",
             #cancelButtonText = "Draw at least one rectangle",
             closeOnClickOutside = FALSE,
             callbackR = function(confirm) {
@@ -630,9 +713,20 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
             }
           )
         }else{
+          del_text <- glue("
+            <h5>
+              <li>
+                You can draw further rectangles, modify or delete rectangles using the buttons on the left side of the map.
+                <br>
+                <img src='drawn_btn.png' alt='Edit buttons on map' style='width:40px;'>
+              </li>
+
+          </h5>
+        ")
           shinyalert(
             title = "Polygon Deleted",
-            text = "The polygon has been deleted. You can draw a new one.",
+            text = HTML(del_text),
+            html = T,
             type = "info",
             showCancelButton = TRUE,
             confirmButtonText = "Finish mapping - evaluate areas",
@@ -718,7 +812,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
     output$slider_container <- renderUI({
       drawn_sf <- drawn_polygons() 
       tagList(
-        paste0("The number for each rectangle in the map corresponds to the number of the slider. For each individual rectangle, how suitable do you think the area is for a sunday hike? 0 = little suitable, 5 = very suitable "),
+        paste0("The number for each rectangle in the map corresponds to the number of the slider. For each individual rectangle, how suitable do you think the area is for a sunday hike? 0 = unsuitable, 5 = very suitable "),
         br(),
         lapply(seq_along(drawn_sf$geometry), function(i) {
           sliderInput(

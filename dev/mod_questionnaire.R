@@ -55,8 +55,8 @@ mod_questionnaire_ui <- function(id){
                          "What is the highest level of education you have fulfilled?",
                          choices = c("Primary school (up to age of 12)" = "prim",
                                      "Secondary school (up to age of 16) " ="sec",
-                                     "high school (up to the age of 19)" = "tertiary",
-                                     "higher edication" = "high",
+                                     "High school (up to the age of 19)" = "tertiary",
+                                     "Higher edication" = "high",
                                      "Prefer not to say"="no_answ"),
                          options = list(
                            placeholder = 'Please select an option below',
@@ -72,7 +72,7 @@ mod_questionnaire_ui <- function(id){
                                              "Secondary sector (Manufacturing, Construction, Repraring)"= "second",
                                              "Tertiary sector (Trading, Finance, Administration)"= "third",
                                              "Quaternary sector (Media, research and development, education, design)" =  "fourth",
-                                             "prefer not to say" = "no_w"),
+                                             "Prefer not to say" = "no_w"),
                                  options = list(
                                    placeholder = 'Please select an option below',
                                    onInitialize = I('function() { this.setValue(""); }')

@@ -43,6 +43,7 @@ library(raster)
 library(shinyBS)
 library(htmlwidgets)
 library(mapedit)
+library(glue)
 
 rm(list = ls())
 
@@ -61,7 +62,7 @@ source("mod_dist_impact.R")
 project_id<-"eu-wendy"
 env<-"dev" #c("dev","prod")
 site_id<-"GRC"
-var_lang<-"en" #c("grk","en","ita","esp")
+var_lang<-"grk" #c("grk","en","ita","esp")
 
 ###########################
 # read setting
