@@ -89,7 +89,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
         addDrawToolbar(
           targetGroup = "drawn",
           polylineOptions = FALSE,
-          polygonOptions = FALSE,
+          polygonOptions = T,
           circleOptions = FALSE,
           markerOptions = FALSE,
           circleMarkerOptions = FALSE,
@@ -262,7 +262,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
         addDrawToolbar(
           targetGroup = "drawn",
           polylineOptions = FALSE,
-          polygonOptions = FALSE,
+          polygonOptions = T,
           circleOptions = FALSE,
           markerOptions = FALSE,
           circleMarkerOptions = FALSE,
@@ -296,7 +296,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
     update_polygon_area_and_check <- function(polygon_sf, modified) {
       #print("-----------")
       
-      area_ha <- st_area(st_transform(polygon_sf, 3857)) /10000 # Transform to meters first
+      area_ha <- st_area(st_transform(polygon_sf, 3857)) /10000 # Transform to meters and then to ha
       area_ha <- as.numeric(area_ha)
       #print(polygon_sf)
       
@@ -320,10 +320,13 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
         #print("just drawn not modified")
       }
       
+      ### check for self intersection
+      check_valid<-st_is_valid(polygon_sf)
+      print(check_valid)
       
       # Check for intersection but not consider the empty starting polygon
       intersects <- FALSE
-      if (nrow(existing_polygons%>%filter(leaflet_id != 0)) > 0) {
+      if (nrow(existing_polygons%>%filter(leaflet_id != 0)) > 0 && check_valid == T) {
         #print("fourth")
         # Union of existing polygons to create a single geometry
         existing_union <- st_union(existing_polygons)
@@ -331,11 +334,19 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
       }
       
 
+
       #print(intersects)
       # Check if the polygon is completely within the study area
-      within_study_area <- st_within(polygon_sf, sf_stud_geom, sparse = FALSE)[1]
+      if(check_valid == T){
+        within_study_area <- st_within(polygon_sf, sf_stud_geom, sparse = FALSE)[1]
+      } else {
+        within_study_area <- FALSE
+      }
       
-      if (area_ha > 60 && area_ha < 1200 && !intersects && within_study_area) {
+      
+
+      
+      if (area_ha > 60 && area_ha < 1200 && !intersects && within_study_area && check_valid == T) {
         #print("fifth")
         # Display success popup alert for valid polygon
         polygon_sf$valid = TRUE
@@ -452,7 +463,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
         )
         
         
-      } else if (intersects) {
+      } else if (intersects  & check_valid == TRUE) {
         #   
         overlay_text <- glue("
           <h4>
@@ -490,7 +501,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
           })
         
         
-      } else if (!within_study_area) {
+      } else if (!within_study_area & check_valid == TRUE) {
         # Display error popup alert for out of study area
         out_text <- glue("
           <h4>
@@ -546,6 +557,33 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
         leafletProxy("map") %>%
           removeDrawToolbar() %>%
           add_edit_toolbar(.)
+      }else if(check_valid == F){
+        selfint_text <- glue("
+          <h4>
+    
+              Please do not draw a polygon with overcrossing lines!
+            </h4>
+            <h5>
+              <li>
+                You must modify or delete the last polygon using the buttons on the left side of the map to continue.
+                <br>
+                <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
+              </li>
+          </h5>
+        ")
+        shinyalert(
+          title = "Self intersection!",
+          text = HTML(selfint_text),
+          html = TRUE,
+          type = "error"
+        )
+        
+        
+        # Disable drawing but keep edit/remove active
+        leafletProxy("map") %>%
+          removeDrawToolbar() %>%
+          add_edit_toolbar(.)
+        
       } else {
         area_ha2<-round(area_ha,1)
         small_text <- glue("

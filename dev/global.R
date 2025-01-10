@@ -45,6 +45,7 @@ library(htmlwidgets)
 library(mapedit)
 library(glue)
 
+
 rm(list = ls())
 
 source("mod_questionnaire.R")
@@ -154,8 +155,8 @@ if(site_type == "onshore"){
 }
 
 #with res of 250m grid we can sample at least 10 pts with variaton within 0.6km2
-A_min<-65
+A_min<-65 #ha
 #A_max<-0.05*round(as.numeric(st_area(sf_stud_geom)),0)
-A_max<-A_min*20
+A_max<-A_min*20 #ha
 
 max_rectangles = 5
