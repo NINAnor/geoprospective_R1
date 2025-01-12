@@ -114,7 +114,9 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         
       ))
     })
-
+    
+    glue1<-glue("<ul><li>The minimum area of a rectangle is {A_min} ha or 70 soccer fields.</li></ul>")
+    
     output$es_quest_where<-renderUI(
       tagList(
         value_box(
@@ -123,7 +125,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
           h5("Draw and modify rectangles inside the orange bounds of the study area."),
           h5("Draw a maximum of five rectangles"),
           br(),
-          h5("The minimum area of a rectangle is 62.5ha or approximately 70 soccer fields."),
+          h5(glue1),
           h5("You will see the [ha] during you draw the rectangle. In addition, the app indicates if your last drawn polygon is too small or too big."),
           theme = value_box_theme(bg = orange, fg = "black"),
           showcase = bs_icon("question-octagon-fill"),
@@ -222,7 +224,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         addDrawToolbar(
           targetGroup = "drawn",
           polylineOptions = FALSE,
-          polygonOptions = FALSE,
+          polygonOptions = draw_pol,
           circleOptions = FALSE,
           markerOptions = FALSE,
           circleMarkerOptions = FALSE,
@@ -274,16 +276,18 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         )
         
         update_polygon_area_and_check <- function(polygon_sf, modified) {
-
-          area_ha <- st_area(st_transform(polygon_sf, 3857)) / 10000 # Transform to ha
+          #print("-----------")
+          
+          area_ha <- st_area(st_transform(polygon_sf, 3857)) /10000 # Transform to meters and then to ha
           area_ha <- as.numeric(area_ha)
-
+          #print(polygon_sf)
           
           leaf_id<-polygon_sf$leaflet_id
-
+          #print(paste0("the new one", leaf_id))
+          
           # Get the existing polygons
           existing_polygons <- drawn_polygons()
-
+          #
           
           #when modified adjust existing pols before intersection check
           if(modified == TRUE){
@@ -298,31 +302,67 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
             #print("just drawn not modified")
           }
           
+          ### check for self intersection
+          check_valid<-st_is_valid(polygon_sf)
+          print(check_valid)
           
           # Check for intersection but not consider the empty starting polygon
           intersects <- FALSE
-          if (nrow(existing_polygons%>%filter(leaflet_id != 0)) > 0) {
+          if (nrow(existing_polygons%>%filter(leaflet_id != 0)) > 0 && check_valid == T) {
             #print("fourth")
             # Union of existing polygons to create a single geometry
             existing_union <- st_union(existing_polygons)
             intersects <- st_intersects(polygon_sf, existing_union, sparse = FALSE)[1]
           }
           
-
+          
           
           #print(intersects)
           # Check if the polygon is completely within the study area
-          within_study_area <- st_within(polygon_sf, sf_stud_geom, sparse = FALSE)[1]
+          if(check_valid == T){
+            within_study_area <- st_within(polygon_sf, sf_stud_geom, sparse = FALSE)[1]
+          } else {
+            within_study_area <- FALSE
+          }
           
-          if (area_ha > A_min && area_ha < A_max && !intersects && within_study_area) {
+          
+          
+          
+          if (area_ha > A_min && area_ha < A_max && !intersects && within_study_area && check_valid == T) {
+            #print("fifth")
             # Display success popup alert for valid polygon
             polygon_sf$valid = TRUE
             cleaned_pols<-st_sf(rbind(existing_polygons,polygon_sf))%>%filter(leaflet_id != 0)
+            
+            #print(paste0("The cleaned poly to be added: ",nrow(cleaned_pols)))
+            area_ha2<-round(area_ha,1)
             drawn_polygons(cleaned_pols)
+            #drawn_polygons(rbind(drawn_polygons(), cleaned_pols))
+            #print(paste0("and this should be the sum +1draw, +0 mod, -1 del of original and new values:" ,nrow(drawn_polygons())))
+            
+            
+            valid_text <- glue("
+          <h4>
+    
+              The selected area is <b>{area_ha2} hectares</b>.
+               </h4>
+            <h5>
+              <li>
+                You can draw further rectangles, modify or delete rectangles using the buttons on the left side of the map.
+                <br>
+                <img src='draw_btn.png' alt='Edit buttons on map' style='width:40px;'>
+              </li>
+              <li>
+              Or you can finish mapping and evaluate the areas in the next step.
+              </li>
+          </h5>
+        ")
+            
             
             shinyalert(
               title = "Valid rectangle!",
-              text = paste("The area is", round(area_ha, 2), "ha."),
+              text = HTML(valid_text),
+              html = TRUE,
               type = "success",
               showCancelButton = TRUE,
               cancelButtonText = "Draw further rectangles or make edits",
@@ -330,25 +370,48 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
               closeOnClickOutside = FALSE,
               callbackR = function(confirm) {
                 if (confirm) {
-   
+                  # Save the polygon and switch tab and display the map with annotations
+                  #drawn_polygons(c(drawn_polygons(), polygon_sf))  # Update the reactive value
+                  
+                  #print(drawn_polygons())
+                  #drawn_polygons(cleaned_pols)
+                  
                   update_final_map()  # Update the final map with annotations
                   update_rectangle_ids()  # Update the rectangle ID display
-
+                  
+                  
                 } else {
                   # Save the polygon and allow further drawing when "Proceed" is clicked
-
+                  #drawn_polygons(c(drawn_polygons(), polygon_sf))  # Update the reactive value
                   drawn_polygons(cleaned_pols)
-
+                  
                   
                   if (nrow(cleaned_pols) == max_rectangles) {
                     # Disable drawing if the max has been reached
                     leafletProxy("map") %>%
                       removeDrawToolbar() %>%
                       add_edit_toolbar(.)
-                    
+                    max_text <- glue("
+                  <h4>
+            
+                      <b>Maximum of {max_rectangles} rectangles is reached</b>.
+                    </h4>
+                    <h5>
+                      <li>
+                        Continue with the evaluation of your areas.
+                        <br>
+                      </li>
+                      <li>
+                      Or with modifying, removing rectangles using the buttons on the left side of the map.
+                      <br>
+                      <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
+                      </li>
+                  </h5>
+                ")
                     shinyalert(
                       title = "Maximum rectangles reached!",
-                      text = "You cannot draw more than 5 rectangles.",
+                      text = HTML(max_text),
+                      html = TRUE,
                       type = "warning",
                       showCancelButton = TRUE,
                       confirmButtonText = "Finish mapping - evaluate areas",
@@ -357,9 +420,12 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
                       callbackR = function(confirm) {
                         if (confirm) {
                           # Save and proceed
-
+                          # cleaned_pols<-st_sf(rbind(existing_polygons,polygon_sf))%>%filter(leaflet_id != 0)
+                          #
                           drawn_polygons(cleaned_pols)
-                          update_rectangle_ids()
+                          updateTabsetPanel(session, "inTabset", selected = "p1")
+                          hideTab(inputId = "inTabset", target = "p0")
+                          showTab(inputId = "inTabset", target = "p1")
                           update_final_map()
                         } else {
                           # Allow editing polygons
@@ -379,11 +445,26 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
             )
             
             
-          } else if (intersects) {
-            #       
+          } else if (intersects  & check_valid == TRUE) {
+            #   
+            overlay_text <- glue("
+          <h4>
+    
+              Please remove the overlay of the last drawn rectangles.
+               </h3>
+            </h4>
+            <h5>
+              <li>
+                You must modify or delete rectangles using the buttons on the left side of the map to continue.
+                <br>
+                <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
+              </li>
+          </h5>
+        ")
             shinyalert(
               title = "No overlay!",
-              text = "This rectangle overlays with another rectangle. Please modify or delete your last drawn rectangle.",
+              text = HTML(overlay_text),
+              html = TRUE,
               type = "error",
               showCancelButton = FALSE,
               confirmButtonText = "Edit rectangles",
@@ -402,12 +483,29 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
               })
             
             
-          } else if (!within_study_area) {
+          } else if (!within_study_area & check_valid == TRUE) {
             # Display error popup alert for out of study area
+            out_text <- glue("
+          <h4>
+    
+              Please place your rectangle inside the study area.
+            </h4>
+            <h5>
+              <li>
+                You must modify or delete the last rectangle using the buttons on the left side of the map to continue.
+                <br>
+                <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
+              </li>
+          </h5>
+        ")
             shinyalert(
               title = "Out of Study Area!",
-              text = "The rectangle must be completely within the defined study area.",
-              type = "error"
+              text = HTML(out_text),
+              html = TRUE,
+              type = "error",
+              showCancelButton = FALSE,
+              confirmButtonText = "Edit rectangles",
+              closeOnClickOutside = FALSE,
             )
             
             
@@ -417,11 +515,29 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
               add_edit_toolbar(.)
             
           } else if (area_ha > A_max) {
+            area_ha2<-round(area_ha,1)
             # Display error popup alert for large area
+            large_text <- glue("
+          <h4>
+    
+              Your polygon is too big <b>{area_ha2} hectares</b>, maximum size allowed: {A_max} hectares.
+            </h4>
+            <h5>
+              <li>
+                You must modify or delete the last rectangle using the buttons on the left side of the map to continue.
+                <br>
+                <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
+              </li>
+          </h5>
+        ")
             shinyalert(
               title = "Too large!",
-              text = paste0("Rectangle area is", round(area_ha, 2), "ha. Must be smaller than ",A_max, " ha."),
-              type = "error"
+              text = HTML(large_text),
+              html = TRUE,
+              type = "error",
+              showCancelButton = FALSE,
+              confirmButtonText = "Edit rectangles",
+              closeOnClickOutside = FALSE,
             )
             
             
@@ -429,11 +545,59 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
             leafletProxy("map") %>%
               removeDrawToolbar() %>%
               add_edit_toolbar(.)
+          }else if(check_valid == F){
+            selfint_text <- glue("
+          <h4>
+    
+              Please do not draw a polygon with overcrossing lines!
+            </h4>
+            <h5>
+              <li>
+                You must modify or delete the last polygon using the buttons on the left side of the map to continue.
+                <br>
+                <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
+              </li>
+          </h5>
+        ")
+            shinyalert(
+              title = "Self intersection!",
+              text = HTML(selfint_text),
+              html = TRUE,
+              type = "error",
+              showCancelButton = FALSE,
+              confirmButtonText = "Edit rectangles",
+              closeOnClickOutside = FALSE,
+            )
+            
+            
+            # Disable drawing but keep edit/remove active
+            leafletProxy("map") %>%
+              removeDrawToolbar() %>%
+              add_edit_toolbar(.)
+            
           } else {
+            area_ha2<-round(area_ha,1)
+            small_text <- glue("
+          <h4>
+    
+              Your polygon is too small  <b>{area_ha2} hectares</b>, minimum size allowed: {A_min} hectares.
+            </h4>
+            <h5>
+              <li>
+                You must modify or delete the last rectangle using the buttons on the left side of the map to continue.
+                <br>
+                <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
+              </li>
+          </h5>
+        ")
             shinyalert(
               title = "Too small!",
-              text = paste0("Rectangle area is", round(area_ha, 2), "ha. Must be larger than than ", A_min, " ha."),
-              type = "error"
+              text = HTML(small_text),
+              html = TRUE,
+              type = "error",
+              showCancelButton = FALSE,
+              confirmButtonText = "Edit rectangles",
+              closeOnClickOutside = FALSE,
             )
             
             
@@ -510,10 +674,21 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
             drawn_polygons(updated_poly)
             updated_poly<-drawn_polygons()
 
-            if(nrow(updated_poly)==0){
+            if(nrow(updated_poly)==0 | nrow(existing_polygons) == 0){
+              del_all_text <- glue("
+          <h4>
+    
+              Draw at least one rectangle on the map using the rectangle button.
+            </h4>
+            <h5>
+              <li>
+                <img src='draw_btn.png' alt='Edit buttons on map' style='width:40px;'>
+              </li>
+          </h5>
+        ")
               shinyalert(
                 title = "Polygon Deleted",
-                text = "The polygon has been deleted.",
+                text = HTML(del_all_text),
                 type = "info",
                 showCancelButton = F,
                 confirmButtonText = "Draw at least one rectangle",
@@ -531,9 +706,19 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
                 }
               )
             }else{
+              del_text <- glue("
+            <h5>
+              <li>
+                You can draw further rectangles, modify or delete rectangles using the buttons on the left side of the map.
+                <br>
+                <img src='draw_btn.png' alt='Edit buttons on map' style='width:40px;'>
+              </li>
+
+          </h5>
+        ")
               shinyalert(
                 title = "Polygon Deleted",
-                text = "The polygon has been deleted. You can draw a new one.",
+                text = HTML(del_text),
                 type = "info",
                 showCancelButton = TRUE,
                 confirmButtonText = "Finish mapping - evaluate areas",

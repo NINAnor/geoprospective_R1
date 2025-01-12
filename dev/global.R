@@ -60,10 +60,10 @@ source("mod_dist_impact.R")
 
 #### Global settings
 
-project_id<-"eu-wendy"
+project_id<-"pareus" #eu-wendy
 env<-"dev" #c("dev","prod")
-site_id<-"GRC"
-var_lang<-"grk" #c("grk","en","ita","esp")
+site_id<-"NO0601" #wendy: GRC, ESP, ITA, pareus: NO0601
+var_lang<-"en" #c("grk","en","ita","esp")
 
 ###########################
 # read setting
@@ -71,7 +71,12 @@ setting<-read.csv("setup/setup.csv")
 setting<-setting%>%filter(study_id == project_id)
 
 ###
-
+draw_pol<-setting$polygon
+if(draw_pol==F){
+  target_geom = "rectangles"
+}else{
+  target_geom = "polygons"
+}
 
 #the wendy project is wrongly named for downloading data
 bqprojID<-setting$bqproj_id
@@ -132,7 +137,7 @@ sf_stud_geom <- sf::st_as_sf(site, wkt = "geometry" )%>%st_set_crs(4326)
 # load the ES list
 es_study<-tbl(con_admin, "es_descr")
 stud_all<-es_study%>%collect()
-# stud_es<-stud_all%>%filter(esID=="farm" | esID == "habitat" | esID =="mat")
+
 
 if(isTRUE(wind_lca_questions)){
   stud_es<-stud_all%>%filter(type == site$siteTYPE)
@@ -141,7 +146,7 @@ if(isTRUE(wind_lca_questions)){
   stud_es<-stud_all
 }
 
-stud_es<-stud_es%>%filter(esID=="farm" | esID == "habitat" | esID =="mat")
+#stud_es<-stud_es%>%filter(esID=="farm" | esID == "habitat" | esID =="mat")
 
 
 ## a grid for the questionnaire
