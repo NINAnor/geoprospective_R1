@@ -44,6 +44,7 @@ library(shinyBS)
 library(htmlwidgets)
 library(mapedit)
 library(glue)
+library(pool)
 
 
 rm(list = ls())
@@ -110,12 +111,21 @@ con_admin<-data.frame(
 )
 
 
-con_admin <- dbConnect(
+# con_admin <- dbConnect(
+#   bigrquery::bigquery(),
+#   project = con_admin$project,
+#   dataset = con_admin$dataset,
+#   billing = con_admin$billing
+# )
+
+con_admin <- dbPool(
   bigrquery::bigquery(),
   project = con_admin$project,
   dataset = con_admin$dataset,
-  billing = con_admin$billing
-)
+  billing = con_admin$billing)
+onStop(function() {
+  poolClose(con_admin)
+})
 
 
 # load study and site params
