@@ -3,3 +3,4 @@
 .RData
 .Ruserdata
 /dev/gcs_keys/*.json
+/prod/gcs_keys/*.json
