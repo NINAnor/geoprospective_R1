@@ -63,8 +63,10 @@ source("mod_dist_impact.R")
 
 project_id<-"eu-wendy" #eu-wendy
 env<-"dev" #c("dev","prod")
-site_id<-"NOR" #wendy: GRC, ESP, ITA, pareus: NO0601
-var_lang<-"en" #c("grk","en","ita","esp")
+
+site_id<-"ITA" #wendy: GRC, ESP, ITA, pareus: NO0601
+var_lang<-"ita" #c("grk","en","ita","esp")
+
 
 ###########################
 # read setting
