@@ -61,10 +61,10 @@ source("mod_dist_impact.R")
 
 #### Global settings
 
-project_id<-"pareus" #eu-wendy
+project_id<-"eu-wendy" #eu-wendy
 env<-"dev" #c("dev","prod")
-site_id<-"NO0601" #wendy: GRC, ESP, ITA, pareus: NO0601
-var_lang<-"en" #c("grk","en","ita","esp")
+site_id<-"ITA" #wendy: GRC, ESP, ITA, pareus: NO0601
+var_lang<-"ita" #c("grk","en","ita","esp")
 
 ###########################
 # read setting
