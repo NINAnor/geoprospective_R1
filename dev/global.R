@@ -62,9 +62,9 @@ source("mod_dist_impact.R")
 #### Global settings
 
 project_id<-"eu-wendy" #eu-wendy
-env<-"prod" #c("dev","prod")
-site_id<-"ITA" #wendy: GRC, ESP, ITA, pareus: NO0601
-var_lang<-"ita" #c("grk","en","ita","esp")
+env<-"dev" #c("dev","prod")
+site_id<-"NOR" #wendy: GRC, ESP, ITA, pareus: NO0601
+var_lang<-"en" #c("grk","en","ita","esp")
 
 ###########################
 # read setting
@@ -161,16 +161,21 @@ if(isTRUE(wind_lca_questions)){
 grd<-st_make_grid(sf_stud_geom, cellsize = 0.05,
                   offset = st_bbox(sf_stud_geom)[1:2],  what = "polygons")
 
-if(site_type == "onshore"){
-  resolution = 250^2
-}else{
-  resolution = 500^2
-}
 
 #with res of 250m grid we can sample at least 10 pts with variaton within 0.6km2
 A_min<-65 #ha
-#A_max<-0.05*round(as.numeric(st_area(sf_stud_geom)),0)
-A_max<-A_min*20 #ha
-A_max_km2<-A_max/100
+if(site_type == "onshore"){
+  resolution = 250^2
+  A_max<-A_min*20 #ha
+  A_max_km2<-A_max/100
+}else{
+  resolution = 1000^2
+  A_max<-A_min*1000 #ha
+  A_max_km2<-A_max/100
+}
+
+
+
+
 
 max_rectangles = 5

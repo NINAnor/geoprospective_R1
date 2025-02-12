@@ -153,16 +153,30 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         showcase = bs_icon("question-octagon-fill")
       )
     ))
-    output$imp_accText<-renderUI(
-      tagList(
-        value_box(
-          title = "",
-          value = paste0("How important is an easy access (by foot, bike, car) to your rectangles to benefit from ", dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang))),"?"),
-          h5("0 = not important at all - 5 = very important"),
-          theme = value_box_theme(bg = orange, fg = "black"),
-          showcase = bs_icon("question-octagon-fill")
-        )
-      ))
+    if(site_type == "onshore"){
+      output$imp_accText<-renderUI(
+        tagList(
+          value_box(
+            title = "",
+            value = paste0("How important is an easy access (by foot, bike, car) to your rectangles to benefit from ", dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang))),"?"),
+            h5("0 = not important at all - 5 = very important"),
+            theme = value_box_theme(bg = orange, fg = "black"),
+            showcase = bs_icon("question-octagon-fill")
+          )
+        ))
+    }else{
+      output$imp_accText<-renderUI(
+        tagList(
+          value_box(
+            title = "",
+            value = paste0("How important is an easy access (by recreational boating, canoe) to your rectangles to benefit from ", dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang))),"?"),
+            h5("0 = not important at all - 5 = very important"),
+            theme = value_box_theme(bg = orange, fg = "black"),
+            showcase = bs_icon("question-octagon-fill")
+          )
+        ))
+    }
+
     
     output$blog_descr<-renderUI(
       tagList(

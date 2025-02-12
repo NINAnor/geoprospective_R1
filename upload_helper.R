@@ -11,7 +11,40 @@ bq_auth(
   path = "dev/gcs_keys/eu-wendy_key.json"
 )
 
-dataset<-"wendy_prod"
+dataset<-"wendy_dev"
+
+
+#### offshore geometry
+NOR_off<-st_read("C:/Users/reto.spielhofer/OneDrive - NINA/Documents/Projects/WENDY/6_PGIS_TOOL_variables/MARINE_ES/NOR_V2.gpkg")
+#simplify
+NOR_off_simple <- st_simplify(NOR_off, dTolerance = 300)  # Adjust tolerance as needed
+st_write(NOR_off_simple,"simple.gpkg")
+nor_tab<-NOR_off_simple%>%dplyr::select(NAME)
+#NOR_offdet<-st_read("C:/Users/reto.spielhofer/OneDrive - NINA/Documents/Projects/WENDY/6_PGIS_TOOL_variables/MARINE_ES/NOR_V2.gpkg")
+
+
+nor_tab$siteAREAkm2<-as.integer(st_area(NOR_off_simple)/1000000)
+nor_tab$siteNAME<-"North sea & Norwegian sea"
+nor_tab$siteN_es <- as.integer(5)
+nor_tab$projID<-"wendy"
+nor_tab$siteID<-"NOR"
+nor_tab$siteSTATUS<-as.integer(1)
+nor_tab$siteCREATETIME<-Sys.time()
+nor_tab$siteCREATOR <-"r.spielhofer"
+nor_tab$respPARTNER <-"NOWC"
+nor_tab$siteTYPE<-"offshore"
+nor_tab$siteLANG<-"en"
+nor_tab$cntrID<-"NOR"
+nor_tab$windfarmNAME<-"Utsira, Haywind Tampen"
+
+nor_tab<-nor_tab%>%st_drop_geometry()
+nor_tab$geometry<-st_as_text(NOR_off_simple$geom)
+nor_tab<-nor_tab%>%dplyr::select(-NAME)
+
+es_tab = bq_table(project = "eu-wendy", dataset = dataset, table = 'study_site')
+bq_table_upload(x = es_tab, values = nor_tab, create_disposition='CREATE_IF_NEEDED', write_disposition='WRITE_APPEND')
+
+
 
 
 #study_area_data

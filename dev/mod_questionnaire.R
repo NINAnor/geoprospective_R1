@@ -155,16 +155,30 @@ mod_questionnaire_server <- function(id, user_id, site_id, sf_stud_geom, site_ty
     })
 
     output$cond_b5<-renderUI({
-      validate(
-        need(input$age >= 18 && input$age <= 110, ""),
-        need(input$age, ''),
-        need(input$gender != '', ''),
-        need(input$edu != '', ''),
-        need(input$work != '', ''),
-        need(input$length_liv != '', ''),
-        need(input$age >= input$length_liv, "You can't live longer in an area than you are old")
-      )
-      actionButton(ns('sub_quest'), 'submit answers', style="color: black; background-color: #31c600; border-color: #31c600")
+      if(site_type == "onshore"){
+        validate(
+          need(input$age >= 18 && input$age <= 110, ""),
+          need(input$age, ''),
+          need(input$gender != '', ''),
+          need(input$edu != '', ''),
+          need(input$work != '', ''),
+          need(input$length_liv != '', ''),
+          need(input$age >= input$length_liv, "You can't live longer in an area than you are old")
+        )
+        actionButton(ns('sub_quest'), 'submit answers', style="color: black; background-color: #31c600; border-color: #31c600")
+        
+      }else{
+        validate(
+          need(input$age >= 18 && input$age <= 110, ""),
+          need(input$age, ''),
+          need(input$gender != '', ''),
+          need(input$edu != '', ''),
+          need(input$work != '', ''),
+
+        )
+        actionButton(ns('sub_quest'), 'submit answers', style="color: black; background-color: #31c600; border-color: #31c600")
+      }
+
     })
     if(site_type == "onshore"){
       output$cond_map<-renderUI({
@@ -185,48 +199,41 @@ mod_questionnaire_server <- function(id, user_id, site_id, sf_stud_geom, site_ty
           uiOutput(ns("cond2"))
         )
       })
+      observeEvent(input$length_liv,{
+        req(input$length_liv)
+        if(input$length_liv >0){
+          output$cond2<-renderUI({
+            removeUI(
+              selector = paste0("#",ns("map_stud"))
+            )
+            tagList(
+              h5("Please select the rectangle in which you currently live."),
+              br(),
+              mapedit::selectModUI(ns("map_living")),
+              
+              
+            )
+          })
+          
+        }
+      })
+      
+      map_liv<-eventReactive(input$length_liv,{
+        req(grd)
+        if(input$length_liv >0){
+          
+          map_liv<- leaflet() %>%
+            addProviderTiles(providers$OpenStreetMap.Mapnik, options = tileOptions(minZoom = 8, maxZoom = 15))%>%
+            addFeatures(st_sf(grd), layerId = ~seq_len(length(grd)))
+          
+        }
+      })
+    }else{
+      
     }
 
-    observeEvent(input$length_liv,{
-       req(input$length_liv)
-      if(input$length_liv >0){
-        output$cond2<-renderUI({
-          removeUI(
-            selector = paste0("#",ns("map_stud"))
-          )
-          tagList(
-            h5("Please select the rectangle in which you currently live."),
-            br(),
-            mapedit::selectModUI(ns("map_living")),
-            # br(),
-            # numericInput(ns("length_liv"),
-            #              "How many years have you lived in the study area?",
-            #              NULL,
-            #              min=0,
-            #              max=110,
-            #              step=1)
 
-          )
-        })
 
-      }
-    })
-
-    # grd<-eventReactive(input$liv_in_area,{
-    #   grd<-st_make_grid(sf_stud_geom, cellsize = 0.02,
-    #                     offset = st_bbox(sf_stud_geom)[1:2],  what = "polygons")
-    # })
-
-    map_liv<-eventReactive(input$length_liv,{
-      req(grd)
-      if(input$length_liv >0){
-
-        map_liv<- leaflet() %>%
-          addProviderTiles(providers$OpenStreetMap.Mapnik, options = tileOptions(minZoom = 8, maxZoom = 15))%>%
-          addFeatures(st_sf(grd), layerId = ~seq_len(length(grd)))
-
-      }
-    })
 
 
     liv_pol <- callModule(module=selectMod,
@@ -264,7 +271,7 @@ mod_questionnaire_server <- function(id, user_id, site_id, sf_stud_geom, site_ty
           user_lat <- as.numeric(999.1)
           user_lng <- as.numeric(999.1)
         }}else{
-        liv_in_area<- "offshore"
+        liv_in_area<- "no"
         length_liv <-as.integer(0)
         user_lat <- as.numeric(999.1)
         user_lng <- as.numeric(999.1)
