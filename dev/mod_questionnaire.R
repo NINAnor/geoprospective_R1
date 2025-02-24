@@ -31,7 +31,7 @@ mod_questionnaire_ui <- function(id){
         numericInput(ns("age"),
                        "How old are you?",
                        NULL,
-                       min=18,
+                       min=10,
                        max=110,
                        step=1),
         uiOutput(ns("cond_b0")),
@@ -68,7 +68,8 @@ mod_questionnaire_ui <- function(id){
       
       selectizeInput(ns("work"),
                                  "In which economic sector do you currently work?",
-                                 choices = c("Primary sector (Farming, logging, fishing, forestry and mining)" = "first",
+                                 choices = c("Student or school" = "school",
+                                   "Primary sector (Farming, logging, fishing, forestry and mining)" = "first",
                                              "Secondary sector (Manufacturing, Construction, Reparing)"= "second",
                                              "Tertiary sector (Trading, Finance, Administration)"= "third",
                                              "Quaternary sector (Media, research and development, education, design)" =  "fourth",
@@ -80,7 +81,8 @@ mod_questionnaire_ui <- function(id){
       uiOutput(ns("cond_b3")),
       br(),
       br(),
-      fluidRow(h4("The orange border shows the study area you are going to map nature benefits")),
+      h3("Study area"),
+      fluidRow(h5("The orange border shows the area in which you are going to map different benefits from nature")),
       br(),
       tags$head(
         tags$style(HTML("
@@ -120,15 +122,23 @@ mod_questionnaire_server <- function(id, user_id, site_id, sf_stud_geom, site_ty
                  animation = "slide-from-bottom",
                  size = "s")
     output$map_stud<-renderLeaflet({
-      leaflet(sf_stud_geom) %>%
-        addPolygons(color = orange, weight = 3, smoothFactor = 0.5,
-                    opacity = 1.0, fillOpacity = 0)%>%
-        addProviderTiles(providers$OpenStreetMap.Mapnik,options = tileOptions(minZoom = 8, maxZoom = 15))
+      if(site_type == "onshore"){
+        leaflet(sf_stud_geom) %>%
+          addPolygons(color = orange, weight = 3, smoothFactor = 0.5,
+                      opacity = 1.0, fillOpacity = 0)%>%
+          addProviderTiles(providers$OpenStreetMap.Mapnik,options = tileOptions(minZoom = 8, maxZoom = 15))
+      }else{
+        leaflet(sf_stud_geom) %>%
+          addPolygons(color = orange, weight = 3, smoothFactor = 2,
+                      opacity = 1.0, fillOpacity = 0)%>%
+          addProviderTiles(providers$OpenStreetMap.Mapnik)
+      }
+     
     })
     
     output$cond_b0<-renderUI({
       validate(
-        need(input$age >= 18 && input$age <= 110, "Provide your age - Age must be between 18 and 110."),
+        need(input$age >= 10 && input$age <= 110, "Provide your age - Age must be between 18 and 110."),
       )
     })
     
@@ -157,7 +167,7 @@ mod_questionnaire_server <- function(id, user_id, site_id, sf_stud_geom, site_ty
     output$cond_b5<-renderUI({
       if(site_type == "onshore"){
         validate(
-          need(input$age >= 18 && input$age <= 110, ""),
+          need(input$age >= 10 && input$age <= 110, ""),
           need(input$age, ''),
           need(input$gender != '', ''),
           need(input$edu != '', ''),
@@ -169,7 +179,7 @@ mod_questionnaire_server <- function(id, user_id, site_id, sf_stud_geom, site_ty
         
       }else{
         validate(
-          need(input$age >= 18 && input$age <= 110, ""),
+          need(input$age >= 10 && input$age <= 110, ""),
           need(input$age, ''),
           need(input$gender != '', ''),
           need(input$edu != '', ''),

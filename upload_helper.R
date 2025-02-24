@@ -27,7 +27,7 @@ nor_tab$siteAREAkm2<-as.integer(st_area(NOR_off_simple)/1000000)
 nor_tab$siteNAME<-"North sea & Norwegian sea"
 nor_tab$siteN_es <- as.integer(5)
 nor_tab$projID<-"wendy"
-nor_tab$siteID<-"NOR"
+nor_tab$siteID<-"NOR_test"
 nor_tab$siteSTATUS<-as.integer(1)
 nor_tab$siteCREATETIME<-Sys.time()
 nor_tab$siteCREATOR <-"r.spielhofer"

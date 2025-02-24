@@ -115,8 +115,8 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
       ))
     })
     
-    glue1<-glue("<ul><li>The minimum area of a rectangle is {A_min} ha or 70 soccer fields.</li></ul>")
-    glue2<-glue("<ul><li>The maximum area of a rectangle is {A_max_km2} km2 (You need more than 1 hour to hike through the area)</li></ul>")
+    glue1<-glue("<ul><li>The minimum size of a drawn area is {A_min} ha or {A_football} soccer fields.</li></ul>")
+    glue2<-glue("<ul><li>The maximum size of a drawn area is {A_max_km2} km2 (You need more than 1 hour to hike through the area)</li></ul>")
 
     output$es_quest_where<-renderUI(
       tagList(
@@ -134,8 +134,8 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         "))),
           br(),
           h5(HTML("<ul><li>Stay within the orange borders.</li></ul>")),
-          h5(HTML("<ul><li>Try to draw the rectangle as precise as possible.</li></ul>")),
-          h5(HTML(paste0("<ul><li>Draw a <b>maximum</b> of five ", target_geom,"</li></ul>"))),
+          h5(HTML("<ul><li>Try to draw the areas as precise as possible.</li></ul>")),
+          h5(HTML(paste0("<ul><li>Draw a <b>maximum of {max_rectangles}</b> ", target_geom,"</li></ul>"))),
           h5(HTML(glue1)),
           h5(HTML(glue2)),
           h5(HTML(paste0("<ul><li>You will see hte [ha] during you draw. After you finished drawing a ",target_geom,", you will get a feedback if the geometry is valid.</li></ul>"))),
@@ -148,7 +148,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
     output$es_quest_how<-renderUI(tagList(
       value_box(
         title = "",
-        value = paste0("For each rectangle indicate, how well you think they are suited for ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang)))),
+        value = paste0("For each area indicate, how well you think they are suited for ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang)))),
         theme = value_box_theme(bg = orange, fg = "black"),
         showcase = bs_icon("question-octagon-fill")
       )
@@ -158,7 +158,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         tagList(
           value_box(
             title = "",
-            value = paste0("How important is an easy access (by foot, bike, car) to your rectangles to benefit from ", dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang))),"?"),
+            value = paste0("How important is an easy access (by foot, bike, car) to your indicated areas, to benefit from ", dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang))),"?"),
             h5("0 = not important at all - 5 = very important"),
             theme = value_box_theme(bg = orange, fg = "black"),
             showcase = bs_icon("question-octagon-fill")
@@ -169,7 +169,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         tagList(
           value_box(
             title = "",
-            value = paste0("How important is an easy access (by recreational boating, canoe) to your rectangles to benefit from ", dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang))),"?"),
+            value = paste0("How important is an easy access (by recreational boating, canoe) to your indicated areas, to benefit from ", dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang))),"?"),
             h5("0 = not important at all - 5 = very important"),
             theme = value_box_theme(bg = orange, fg = "black"),
             showcase = bs_icon("question-octagon-fill")
@@ -367,14 +367,14 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
             #print(paste0("and this should be the sum +1draw, +0 mod, -1 del of original and new values:" ,nrow(drawn_polygons())))
             
             
-            valid_text <- glue("
+            valid_text <- glue(paste0("
           <h4>
     
               The selected area is <b>{area_ha2} hectares</b>.
                </h4>
             <h5>
               <li>
-                You can draw further rectangles, modify or delete rectangles using the buttons on the left side of the map.
+                You can draw further ",target_geom,", modify or delete areas using the buttons on the left side of the map.
                 <br>
                 <img src='draw_btn.png' alt='Edit buttons on map' style='width:40px;'>
               </li>
@@ -382,16 +382,16 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
               Or you can finish mapping and evaluate the areas in the next step.
               </li>
           </h5>
-        ")
+        "))
             
             
             shinyalert(
-              title = "Valid rectangle!",
+              title = "Valid area",
               text = HTML(valid_text),
               html = TRUE,
               type = "success",
               showCancelButton = TRUE,
-              cancelButtonText = "Draw further rectangles or make edits",
+              cancelButtonText = paste0("Draw further ",target_geom," or make edits"),
               confirmButtonText = "Finish mapping - evaluate areas",
               closeOnClickOutside = FALSE,
               callbackR = function(confirm) {
@@ -420,7 +420,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
                     max_text <- glue("
                   <h4>
             
-                      <b>Maximum of {max_rectangles} rectangles is reached</b>.
+                      <b>Maximum of {max_rectangles}",target_geom," is reached</b>.
                     </h4>
                     <h5>
                       <li>
@@ -428,14 +428,14 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
                         <br>
                       </li>
                       <li>
-                      Or with modifying, removing rectangles using the buttons on the left side of the map.
+                      Or with modifying, removing areas using the buttons on the left side of the map.
                       <br>
                       <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
                       </li>
                   </h5>
                 ")
                     shinyalert(
-                      title = "Maximum rectangles reached!",
+                      title = paste0("Maximum number of ",target_geom, " reached"),
                       text = HTML(max_text),
                       html = TRUE,
                       type = "warning",
@@ -475,13 +475,12 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
             #   
             overlay_text <- glue("
           <h4>
-    
-              Please remove the overlay of the last drawn rectangles.
+              Please remove the overlay of the last drawn ",target_geom,".
                </h3>
             </h4>
             <h5>
               <li>
-                You must modify or delete rectangles using the buttons on the left side of the map to continue.
+                You must modify or delete areas using the buttons on the left side of the map to continue.
                 <br>
                 <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
               </li>
@@ -493,7 +492,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
               html = TRUE,
               type = "error",
               showCancelButton = FALSE,
-              confirmButtonText = "Edit rectangles",
+              confirmButtonText = "Edit areas",
               closeOnClickOutside = FALSE,
               callbackR = function(confirm) {
                 if (confirm) {
@@ -514,11 +513,11 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
             out_text <- glue("
           <h4>
     
-              Please place your rectangle inside the study area.
+              Please place your ",target_geom,"  inside the study area.
             </h4>
             <h5>
               <li>
-                You must modify or delete the last rectangle using the buttons on the left side of the map to continue.
+                You must modify or delete the last area using the buttons on the left side of the map to continue.
                 <br>
                 <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
               </li>
@@ -530,7 +529,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
               html = TRUE,
               type = "error",
               showCancelButton = FALSE,
-              confirmButtonText = "Edit rectangles",
+              confirmButtonText = "Edit areas",
               closeOnClickOutside = FALSE,
             )
             
@@ -550,7 +549,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
             </h4>
             <h5>
               <li>
-                You must modify or delete the last rectangle using the buttons on the left side of the map to continue.
+                You must modify or delete the last drawn ",target_geom,"  using the buttons on the left side of the map to continue.
                 <br>
                 <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
               </li>
@@ -562,7 +561,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
               html = TRUE,
               type = "error",
               showCancelButton = FALSE,
-              confirmButtonText = "Edit rectangles",
+              confirmButtonText = "Edit areas",
               closeOnClickOutside = FALSE,
             )
             
@@ -591,7 +590,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
               html = TRUE,
               type = "error",
               showCancelButton = FALSE,
-              confirmButtonText = "Edit rectangles",
+              confirmButtonText = "Edit areas",
               closeOnClickOutside = FALSE,
             )
             
@@ -610,7 +609,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
             </h4>
             <h5>
               <li>
-                You must modify or delete the last rectangle using the buttons on the left side of the map to continue.
+                You must modify or delete the last area using the buttons on the left side of the map to continue.
                 <br>
                 <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
               </li>
@@ -622,7 +621,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
               html = TRUE,
               type = "error",
               showCancelButton = FALSE,
-              confirmButtonText = "Edit rectangles",
+              confirmButtonText = "Edit areas",
               closeOnClickOutside = FALSE,
             )
             
@@ -701,10 +700,11 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
             updated_poly<-drawn_polygons()
 
             if(nrow(updated_poly)==0 | nrow(existing_polygons) == 0){
-              del_all_text <- glue("
+              if(target_geom == "rectangle"){
+                del_all_text <- glue("
           <h4>
     
-              Draw at least one rectangle on the map using the rectangle button.
+              Draw at least one area on the map using the rectangle button.
             </h4>
             <h5>
               <li>
@@ -712,12 +712,25 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
               </li>
           </h5>
         ")
+              }else{
+                del_all_text <- glue("
+          <h4>
+    
+              Draw at least one area on the map using the rectangle or polygon button.
+            </h4>
+            <h5>
+              <li>
+                <img src='draw_btn.png' alt='Edit buttons on map' style='width:40px;'>
+              </li>
+          </h5>
+        ")
+              }
               shinyalert(
                 title = "Polygon Deleted",
                 text = HTML(del_all_text),
                 type = "info",
                 showCancelButton = F,
-                confirmButtonText = "Draw at least one rectangle",
+                confirmButtonText = "Draw at least one area",
                 #cancelButtonText = "Draw at least one rectangle",
                 closeOnClickOutside = FALSE,
                 callbackR = function(confirm) {
@@ -735,7 +748,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
               del_text <- glue("
             <h5>
               <li>
-                You can draw further rectangles, modify or delete rectangles using the buttons on the left side of the map.
+                You can draw further areas, modify or delete these, using the buttons on the left side of the map.
                 <br>
                 <img src='draw_btn.png' alt='Edit buttons on map' style='width:40px;'>
               </li>
@@ -748,7 +761,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
                 type = "info",
                 showCancelButton = TRUE,
                 confirmButtonText = "Finish mapping - evaluate areas",
-                cancelButtonText = "Draw further rectangles or make edits",
+                cancelButtonText = "Draw further areas or make edits",
                 closeOnClickOutside = FALSE,
                 callbackR = function(confirm) {
                   if (confirm) {
@@ -867,7 +880,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
                       min = 0, max = 5, value = 3)%>%
             shinyInput_label_embed(
               icon("info") %>%
-                bs_embed_tooltip(title = "Ask yourself how important an easy access to the area is necessary to use or profit from this nature benefit. Is it important for you to be able to reach your areas without effort? 1 = not important at all, 5 = very important",placement = "right")),
+                bs_embed_tooltip(title = "Ask yourself how important 'easy access' to the area is, to use or profit from this nature benefit. Is it important for you to be able to reach your areas without effort? 1 = not important at all, 5 = very important",placement = "right")),
           use_bs_tooltip(),
           br(),
           uiOutput(ns("blog_descr")),
@@ -934,8 +947,8 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
       tagList(
         value_box(
           title = "",
-          value = paste0("For each individual rectangle, how suitable do you think the area is for ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang))),"?"),
-          h5("The number for each rectangle in the map corresponds to the number of the slider"),
+          value = paste0("For each individual area, how suitable do you think the place is for ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang))),"?"),
+          h5("The number for each area in the map corresponds to the number of the slider"),
           h5("0 = unsuitable, 5 = very suitable"),
           theme = value_box_theme(bg = orange, fg = "black"),
           showcase = bs_icon("question-octagon-fill")
@@ -944,7 +957,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         lapply(seq_along(drawn_sf$geometry), function(i) {
           sliderInput(
             inputId = ns(paste0("slider_", i)),
-            label = paste("Rectangle ID:", i),
+            label = paste("Area ID:", i),
             min = 0, max = 5, value = 3  # Default value set to 3, can be customized
           )
         })

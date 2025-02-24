@@ -57,16 +57,14 @@ source("mod_ahp_single.R")
 source("mod_dist_impact.R")
 
 
-
-
 #### Global settings
 
-project_id<-"eu-wendy" #eu-wendy
+project_id<-"pareus" #eu-wendy, pareus
 env<-"dev" #c("dev","prod")
 
 
-site_id<-"ITA" #wendy: GRC, ESP, ITA, pareus: NO0601
-var_lang<-"ita" #c("grk","en","ita","esp")
+site_id<-"FRA_test" #wendy: GRC, ESP, ITA, pareus: NO0601, SK021
+var_lang<-"en" #c("grk","en","ita","esp")
 
 
 
@@ -100,6 +98,7 @@ cred_path<-paste0("gcs_keys/",project_id,"_key.json")
 #bucket
 bucket_name<-paste0(bqprojID,"_geopros_",env)
 gcs_auth(cred_path)
+#gcs_auth("C:/Users/reto.spielhofer/git/wendy_geopros_R1/gcs_keys/eu-wendy_key.json")
 gcs_global_bucket(bucket_name) #set it as global bucket
 
 ## BQ connection to store rectangles
@@ -111,7 +110,7 @@ bq_auth(
 con_admin<-data.frame(
   project = project_id,
   dataset = dataset,
-  billing =project_id
+  billing = project_id
 )
 
 
@@ -167,19 +166,16 @@ grd<-st_make_grid(sf_stud_geom, cellsize = 0.05,
 
 
 #with res of 250m grid we can sample at least 10 pts with variaton within 0.6km2
-A_min<-65 #ha
+A_min<-as.numeric(setting$a_min_ha) #ha
 if(site_type == "onshore"){
   resolution = 250^2
-  A_max<-A_min*20 #ha
+  A_max<-A_min*setting$factor_a_max #ha
   A_max_km2<-A_max/100
 }else{
   resolution = 1000^2
   A_max<-A_min*1000 #ha
   A_max_km2<-A_max/100
 }
+A_football<-round(A_min*2.47,0)
 
-
-
-
-
-max_rectangles = 5
+max_rectangles = setting$max_rectangles

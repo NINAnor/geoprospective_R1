@@ -59,12 +59,23 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
     })
     
     output$es_quest_how<-renderUI(tagList(
-      value_box(
-        title = "",
-        value = paste0("For each rectangle indicate, how well you think they are suited for a sunday hike?"),
-        theme = value_box_theme(bg = orange, fg = "black"),
-        showcase = bs_icon("question-octagon-fill")
-      )
+
+      if(target_geom == "rectangle"){
+        value_box(
+          title = "",
+          value = paste0("For each rectangle indicate, how well you think they are suited for a sunday hike?"),
+          theme = value_box_theme(bg = orange, fg = "black"),
+          showcase = bs_icon("question-octagon-fill")
+        )
+      }else{
+        value_box(
+          title = "",
+          value = paste0("For each polygon indicate, how well you think they are suited for a sunday hike?"),
+          theme = value_box_theme(bg = orange, fg = "black"),
+          showcase = bs_icon("question-octagon-fill")
+        )
+        
+      }
     ))
 
     
@@ -105,19 +116,36 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
     }
     
     output$map <- renderLeaflet({
-      leaflet(sf_stud_geom) %>%
-        addProviderTiles(providers$OpenStreetMap.Mapnik,options = tileOptions(minZoom = 8, maxZoom = 15),group = "Openstreet map")%>%
-        addProviderTiles(providers$Esri.WorldImagery,options = tileOptions(minZoom = 8, maxZoom = 15),group = "World image")%>%
-        add_full_toolbar(.) %>%
-        addLayersControl(
-          overlayGroups = c("drawn"),
-          options = layersControlOptions(collapsed = FALSE)
-        ) %>%
-        # Add study area to the map
-        addPolygons(color = "orange", weight = 3, smoothFactor = 0.5,
-                    opacity = 1.0, fillOpacity = 0)%>%
-        addLayersControl(baseGroups = c("Openstreet map","World image"),
-                         options = layersControlOptions(collapsed = FALSE))
+      if(site_type == "onshore"){
+        leaflet(sf_stud_geom) %>%
+          addProviderTiles(providers$OpenStreetMap.Mapnik,options = tileOptions(minZoom = 8, maxZoom = 15),group = "Openstreet map")%>%
+          addProviderTiles(providers$Esri.WorldImagery,options = tileOptions(minZoom = 8, maxZoom = 15),group = "World image")%>%
+          add_full_toolbar(.) %>%
+          addLayersControl(
+            overlayGroups = c("drawn"),
+            options = layersControlOptions(collapsed = FALSE)
+          ) %>%
+          # Add study area to the map
+          addPolygons(color = "orange", weight = 3, smoothFactor = 0.5,
+                      opacity = 1.0, fillOpacity = 0)%>%
+          addLayersControl(baseGroups = c("Openstreet map","World image"),
+                           options = layersControlOptions(collapsed = FALSE))
+      }else{
+        leaflet(sf_stud_geom) %>%
+          addProviderTiles(providers$OpenStreetMap.Mapnik,group = "Openstreet map")%>%
+          addProviderTiles(providers$Esri.WorldImagery,group = "World image")%>%
+          add_full_toolbar(.) %>%
+          addLayersControl(
+            overlayGroups = c("drawn"),
+            options = layersControlOptions(collapsed = FALSE)
+          ) %>%
+          # Add study area to the map
+          addPolygons(color = "orange", weight = 3, smoothFactor = 2,
+                      opacity = 1.0, fillOpacity = 0)%>%
+          addLayersControl(baseGroups = c("Openstreet map","World image"),
+                           options = layersControlOptions(collapsed = FALSE))
+      }
+
     })
     
     
@@ -128,8 +156,8 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
       updateProgressBar(session = session, id = "pb", value = 20)
       removeUI(selector = paste0("#",ns("task_0")))
 
-      glue1<-glue("<ul><li>The minimum area of a rectangle is {A_min} ha or 70 soccer fields.</li></ul>")
-      glue2<-glue("<ul><li>The maximum area of a rectangle is {A_max_km2} km2 (You need more than 1 hour to hike through the area)</li></ul>")
+      glue1<-glue("<ul><li>The minimum size of a drawn area is {A_min} ha or {A_football} soccer fields.</li></ul>")
+      glue2<-glue("<ul><li>The maximum size of a drawn area is {A_max_km2} km2 (You need more than 1 hour to hike through the area)</li></ul>")
       
       
       output$task_1<-renderUI({
@@ -140,7 +168,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
           value_box(
             title = "",
             value ="",
-            h4(HTML(paste0("For training purposes, draw a <b>maximum</b> of five ", target_geom, " that show areas suitable for a Sunday hike in the study area"))),
+            h4(HTML(paste0("For training purposes, draw a <b>maximum</b> of {max_rectangles} ", target_geom, " that show areas suitable for a Sunday hike in the study area"))),
             theme = value_box_theme(bg = orange, fg = "black"),
             showcase = bs_icon("question-octagon-fill"),
             showcase_layout = "left center"
@@ -156,7 +184,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
           </ul>
         "))),
           h5(HTML("<ul><li>Stay within the orange borders.</li></ul>")),
-          h5(HTML("<ul><li>Try to draw the rectangle as precise as possible.</li></ul>")),
+          h5(HTML(paste0("<ul><li>Try to draw the areas as precise as possible.</li></ul>"))),
           h5(HTML(glue1)),
           h5(HTML(glue2)),
           h5(HTML(paste0("<ul><li>You will see hte [ha] during you draw. After you finished drawing a ",target_geom,", you will get a feedback if the geometry is valid.</li></ul>"))),
@@ -204,18 +232,46 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
     })
     
     observeEvent(input$help1,{
-      showModal(modalDialog(
-        easyClose = T,
-        size = "l",
-        title = "",
-        h3("How draw a rectangle"),
-        h5("To define your areas, you can draw a maximum of five rectangles on the map."),
-        h5("-click the rectangle button at the left side of the map"),
-        h5("-click on the map where you want to place a corner of the rectangle, press and hold the left mouse key "),
-        h5("-draw your rectangle and release the mouse"),
-        br(),
-        HTML('<iframe src="https://drive.google.com/file/d/1L-Zt4FETqCQuJmzg-Ff2qr_Vc7yn4LWr/preview" width="480" height="360" allow="autoplay"></iframe>'),
-      ))
+      if(target_geom == "rectangles"){
+        showModal(modalDialog(
+          easyClose = T,
+          size = "l",
+          title = "",
+          h3(paste0("How draw a rectangle")),
+          h5(paste0("You can draw a maximum of {max_rectangles} rectangles on the map.")),
+          h5("-click the rectangle button at the left side of the map"),
+          h5("-click on the map where you want to place a corner of the rectangle, press and hold the left mouse key "),
+          h5("-draw your rectangle and release the mouse"),
+          br(),
+          HTML('<iframe src="https://drive.google.com/file/d/1L-Zt4FETqCQuJmzg-Ff2qr_Vc7yn4LWr/preview" width="480" height="360" allow="autoplay"></iframe>'),
+        ))
+        
+      }else{
+        
+        showModal(modalDialog(
+          easyClose = T,
+          size = "l",
+          title = "",
+          h3(paste0("How draw polygons or rectangles")),
+          h5(paste0("You can draw a maximum of {max_rectangles} rectangles or polygons on the map.")),
+          h4("Rectangles"),
+          h5("These are simple geometries but less precise than polygons"),
+          h5("-click the rectangle button on the left side of the map"),
+          h5("-click on the map where you want to place a corner of the rectangle, press and hold the left mouse key "),
+          h5("-draw your rectangle and release the mouse"),
+          HTML('<iframe src="https://drive.google.com/file/d/1L-Zt4FETqCQuJmzg-Ff2qr_Vc7yn4LWr/preview" width="480" height="360" allow="autoplay"></iframe>'),
+          br(),
+          h4("Polygons"),
+          h5("These are more precise but slightly more difficult to draw"),
+          h5("-Click the polygon button on the left side of the map"),
+          h5("-Click on the map where you want to put a first border point of your area"),
+          h5("-Add further points to define the shape of your area (Do not self overlap the area"),
+          h5("-Click on the first point again to finish mapping"),
+          br(),
+        ))
+        
+      }
+
     })
     
     observeEvent(input$help2,{
@@ -223,11 +279,11 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
         easyClose = T,
         size = "l",
         title = "",
-        h3("Remove rectangles"),
-        h5("If necessary, you can remove rectangles as shown in the animation. Important: press “save areas” to confirm your answers."),
+        h3("Remove areas"),
+        h5("If necessary, you can remove rectangles or polygons as shown in the animation. Important: press “save areas” to confirm your answers."),
         br(),
-        h3("Modify rectangles"),
-        h5("Click on the modify button on the right. You can now move the whole rectangle or change its shape."),
+        h3("Modify areas"),
+        h5("Click on the modify button on the right. You can now move the whole area or change its shape."),
         br(),
         HTML('<iframe src="https://drive.google.com/file/d/19Z-2agDpCJU87l4L7O8YRlafHPzVnliU/preview" width="480" height="360" allow="autoplay"></iframe>'),
         
@@ -362,7 +418,11 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
         #drawn_polygons(rbind(drawn_polygons(), cleaned_pols))
         #print(paste0("and this should be the sum +1draw, +0 mod, -1 del of original and new values:" ,nrow(drawn_polygons())))
 
-        
+        if(target_geom == "rectangles"){
+          
+        }else{
+          
+        }
         valid_text <- glue(paste0("
           <h4>
     
@@ -370,7 +430,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
                </h4>
             <h5>
               <li>
-                You can draw further ",target_geom,", modify or delete rectangles using the buttons on the left side of the map.
+                You can draw further ",target_geom,", modify or delete areas using the buttons on the left side of the map.
                 <br>
                 <img src='draw_btn.png' alt='Edit buttons on map' style='width:40px;'>
               </li>
@@ -382,7 +442,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
         
 
         shinyalert(
-          title = paste0("Valid ",target_geom),
+          title = "Valid area",
           text = HTML(valid_text),
           html = TRUE,
           type = "success",
@@ -424,14 +484,14 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
                         <br>
                       </li>
                       <li>
-                      Or with modifying, removing rectangles using the buttons on the left side of the map.
+                      Or with modifying, removing areas using the buttons on the left side of the map.
                       <br>
                       <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
                       </li>
                   </h5>
                 "))
                 shinyalert(
-                  title = paste0("Maximum number of ",target_geom, " reached!"),
+                  title = paste0("Maximum number of ",target_geom, " reached"),
                   text = HTML(max_text),
                   html = TRUE,
                   type = "warning",
@@ -477,7 +537,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
             </h4>
             <h5>
               <li>
-                You must modify or delete rectangles using the buttons on the left side of the map to continue.
+                You must modify or delete areas using the buttons on the left side of the map to continue.
                 <br>
                 <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
               </li>
@@ -489,7 +549,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
           html = TRUE,
           type = "error",
           showCancelButton = FALSE,
-          confirmButtonText = "Edit rectangles",
+          confirmButtonText = "Edit areas",
           closeOnClickOutside = FALSE,
           callbackR = function(confirm) {
             if (confirm) {
@@ -509,12 +569,11 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
         # Display error popup alert for out of study area
         out_text <- glue(paste0("
           <h4>
-    
               Please place your ",target_geom,"  inside the study area.
             </h4>
             <h5>
               <li>
-                You must modify or delete the last rectangle using the buttons on the left side of the map to continue.
+                You must modify or delete the last area using the buttons on the left side of the map to continue.
                 <br>
                 <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
               </li>
@@ -526,7 +585,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
           html = TRUE,
           type = "error",          
           showCancelButton = FALSE,
-          confirmButtonText = "Edit rectangles",
+          confirmButtonText = "Edit areas",
           closeOnClickOutside = FALSE,
         )
         
@@ -542,7 +601,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
         large_text <- glue(paste0("
           <h4>
     
-              Your polygon is too big <b>{area_ha2} hectares</b>, maximum size allowed: {A_max} hectares.
+              Your area is too big <b> {area_ha2} hectares</b>, maximum area allowed: {A_max} hectares.
             </h4>
             <h5>
               <li>
@@ -558,7 +617,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
           html = TRUE,
           type = "error",
           showCancelButton = FALSE,
-          confirmButtonText = "Edit rectangles",
+          confirmButtonText = "Edit areas",
           closeOnClickOutside = FALSE,
         )
         
@@ -586,7 +645,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
           html = TRUE,
           type = "error",
           showCancelButton = FALSE,
-          confirmButtonText = "Edit rectangles",
+          confirmButtonText = "Edit areas",
           closeOnClickOutside = FALSE,
         )
         
@@ -601,11 +660,11 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
         small_text <- glue("
           <h4>
     
-              Your polygon is too small  <b>{area_ha2} hectares</b>, minimum size allowed: {A_min} hectares.
+              Your area is too small  <b> {area_ha2} hectares</b>, minimum area allowed: {A_min} hectares.
             </h4>
             <h5>
               <li>
-                You must modify or delete the last rectangle using the buttons on the left side of the map to continue.
+                You must modify or delete the last area using the buttons on the left side of the map to continue.
                 <br>
                 <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
               </li>
@@ -617,7 +676,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
           html = TRUE,
           type = "error",
           showCancelButton = FALSE,
-          confirmButtonText = "Edit rectangles",
+          confirmButtonText = "Edit area",
           closeOnClickOutside = FALSE,
         )
         
@@ -733,10 +792,11 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
         
         
         if(nrow(updated_poly)==0 | nrow(existing_polygons) == 0){
-          del_all_text <- glue("
+          if(target_geom == "rectangle"){
+            del_all_text <- glue("
           <h4>
     
-              Draw at least one rectangle on the map using the rectangle button.
+              Draw at least one area on the map using the rectangle button.
             </h4>
             <h5>
               <li>
@@ -744,13 +804,27 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
               </li>
           </h5>
         ")
+          }else{
+            del_all_text <- glue("
+          <h4>
+    
+              Draw at least one area on the map using the rectangle or polygon button.
+            </h4>
+            <h5>
+              <li>
+                <img src='draw_btn.png' alt='Edit buttons on map' style='width:40px;'>
+              </li>
+          </h5>
+        ")
+          }
+
           shinyalert(
             title = "Polygon Deleted",
             text = HTML(del_all_text),
             html = T,
             type = "info",
             showCancelButton = F,
-            confirmButtonText = "Draw rectangle",
+            confirmButtonText = "Draw area",
             #cancelButtonText = "Draw at least one rectangle",
             closeOnClickOutside = FALSE,
             callbackR = function(confirm) {
@@ -769,7 +843,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
           del_text <- glue("
             <h5>
               <li>
-                You can draw further rectangles, modify or delete rectangles using the buttons on the left side of the map.
+                You can draw further areas, modify or delete these, using the buttons on the left side of the map.
                 <br>
                 <img src='draw_btn.png' alt='Edit buttons on map' style='width:40px;'>
               </li>
@@ -783,7 +857,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
             type = "info",
             showCancelButton = TRUE,
             confirmButtonText = "Finish mapping - evaluate areas",
-            cancelButtonText = "Draw further rectangles or make edits",
+            cancelButtonText = "Draw further areas or make edits",
             closeOnClickOutside = FALSE,
             callbackR = function(confirm) {
               if (confirm) {
@@ -811,8 +885,8 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
     
     update_final_map <- function() {
       removeUI(selector = paste0("#",ns("task_1")))
-        shinyalert(  title = "Evaluating your rectangles",
-                     text = "As soon as you have saved all rectangles, they will appear on the map again with a red number. Below you will find a slider for each rectangle with a corresponding number. With the slider you are now asked to rate each rectangle how well it is suited for a Sunday hike.",
+        shinyalert(  title = "Evaluating your areas",
+                     text = "As soon as you have saved all areas, they will appear on the map again with a red number. Below you will find a slider for each area with a corresponding number. With the slider you are now asked to rate each area how well it is suited for a Sunday hike.",
                      type = "info",
                      closeOnEsc = TRUE,
                      closeOnClickOutside = TRUE,
@@ -858,19 +932,19 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
     
     # Function to update the rectangle IDs display
     update_rectangle_ids <- function() {
-      ids <- paste("Rectangle IDs:", seq_along(drawn_polygons()), collapse = ", ")
+      ids <- paste("Area IDs:", seq_along(drawn_polygons()), collapse = ", ")
       # You can display this somewhere in the UI if needed
     }
     
     output$slider_container <- renderUI({
       drawn_sf <- drawn_polygons() 
       tagList(
-        paste0("The number for each rectangle in the map corresponds to the number of the slider. For each individual rectangle, how suitable do you think the area is for a sunday hike? 0 = unsuitable, 5 = very suitable "),
+        paste0("The number for each area in the map corresponds to the number of the slider. For each individual area, how suitable do you think the place is for a sunday hike? 0 = unsuitable, 5 = very suitable "),
         br(),
         lapply(seq_along(drawn_sf$geometry), function(i) {
           sliderInput(
             inputId = ns(paste0("slider_", i)),
-            label = paste("Rectangle ID:", i),
+            label = paste("Area ID:", i),
             min = 0, max = 5, value = 3  # Default value set to 3, can be customized
           )
         })
