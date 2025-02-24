@@ -64,7 +64,7 @@ env<-"dev" #c("dev","prod")
 
 
 site_id<-"FRA_test" #wendy: GRC, ESP, ITA, pareus: NO0601, SK021
-var_lang<-"en" #c("grk","en","ita","esp")
+var_lang<-"fra" #c("grk","en","ita","esp")
 
 
 

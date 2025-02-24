@@ -135,7 +135,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
           br(),
           h5(HTML("<ul><li>Stay within the orange borders.</li></ul>")),
           h5(HTML("<ul><li>Try to draw the areas as precise as possible.</li></ul>")),
-          h5(HTML(paste0("<ul><li>Draw a <b>maximum of {max_rectangles}</b> ", target_geom,"</li></ul>"))),
+          h5(HTML(glue(paste0("<ul><li>Draw a <b>maximum of {max_rectangles}</b> ", target_geom,"</li></ul>")))),
           h5(HTML(glue1)),
           h5(HTML(glue2)),
           h5(HTML(paste0("<ul><li>You will see hte [ha] during you draw. After you finished drawing a ",target_geom,", you will get a feedback if the geometry is valid.</li></ul>"))),

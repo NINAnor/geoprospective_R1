@@ -168,7 +168,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
           value_box(
             title = "",
             value ="",
-            h4(HTML(paste0("For training purposes, draw a <b>maximum</b> of {max_rectangles} ", target_geom, " that show areas suitable for a Sunday hike in the study area"))),
+            h4(HTML(glue(paste0("For training purposes, draw a <b>maximum</b> of {max_rectangles} ", target_geom, " that show areas suitable for a Sunday hike in the study area")))),
             theme = value_box_theme(bg = orange, fg = "black"),
             showcase = bs_icon("question-octagon-fill"),
             showcase_layout = "left center"
