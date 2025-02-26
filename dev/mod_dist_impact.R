@@ -45,7 +45,7 @@ mod_dist_impact_ui <- function(id){
 #' dist_impact Server Functions
 #'
 #' @noRd
-mod_dist_impact_server <- function(id, userID, site_id, stud_all){
+mod_dist_impact_server <- function(id, userID, site_id, stud_all,site_type){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     shinyalert(  title = "Impacts of wind energy on nature benefits",
@@ -58,7 +58,13 @@ mod_dist_impact_server <- function(id, userID, site_id, stud_all){
                  animation = "slide-from-bottom",
                  size = "s")
     ## change it afterwards to the correct es!!
-    stud_es<-stud_all%>%filter(esID == "recr" | esID == "wild_hunt" | esID == "wild_col"| esID == "habitat"| esID == "sense"| esID == "aest")
+    if(site_type=="onshore"){
+      stud_es<-stud_all%>%filter(esID == "recr" | esID == "wild_hunt" | esID == "wild_col"| esID == "habitat"| esID == "sense"| esID == "aest")
+      
+    }else{
+      stud_es<-stud_all%>%filter(esID == "aest_off" | esID == "fish_wilf" | esID == "recr_off"| esID == "sense_off")
+      
+    }
     
     ####
     output$slider_impact <- renderUI({

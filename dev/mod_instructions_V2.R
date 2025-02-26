@@ -39,12 +39,18 @@ mod_instructions_ui <- function(id){
 #' training Server Functions
 #'
 #' @noRd
-mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
+mod_instructions_server <- function(id,sf_stud_geom,userID,site_id,site_type){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     rv1<-reactiveValues(
       u = reactive({})
     )
+    
+    if(site_type == "onshore"){
+      target_activity = "a sunday hike"
+    }else{
+      target_activity = "a boat trip with friends"
+    }
     ## ES shortly explained
     output$task_0<-renderUI({
       tagList(
@@ -60,17 +66,18 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
     
     output$es_quest_how<-renderUI(tagList(
 
+
       if(target_geom == "rectangle"){
         value_box(
           title = "",
-          value = paste0("For each rectangle indicate, how well you think they are suited for a sunday hike?"),
+          value = paste0("For each rectangle indicate, how well you think they are suited for ",target_activity,"?"),
           theme = value_box_theme(bg = orange, fg = "black"),
           showcase = bs_icon("question-octagon-fill")
         )
       }else{
         value_box(
           title = "",
-          value = paste0("For each polygon indicate, how well you think they are suited for a sunday hike?"),
+          value = paste0("For each polygon indicate, how well you think they are suited for ",target_activity,"?"),
           theme = value_box_theme(bg = orange, fg = "black"),
           showcase = bs_icon("question-octagon-fill")
         )
@@ -168,7 +175,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
           value_box(
             title = "",
             value ="",
-            h4(HTML(glue(paste0("For training purposes, draw a <b>maximum</b> of {max_rectangles} ", target_geom, " that show areas suitable for a Sunday hike in the study area")))),
+            h4(HTML(glue(paste0("For training purposes, draw a <b>maximum</b> of {max_rectangles} ", target_geom, " that show areas suitable for ",target_activity," in the study area")))),
             theme = value_box_theme(bg = orange, fg = "black"),
             showcase = bs_icon("question-octagon-fill"),
             showcase_layout = "left center"
@@ -886,7 +893,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
     update_final_map <- function() {
       removeUI(selector = paste0("#",ns("task_1")))
         shinyalert(  title = "Evaluating your areas",
-                     text = "As soon as you have saved all areas, they will appear on the map again with a red number. Below you will find a slider for each area with a corresponding number. With the slider you are now asked to rate each area how well it is suited for a Sunday hike.",
+                     text = paste0("As soon as you have saved all areas, they will appear on the map again with a red number. Below you will find a slider for each area with a corresponding number. With the slider you are now asked to rate each area how well it is suited for ",target_activity),
                      type = "info",
                      closeOnEsc = TRUE,
                      closeOnClickOutside = TRUE,
@@ -939,7 +946,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id){
     output$slider_container <- renderUI({
       drawn_sf <- drawn_polygons() 
       tagList(
-        paste0("The number for each area in the map corresponds to the number of the slider. For each individual area, how suitable do you think the place is for a sunday hike? 0 = unsuitable, 5 = very suitable "),
+        paste0("The number for each area in the map corresponds to the number of the slider. For each individual area, how suitable do you think the place is for ",target_activity,"? 0 = unsuitable, 5 = very suitable "),
         br(),
         lapply(seq_along(drawn_sf$geometry), function(i) {
           sliderInput(

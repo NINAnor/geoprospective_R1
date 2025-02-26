@@ -49,22 +49,32 @@ library(pool)
 
 rm(list = ls())
 
-source("mod_questionnaire.R")
-source("mod_mapping1_V2.R")
-source("mod_instructions_V2.R")
-source("mod_ahp_group.R")
-source("mod_ahp_single.R")
-source("mod_dist_impact.R")
+
 
 
 #### Global settings
 
-project_id<-"pareus" #eu-wendy, pareus
+project_id<-"eu-wendy" #eu-wendy, pareus
 env<-"dev" #c("dev","prod")
+if(project_id=="eu-wendy"){
+  source("mod_questionnaire.R")
+  source("mod_mapping1_V2.R")
+  source("mod_instructions_V2.R")
+  source("mod_ahp_group.R")
+  source("mod_ahp_single.R")
+  source("mod_dist_impact.R")
+}else{
+  source("mod_questionnaire.R")
+  source("mod_mapping1_V2.R")
+  source("mod_instructions_V2.R")
+  source("mod_ahp_group.R")
+  source("mod_ahp_single.R")
+
+}
 
 
-site_id<-"FRA_test" #wendy: GRC, ESP, ITA, pareus: NO0601, SK021
-var_lang<-"fra" #c("grk","en","ita","esp")
+site_id<-"NOR" #wendy: GRC, ESP, ITA, pareus: NO0601, SK021
+var_lang<-"en" #c("grk","en","ita","esp")
 
 
 

@@ -216,7 +216,7 @@ function(input, output, session) {
     hideTab(inputId = "inTabset",
             target = "p3")
     showTab(inputId = "inTabset", target = "p4")
-    rv$v<-mod_instructions_server("training_1",sf_stud_geom,userID,site_id)
+    rv$v<-mod_instructions_server("training_1",sf_stud_geom,userID,site_id,site_type)
   })
   
   #######################
@@ -342,7 +342,7 @@ function(input, output, session) {
           
         )
       })
-      rv$y <- mod_dist_impact_server("ahp_dist_1", isolate(userID()), site_id, stud_all)
+      rv$y <- mod_dist_impact_server("ahp_dist_1", isolate(userID()), site_id, stud_all,site_type)
     }else{
       
       updateProgressBar(session = session, id = "pb", value = 100)
