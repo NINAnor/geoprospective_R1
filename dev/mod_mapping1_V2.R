@@ -1123,16 +1123,18 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
       pts$SPECIES<-rep("pres",nrow(pts))
       
       
-      if(nrow(pts)>3000){
-        pts<-pts[sample(nrow(pts), 3000), ]
+      if(nrow(pts)>1000){
+        pts<-pts[sample(nrow(pts), 1000), ]
       }
       
       
       
       ############ save map on gcs within studID folder
       update_modal_progress(0.4, text = "train model")
-      SDM <- SSDM::modelling('MARS', pts, 
-                             pred_w, Xcol = 'lon', Ycol = 'lat')
+      SDM <- SSDM::modelling('RF', pts, 
+                             pred_w, Xcol = 'lon', Ycol = 'lat',cv = "holdout",
+                             cv.param = c(0.7, 2),
+                             final.fit.data = "all")
       
       train_param <-
         list(

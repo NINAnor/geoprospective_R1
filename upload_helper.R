@@ -69,7 +69,7 @@ ita_nuts<-gisco_get_nuts(year = "2021",
                          country = "ITA",
                          nuts_id = c("ITF65","ITF64","ITF63"),
                          nuts_level = "3")
-wt_ita<-dat_sf%>%filter(cntrID == "ITA")%>%st_buffer(0.6)
+wt_ita<-dat_sf%>%filter(cntrID == "ITA")
 st_crs(wt_ita) <- 4326
 
 ita_nuts_diss<-st_union(ita_nuts)%>%st_sf()
@@ -105,9 +105,11 @@ bq_table_upload(x = es_tab, values = polygons, create_disposition='CREATE_IF_NEE
 
 ###### Spain, we just consider the three northern case studies, not the
 
-wt_esp<-dat_sf%>%filter(cntrID == "ESP",windfarmNAME !="Motilla")%>%st_buffer(0.6)
+wt_esp<-dat_sf%>%filter(cntrID == "ESP",windfarmNAME !="Motilla")
 st_crs(wt_esp) <- 4326
-bbox_wf<-st_bbox(wt_esp)%>%st_as_sfc()%>%st_sf()
+wt_esp_buff<-wt_esp%>%st_buffer(0.6)
+
+bbox_wf<-st_bbox(wt_esp_buff)%>%st_as_sfc()%>%st_sf()
 
 esp_nuts<-gisco_get_nuts(year = "2021",
                          epsg = "4326",
@@ -115,7 +117,7 @@ esp_nuts<-gisco_get_nuts(year = "2021",
                          update_cache = FALSE,
                          cache_dir = NULL,
                          verbose = FALSE,
-                         resolution = "01",
+                         resolution = "10",
                          spatialtype = "RG",
                          country = "ESP",
                          nuts_id = NULL,
@@ -124,7 +126,7 @@ esp_nuts<-gisco_get_nuts(year = "2021",
 
 
 # st_area(bbox_wf)/1000000
-wt_esp<-st_join(wt_esp,esp_nuts,join = st_intersects)
+wt_esp_buff<-st_join(wt_esp,esp_nuts,join = st_intersects)
 nuts_uni<-wt_esp%>%distinct(wt_esp$NUTS_ID)
 
 nuts_filter<-esp_nuts%>%filter(NUTS_ID %in% nuts_uni$`wt_esp$NUTS_ID`)
@@ -134,7 +136,7 @@ nuts_filter<-esp_nuts%>%filter(NUTS_ID %in% nuts_uni$`wt_esp$NUTS_ID`)
 
 ggplot() +
   geom_sf(data = nuts_filter, fill = "lightblue", color = "black") +  # Plot the polygon
-  geom_sf(data = wt_esp, color = "red", size = 3) +  # Plot the point on top
+  geom_sf(data = wt_esp, color = "red", size = 1, fill=NA) +  # Plot the point on top
   geom_sf(data = bbox_wf, fill = NA, color = "red", linetype = "dashed") +
   theme_minimal()
 
@@ -161,7 +163,8 @@ bq_table_upload(x = es_tab, values = polygons, create_disposition='CREATE_IF_NEE
 
 
 #### For greece we take the whole crete island (EL43)
-
+wt_grc<-dat_sf%>%filter(cntrID == "GRC")
+st_crs(wt_grc) <- 4326
 grc_nuts<-gisco_get_nuts(year = "2021",
                          epsg = "4326",
                          cache = TRUE,
@@ -175,8 +178,8 @@ grc_nuts<-gisco_get_nuts(year = "2021",
                          nuts_level = "2")
 grc_nuts<-grc_nuts%>%select(geometry)
 st_area(grc_nuts)/1000000
-wt_grc<-dat_sf%>%filter(cntrID == "GRC")%>%st_buffer(0.5)
-st_crs(wt_grc) <- 4326
+
+
 # bbox_wf<-st_bbox(wt_esp)%>%st_as_sfc()
 # st_area(bbox_wf)/1000000
 # wt_esp<-st_join(wt_esp,esp_nuts,join = st_intersects)
@@ -185,7 +188,7 @@ st_crs(wt_grc) <- 4326
 
 ggplot() +
   geom_sf(data = grc_nuts, fill = "lightblue", color = "black") +  # Plot the polygon
-  geom_sf(data = wt_grc, color = "red", size = 3) +  # Plot the point on top
+  geom_sf(data = wt_grc, color = "red", size = 5, fill=NA) +  # Plot the point on top
   #geom_sf(data = bbox_wf, fill = NA, color = "red", linetype = "dashed") +
   theme_minimal()
 
@@ -297,3 +300,15 @@ mapview(rect)
 dat<-read.csv("C:/Users/reto.spielhofer/OneDrive - NINA/Documents/Projects/WENDY/PGIS_ES/data_base/setup_230710/es_descr.csv")
 es_tab = bq_table(project = "eu-wendy", dataset = "wendy_dev", table = 'es_descr')
 bq_table_upload(x = es_tab, values = dat, create_disposition='CREATE_IF_NEEDED', write_disposition='WRITE_APPEND')
+
+
+
+
+
+
+
+
+
+
+
+
