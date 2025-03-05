@@ -949,7 +949,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
           title = "",
           value = paste0("For each individual area, how suitable do you think the place is for ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang))),"?"),
           h5("The number for each area in the map corresponds to the number of the slider"),
-          h5("0 = unsuitable, 5 = very suitable"),
+          h5("0 = moderately suitable, 5 = very suitable"),
           theme = value_box_theme(bg = orange, fg = "black"),
           showcase = bs_icon("question-octagon-fill")
         ),

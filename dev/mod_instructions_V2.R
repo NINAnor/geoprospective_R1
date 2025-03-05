@@ -946,7 +946,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id,site_type){
     output$slider_container <- renderUI({
       drawn_sf <- drawn_polygons() 
       tagList(
-        paste0("The number for each area in the map corresponds to the number of the slider. For each individual area, how suitable do you think the place is for ",target_activity,"? 0 = unsuitable, 5 = very suitable "),
+        paste0("The number for each area in the map corresponds to the number of the slider. For each individual area, how suitable do you think the place is for ",target_activity,"? 0 = moderately suitable, 5 = very suitable "),
         br(),
         lapply(seq_along(drawn_sf$geometry), function(i) {
           sliderInput(
