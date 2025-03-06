@@ -54,7 +54,7 @@ rm(list = ls())
 
 #### Global settings
 
-project_id<-"pareus" #eu-wendy, pareus
+project_id<-"eu-wendy" #eu-wendy, pareus
 env<-"dev" #c("dev","prod")
 if(project_id=="eu-wendy"){
   source("mod_questionnaire.R")
@@ -73,7 +73,7 @@ if(project_id=="eu-wendy"){
 }
 
 
-site_id<-"SK021" #wendy: GRC, ESP, ITA, pareus: NO0601, SK021
+site_id<-"NOR" #wendy: GRC, ESP, ITA, pareus: NO0601, SK021, FRA_test
 var_lang<-"en" #c("grk","en","ita","esp")
 
 
@@ -95,6 +95,7 @@ if(draw_pol==F){
 bqprojID<-setting$bqproj_id
 wind_lca_questions<-setting$include_wind_lca
 num_tabs <- setting$num_tabs
+
 
 ## color schema
 orange = "#ffa626"

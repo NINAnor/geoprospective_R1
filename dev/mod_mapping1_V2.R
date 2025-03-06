@@ -277,19 +277,34 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
     }
     
     output$map <- renderLeaflet({
-      leaflet(sf_stud_geom) %>%
-        addProviderTiles(providers$OpenStreetMap.Mapnik,options = tileOptions(minZoom = 8, maxZoom = 15),group = "Openstreet map")%>%
-        addProviderTiles(providers$Esri.WorldImagery,options = tileOptions(minZoom = 8, maxZoom = 15),group = "World image")%>%
-        add_full_toolbar(.) %>%
-        addLayersControl(
-          overlayGroups = c("drawn"),
-          options = layersControlOptions(collapsed = FALSE)
-        ) %>%
-        # Add study area to the map
-        addPolygons(color = "orange", weight = 3, smoothFactor = 0.5,
-                    opacity = 1.0, fillOpacity = 0)%>%
+      if(site_type == "onshore"){
+        leaflet(sf_stud_geom) %>%
+          addProviderTiles(providers$OpenStreetMap.Mapnik,options = tileOptions(minZoom = 8, maxZoom = 15),group = "Openstreet map")%>%
+          addProviderTiles(providers$Esri.WorldImagery,options = tileOptions(minZoom = 8, maxZoom = 15),group = "World image")%>%
+          add_full_toolbar(.) %>%
+          addLayersControl(
+            overlayGroups = c("drawn"),
+            options = layersControlOptions(collapsed = FALSE)
+          ) %>%
+          # Add study area to the map
+          addPolygons(color = "orange", weight = 3, smoothFactor = 0.5,
+                      opacity = 1.0, fillOpacity = 0)%>%
           addLayersControl(baseGroups = c("Openstreet map","World image"),
                            options = layersControlOptions(collapsed = FALSE))
+      }else{
+        leaflet(sf_stud_geom) %>%
+          addProviderTiles(providers$OpenStreetMap.Mapnik,group = "Openstreet map")%>%
+          addProviderTiles(providers$Esri.WorldImagery,group = "World image")%>%
+          add_full_toolbar(.) %>%
+          #Add study area to the map
+          addPolygons(color = "orange", weight = 3, smoothFactor = 2,
+                      opacity = 1.0, fillOpacity = 0)%>%
+          addLayersControl(baseGroups = c("Openstreet map","World image"),
+                           overlayGroups = c("drawn"),
+                           options = layersControlOptions(collapsed = FALSE))%>%
+          setView(lat = 59.3233563, lng = 4.8832060, zoom= 10)#utsira
+        
+      }
     })
     
 
@@ -1141,8 +1156,22 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
       
       
       pts_in<-st_transform(pts_in,st_crs(pred))
-      pts <- do.call(rbind, st_geometry(pts_in)) %>% 
-        as_tibble() %>% setNames(c("lon","lat"))
+      
+      extracted_values <- terra::extract(pred_w, pts_in)
+      
+      # Combine with original point data
+      pts_in <- cbind(pts_in, extracted_values)
+      
+      pts_in <- cbind(pts_in, st_coordinates(pts_in))  # Adds X (lon) & Y (lat)
+      colnames(pts_in)[colnames(pts_in) %in% c("X", "Y")] <- c("lon", "lat")
+      pts <- st_drop_geometry(pts_in)
+      
+      pts_in <- na.omit(pts)
+      pts<-pts%>%dplyr::select(lon, lat)
+      
+      
+      # pts <- do.call(rbind, st_geometry(pts_in)) %>% 
+      #   as_tibble() %>% setNames(c("lon","lat"))
       pts$SPECIES<-rep("pres",nrow(pts))
       
       
@@ -1217,21 +1246,37 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
       
 
       output$res_map <- renderLeaflet({
-        leaflet(sf_stud_geom)%>%
-          addPolygons(color = "orange", weight = 3, smoothFactor = 0.5,
-                      opacity = 1.0, fillOpacity = 0)%>%
-          addProviderTiles(providers$OpenStreetMap.Mapnik,options = tileOptions(minZoom = 8, maxZoom = 15),group = "Openstreet map")%>%
-          addProviderTiles(providers$Esri.WorldImagery,options = tileOptions(minZoom = 8, maxZoom = 15),group = "World image")%>%
-          addRasterImage(prediction,colors = color_palette, opacity = 0.6)%>%
-          addLegend(
-            pal = color_palette,
-            values = values(prediction),
-            labels= labels,
-            title = paste0("Probability to benefit from ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang)))),
-            position = "bottomright"
-          )
-        # addLayersControl(baseGroups = c("Openstreet map","World image"),
-        #                  options = layersControlOptions(collapsed = T))
+        if(site_type=="onshore"){
+          leaflet(sf_stud_geom)%>%
+            addPolygons(color = "orange", weight = 3, smoothFactor = 0.5,
+                        opacity = 1.0, fillOpacity = 0)%>%
+            addProviderTiles(providers$OpenStreetMap.Mapnik,options = tileOptions(minZoom = 8, maxZoom = 15),group = "Openstreet map")%>%
+            addProviderTiles(providers$Esri.WorldImagery,options = tileOptions(minZoom = 8, maxZoom = 15),group = "World image")%>%
+            addRasterImage(prediction,colors = color_palette, opacity = 0.6)%>%
+            addLegend(
+              pal = color_palette,
+              values = values(prediction),
+              labels= labels,
+              title = paste0("Probability to benefit from ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang)))),
+              position = "bottomright"
+            )
+        }else{
+          leaflet(sf_stud_geom)%>%
+            addPolygons(color = "orange", weight = 3, smoothFactor = 0.5,
+                        opacity = 1.0, fillOpacity = 0)%>%
+            addProviderTiles(providers$OpenStreetMap.Mapnik,group = "Openstreet map")%>%
+            addProviderTiles(providers$Esri.WorldImagery,group = "World image")%>%
+            addRasterImage(prediction,colors = color_palette, opacity = 0.6)%>%
+            addLegend(
+              pal = color_palette,
+              values = values(prediction),
+              labels= labels,
+              title = paste0("Probability to benefit from ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang)))),
+              position = "bottomright"
+            )%>%
+            setView(lat = 59.3233563, lng = 4.8832060, zoom= 10)#utsira
+        }
+
       })
       remove_modal_progress()
       output$btn_cond<-renderUI({

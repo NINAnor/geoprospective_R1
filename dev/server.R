@@ -303,11 +303,21 @@ function(input, output, session) {
           shinyjs::runjs(paste("$('.nav-tabs li:nth-child(", i, ")').hide();"))
         }else{
           removeUI("#tabs")
-          output$ahp_group<-renderUI({
-            tagList(
-              mod_ahp_group_ui("ahp_group_1")
-            )
-          })
+          if(site_type == "onshore"){
+            output$ahp_group<-renderUI({
+              tagList(
+                mod_ahp_group_ui("ahp_group_1")
+              )
+            })
+          }else{
+            output$ahp_dist<-renderUI({
+              tagList(
+                mod_dist_impact_ui("ahp_dist_1")
+                
+              )
+            })
+          }
+
 
         }
         
@@ -315,36 +325,63 @@ function(input, output, session) {
     })
   }, once = TRUE)
   
-  
-  rv$w <- mod_ahp_group_server("ahp_group_1", isolate(userID()), site_id, area_name)
-  
-  observeEvent(rv$w(),{
-    removeUI("#ahp_group")
-    updateProgressBar(session = session, id = "pb", value = 90)
-    output$ahp_single<-renderUI({
-      tagList(
-        mod_ahp_single_ui("ahp_single_1")
-
-      )
-    })
-    rv$x <- mod_ahp_single_server("ahp_single_1", isolate(userID()), site_id, stud_all)
-  })
-  
-  
-  observeEvent(rv$x(),{
-    removeUI("#ahp_single")
-    if(isTRUE(wind_lca_questions)){
-      #removeUI("#ahp_single")
-      updateProgressBar(session = session, id = "pb", value = 95)
-      output$ahp_dist<-renderUI({
+  if(site_type == "onshore"){
+    rv$w <- mod_ahp_group_server("ahp_group_1", isolate(userID()), site_id, area_name)
+    
+    observeEvent(rv$w(),{
+      removeUI("#ahp_group")
+      updateProgressBar(session = session, id = "pb", value = 90)
+      output$ahp_single<-renderUI({
         tagList(
-          mod_dist_impact_ui("ahp_dist_1")
+          mod_ahp_single_ui("ahp_single_1")
           
         )
       })
-      rv$y <- mod_dist_impact_server("ahp_dist_1", isolate(userID()), site_id, stud_all,site_type)
-    }else{
+      rv$x <- mod_ahp_single_server("ahp_single_1", isolate(userID()), site_id, stud_all)
+    })
+    
+    
+    observeEvent(rv$x(),{
+      removeUI("#ahp_single")
+      if(isTRUE(wind_lca_questions)){
+        #removeUI("#ahp_single")
+        updateProgressBar(session = session, id = "pb", value = 95)
+        output$ahp_dist<-renderUI({
+          tagList(
+            mod_dist_impact_ui("ahp_dist_1")
+            
+          )
+        })
+        rv$y <- mod_dist_impact_server("ahp_dist_1", isolate(userID()), site_id, stud_all,site_type)
+      }else{
+        
+        updateProgressBar(session = session, id = "pb", value = 100)
+        output$final<-renderUI({
+          tagList(
+            bslib::value_box(
+              title= "",
+              showcase_layout = "left center",
+              theme = value_box_theme(bg = blue, fg = "black"),
+              showcase = bs_icon("check-square"),
+              h5("This is the end of the first session of the study, you can now close the browser. Thank you very much for your participation. In case you provided your email, we will contact you soon for the second session."),
+              h5(HTML(paste0(
+                'More information about the <a href="', 
+                setting$project.url, 
+                '">', 
+                setting$project_name, 
+                ' project</a>'
+              )))
+            )
+            
+          )
+        })
+      }
       
+    })
+    
+    
+    observeEvent(rv$y(),{
+      removeUI("#ahp_dist")
       updateProgressBar(session = session, id = "pb", value = 100)
       output$final<-renderUI({
         tagList(
@@ -360,34 +397,41 @@ function(input, output, session) {
               '">', 
               setting$project_name, 
               ' project</a>'
-            )))
-          )
+            )))          )
           
         )
       })
+      
+    })
+    
+  }else{
+    rv$w <- mod_dist_impact_server("ahp_dist_1", isolate(userID()), site_id, stud_all,site_type)
+    observeEvent(rv$w(),{
+      removeUI("#ahp_dist")
+      updateProgressBar(session = session, id = "pb", value = 100)
+      output$final<-renderUI({
+        tagList(
+          bslib::value_box(
+            title= "",
+            showcase_layout = "left center",
+            theme = value_box_theme(bg = blue, fg = "black"),
+            showcase = bs_icon("check-square"),
+            h5("This is the end of the first session of the study, you can now close the browser. Thank you very much for your participation. In case you provided your email, we will contact you soon for the second session."),
+            h5(HTML(paste0(
+              'More information about the <a href="', 
+              setting$project.url, 
+              '">', 
+              setting$project_name, 
+              ' project</a>'
+            )))          )
+          
+        )
+      })
+      
+    })
+      
     }
 
-  })
-  
-  
-  observeEvent(rv$y(),{
-    removeUI("#ahp_dist")
-    updateProgressBar(session = session, id = "pb", value = 100)
-    output$final<-renderUI({
-      tagList(
-        bslib::value_box(
-          title= "",
-          showcase_layout = "left center",
-          theme = value_box_theme(bg = blue, fg = "black"),
-          showcase = bs_icon("check-square"),
-          h5("This is the end of the first session of the study, you can now close the browser. Thank you very much for your participation. In case you provided your email, we will contact you soon for the second session."),
-          h5(HTML('More information about the <a href="https://wendy-project.eu" target="_blank">EU-WENDY project</a>'))
-       )
-
-    )
-  })
-
-  })
   
   
   

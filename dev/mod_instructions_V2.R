@@ -84,6 +84,8 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id,site_type){
         
       }
     ))
+    
+
 
     
     # Function to add the drawing toolbar with only editing and removing options
@@ -121,6 +123,8 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id,site_type){
           editOptions = list(edit = TRUE, remove = TRUE, clearAll = FALSE)# Keep edit/remove options enabled
         )
     }
+
+
     
     output$map <- renderLeaflet({
       if(site_type == "onshore"){
@@ -142,22 +146,16 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id,site_type){
           addProviderTiles(providers$OpenStreetMap.Mapnik,group = "Openstreet map")%>%
           addProviderTiles(providers$Esri.WorldImagery,group = "World image")%>%
           add_full_toolbar(.) %>%
-          addLayersControl(
-            overlayGroups = c("drawn"),
-            options = layersControlOptions(collapsed = FALSE)
-          ) %>%
-          # Add study area to the map
+          #Add study area to the map
           addPolygons(color = "orange", weight = 3, smoothFactor = 2,
                       opacity = 1.0, fillOpacity = 0)%>%
           addLayersControl(baseGroups = c("Openstreet map","World image"),
-                           options = layersControlOptions(collapsed = FALSE))
-      }
+                           overlayGroups = c("drawn"),
+                           options = layersControlOptions(collapsed = FALSE))%>%
+          setView(lat = 59.3233563, lng = 4.8832060, zoom= 10)#utsira
 
+      }
     })
-    
-    
-    
-    
     
     observeEvent(input$to_task1,{
       updateProgressBar(session = session, id = "pb", value = 20)
@@ -310,56 +308,56 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id,site_type){
     
     final_saved_polygons <- reactiveVal(NULL) #
     
-    # Function to add the drawing toolbar with only editing and removing options
-    add_edit_toolbar <- function(map) {
-      map %>%
-        addDrawToolbar(
-          targetGroup = "drawn",
-          polylineOptions = FALSE,
-          polygonOptions = FALSE,
-          circleOptions = FALSE,
-          markerOptions = FALSE,
-          circleMarkerOptions = FALSE,
-          rectangleOptions = FALSE,  # Disable drawing new rectangles
-          editOptions = list(edit = TRUE, remove = TRUE)  # Keep edit/remove options enabled
-        )
-    }
-    
-    # Function to add the full drawing toolbar (including rectangle drawing)
-    add_full_toolbar <- function(map) {
-      map %>%
-        addDrawToolbar(
-          targetGroup = "drawn",
-          polylineOptions = FALSE,
-          polygonOptions = draw_pol,
-          circleOptions = FALSE,
-          markerOptions = FALSE,
-          circleMarkerOptions = FALSE,
-          rectangleOptions = drawRectangleOptions(
-            showArea = FALSE,
-            shapeOptions = drawShapeOptions(
-              clickable = TRUE
-            )
-          ),  # Enable drawing new rectangles
-          editOptions = list(edit = TRUE, remove = TRUE, clearAll = FALSE)# Keep edit/remove options enabled
-        )
-    }
-    
-    output$map <- renderLeaflet({
-      leaflet(sf_stud_geom) %>%
-        addProviderTiles(providers$OpenStreetMap.Mapnik,options = tileOptions(minZoom = 8, maxZoom = 15),group = "Openstreet map")%>%
-        addProviderTiles(providers$Esri.WorldImagery,options = tileOptions(minZoom = 8, maxZoom = 15),group = "World image")%>%
-        add_full_toolbar(.) %>%
-        addLayersControl(
-          overlayGroups = c("drawn"),
-          options = layersControlOptions(collapsed = FALSE)
-        ) %>%
-        # Add study area to the map
-        addPolygons(color = "orange", weight = 3, smoothFactor = 0.5,
-                    opacity = 1.0, fillOpacity = 0)%>%
-        addLayersControl(baseGroups = c("Openstreet map","World image"),
-                         options = layersControlOptions(collapsed = FALSE))
-    })
+    # # Function to add the drawing toolbar with only editing and removing options
+    # add_edit_toolbar <- function(map) {
+    #   map %>%
+    #     addDrawToolbar(
+    #       targetGroup = "drawn",
+    #       polylineOptions = FALSE,
+    #       polygonOptions = FALSE,
+    #       circleOptions = FALSE,
+    #       markerOptions = FALSE,
+    #       circleMarkerOptions = FALSE,
+    #       rectangleOptions = FALSE,  # Disable drawing new rectangles
+    #       editOptions = list(edit = TRUE, remove = TRUE)  # Keep edit/remove options enabled
+    #     )
+    # }
+    # 
+    # # Function to add the full drawing toolbar (including rectangle drawing)
+    # add_full_toolbar <- function(map) {
+    #   map %>%
+    #     addDrawToolbar(
+    #       targetGroup = "drawn",
+    #       polylineOptions = FALSE,
+    #       polygonOptions = draw_pol,
+    #       circleOptions = FALSE,
+    #       markerOptions = FALSE,
+    #       circleMarkerOptions = FALSE,
+    #       rectangleOptions = drawRectangleOptions(
+    #         showArea = FALSE,
+    #         shapeOptions = drawShapeOptions(
+    #           clickable = TRUE
+    #         )
+    #       ),  # Enable drawing new rectangles
+    #       editOptions = list(edit = TRUE, remove = TRUE, clearAll = FALSE)# Keep edit/remove options enabled
+    #     )
+    # }
+    # 
+    # output$map <- renderLeaflet({
+    #   leaflet(sf_stud_geom) %>%
+    #     addProviderTiles(providers$OpenStreetMap.Mapnik,options = tileOptions(minZoom = 8, maxZoom = 15),group = "Openstreet map")%>%
+    #     addProviderTiles(providers$Esri.WorldImagery,options = tileOptions(minZoom = 8, maxZoom = 15),group = "World image")%>%
+    #     add_full_toolbar(.) %>%
+    #     addLayersControl(
+    #       overlayGroups = c("drawn"),
+    #       options = layersControlOptions(collapsed = FALSE)
+    #     ) %>%
+    #     # Add study area to the map
+    #     addPolygons(color = "orange", weight = 3, smoothFactor = 0.5,
+    #                 opacity = 1.0, fillOpacity = 0)%>%
+    #     addLayersControl(baseGroups = c("Openstreet map","World image"),
+    #                      options = layersControlOptions(collapsed = FALSE))
+    # })
     
     # Function to calculate area, check for intersections, and ensure within study area
     update_polygon_area_and_check <- function(polygon_sf, modified) {

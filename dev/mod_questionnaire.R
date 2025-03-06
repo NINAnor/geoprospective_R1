@@ -95,7 +95,12 @@ mod_questionnaire_ui <- function(id){
       br(),
       br(),
       h3("Study area"),
-      fluidRow(h5("The orange border shows the area in which you are going to map different benefits from nature")),
+      if(site_type == "onshore"){
+        fluidRow(h5("The orange border shows the area in which you are going to map different benefits from nature"))
+      }else{
+        fluidRow(h5("The orange border delineates the offshore area in which you are going to map different benefits from nature"))
+      }
+      ,
       br(),
       tags$head(
         tags$style(HTML("
@@ -144,7 +149,8 @@ mod_questionnaire_server <- function(id, user_id, site_id, sf_stud_geom, site_ty
         leaflet(sf_stud_geom) %>%
           addPolygons(color = orange, weight = 3, smoothFactor = 2,
                       opacity = 1.0, fillOpacity = 0)%>%
-          addProviderTiles(providers$OpenStreetMap.Mapnik)
+          addProviderTiles(providers$OpenStreetMap.Mapnik)%>%
+          setView(lat = 59.3233563, lng = 4.8832060, zoom= 10)
       }
      
     })

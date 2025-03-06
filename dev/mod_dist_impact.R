@@ -26,8 +26,8 @@ mod_dist_impact_ui <- function(id){
   ns <- NS(id)
   tagList(
     value_box(
-      title = "",
-      value = "Impacts of wind energy on benefits of nature",
+      title = "Impacts of wind energy on benefits of nature",
+      value = "",
       h4("Imagine that you are visiting a certain location in the study area and that you can see and/or hear a wind turbine from there. According to you, how much are the following different benefits of nature affected by the visual, acoustic or combined impact of the wind turbine?"),
       theme = value_box_theme(bg = orange, fg = "black"),
       showcase = bs_icon("question-octagon-fill")
@@ -48,22 +48,22 @@ mod_dist_impact_ui <- function(id){
 mod_dist_impact_server <- function(id, userID, site_id, stud_all,site_type){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
-    shinyalert(  title = "Impacts of wind energy on nature benefits",
-                 text = "As a last part in this session, you are going to rate the impact of wind turbines on different nature benefits.",
-                 type = "info",
-                 closeOnEsc = TRUE,
-                 closeOnClickOutside = TRUE,
-                 showCancelButton = FALSE,
-                 showConfirmButton = TRUE,
-                 animation = "slide-from-bottom",
-                 size = "s")
+
     ## change it afterwards to the correct es!!
     if(site_type=="onshore"){
       stud_es<-stud_all%>%filter(esID == "recr" | esID == "wild_hunt" | esID == "wild_col"| esID == "habitat"| esID == "sense"| esID == "aest")
-      
+
     }else{
       stud_es<-stud_all%>%filter(esID == "aest_off" | esID == "fish_wilf" | esID == "recr_off"| esID == "sense_off")
-      
+      # shinyalert(  title = "Impacts of wind energy on nature benefits",
+      #              text = "As a last part in this session, you are going to rate the impact of wind turbines on different nature benefits.",
+      #              type = "info",
+      #              closeOnEsc = TRUE,
+      #              closeOnClickOutside = TRUE,
+      #              showCancelButton = FALSE,
+      #              showConfirmButton = TRUE,
+      #              animation = "slide-from-bottom",
+      #              size = "s")
     }
     
     ####
