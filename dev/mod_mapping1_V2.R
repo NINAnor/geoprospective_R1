@@ -128,7 +128,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
             <li>
               Start drawing ", target_geom," on the map, using the following button.
               <br>
-              <img src='draw_btn.png' alt='Map drawing' style='width:40px;'>
+              <img src='",target_geom,"_draw.jpg' alt='Map drawing' style='width:40px;'>
             </li>
           </ul>
         "))),
@@ -145,14 +145,26 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         )
       )
     )
-    output$es_quest_how<-renderUI(tagList(
+    
+    output$es_confidence<-renderUI(tagList(
       value_box(
         title = "",
-        value = paste0("For each area indicate, how well you think they are suited for ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang)))),
+        value = paste0("How confident do you feel that the areas you have indicated are suitable for ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang))),"?"),
+        h5("0 = not confident - 5 = very confident"),
         theme = value_box_theme(bg = orange, fg = "black"),
         showcase = bs_icon("question-octagon-fill")
       )
     ))
+    
+    
+    # output$es_quest_how<-renderUI(tagList(
+    #   value_box(
+    #     title = "",
+    #     value = paste0("For each area indicate, how well you think they are suited for ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang)))),
+    #     theme = value_box_theme(bg = orange, fg = "black"),
+    #     showcase = bs_icon("question-octagon-fill")
+    #   )
+    # ))
     if(site_type == "onshore"){
       output$imp_accText<-renderUI(
         tagList(
@@ -255,7 +267,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
           markerOptions = FALSE,
           circleMarkerOptions = FALSE,
           rectangleOptions = drawRectangleOptions(
-            showArea = TRUE,
+            showArea = FALSE,
             shapeOptions = drawShapeOptions(
               clickable = TRUE
             )
@@ -376,7 +388,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
               <li>
                 You can draw further ",target_geom,", modify or delete areas using the buttons on the left side of the map.
                 <br>
-                <img src='draw_btn.png' alt='Edit buttons on map' style='width:40px;'>
+                <img src='",target_geom,"_draw.jpg' alt='Edit buttons on map' style='width:40px;'>
               </li>
               <li>
               Or you can finish mapping and evaluate the areas in the next step.
@@ -430,7 +442,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
                       <li>
                       Or with modifying, removing areas using the buttons on the left side of the map.
                       <br>
-                      <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
+                      <img src='edit_btn.jpg' alt='Edit buttons on map' style='width:40px;'>
                       </li>
                   </h5>
                 ")
@@ -482,7 +494,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
               <li>
                 You must modify or delete areas using the buttons on the left side of the map to continue.
                 <br>
-                <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
+                <img src='edit_btn.jpg' alt='Edit buttons on map' style='width:40px;'>
               </li>
           </h5>
         ")
@@ -519,7 +531,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
               <li>
                 You must modify or delete the last area using the buttons on the left side of the map to continue.
                 <br>
-                <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
+                <img src='edit_btn.jpg' alt='Edit buttons on map' style='width:40px;'>
               </li>
           </h5>
         ")
@@ -551,7 +563,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
               <li>
                 You must modify or delete the last drawn ",target_geom,"  using the buttons on the left side of the map to continue.
                 <br>
-                <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
+                <img src='edit_btn.jpg' alt='Edit buttons on map' style='width:40px;'>
               </li>
           </h5>
         ")
@@ -580,7 +592,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
               <li>
                 You must modify or delete the last polygon using the buttons on the left side of the map to continue.
                 <br>
-                <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
+                <img src='edit_btn.jpg' alt='Edit buttons on map' style='width:40px;'>
               </li>
           </h5>
         ")
@@ -611,7 +623,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
               <li>
                 You must modify or delete the last area using the buttons on the left side of the map to continue.
                 <br>
-                <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
+                <img src='edit_btn.jpg' alt='Edit buttons on map' style='width:40px;'>
               </li>
           </h5>
         ")
@@ -708,7 +720,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
             </h4>
             <h5>
               <li>
-                <img src='draw_btn.png' alt='Edit buttons on map' style='width:40px;'>
+                <img src='",target_geom,"_draw.jpg' alt='Edit buttons on map' style='width:40px;'>
               </li>
           </h5>
         ")
@@ -720,7 +732,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
             </h4>
             <h5>
               <li>
-                <img src='draw_btn.png' alt='Edit buttons on map' style='width:40px;'>
+                <img src='",target_geom,"_draw.jpg' alt='Edit buttons on map' style='width:40px;'>
               </li>
           </h5>
         ")
@@ -750,7 +762,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
               <li>
                 You can draw further areas, modify or delete these, using the buttons on the left side of the map.
                 <br>
-                <img src='draw_btn.png' alt='Edit buttons on map' style='width:40px;'>
+                <img src='",target_geom,"_draw.jpg' alt='Edit buttons on map' style='width:40px;'>
               </li>
 
           </h5>
@@ -807,6 +819,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
           esID = rand_es_sel$esID,
           userID = userID,
           siteID = site_id,
+          confidence = as.numeric(0.000001),
           imp_acc= as.integer(0),
           imp_nat= as.integer(0),
           imp_lulc = as.integer(0),
@@ -869,7 +882,11 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
       drawn_sf <- drawn_polygons()  # Retrieve the stored polygons
       output$rating<-renderUI( 
         tagList(
-          uiOutput(ns("es_quest_how")),
+          uiOutput(ns("es_confidence")),
+          sliderInput(ns("es_con"), "",
+                      min = 0, max = 5, value = 3),
+          # br(),
+          # uiOutput(ns("es_quest_how")),
           br(),
           leafletOutput(ns("map_res")),
           br(),
@@ -928,7 +945,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
             lng = st_coordinates(st_centroid(drawn_sf))[, 1], 
             lat = st_coordinates(st_centroid(drawn_sf))[, 2], 
             label = paste("ID:", seq_along(drawn_sf$geometry)), 
-            labelOptions = labelOptions(noHide = TRUE, direction = 'top', textOnly = TRUE, style = list('color' = 'red'))
+            labelOptions = labelOptions(noHide = TRUE, direction = 'top', textOnly = TRUE, style = list('color' = 'red', 'font-size' = '18px', 'font-weight' = 'bold'))
           )%>%
           addLayersControl(baseGroups = c("Openstreet map","World image"),
                            options = layersControlOptions(collapsed = FALSE))
@@ -998,13 +1015,19 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         selector = paste0("#",ns("map_res"))
       )
       removeUI(
+        selector =  paste0("div:has(> #",ns("es_con"),")")
+      )
+      removeUI(
         selector =  paste0("div:has(> #",ns("imp_acc"),")")
       )
       removeUI(
         selector = paste0("#",ns("imp_accText")))
       removeUI(
-        selector = paste0("#",ns("es_quest_how"))
+        selector = paste0("#",ns("es_confidence"))
       )
+      # removeUI(
+      #   selector = paste0("#",ns("es_quest_how"))
+      # )
       removeUI(
         selector = paste0("#",ns("slider_container"))
       )
@@ -1141,6 +1164,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
           esID = rand_es_sel$esID,
           userID = userID,
           siteID = site_id,
+          confidence = as.numeric(input$es_con),
           imp_acc= as.integer(input$imp_acc),
           imp_nat= as.integer(0),
           imp_lulc = as.integer(0),
