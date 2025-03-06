@@ -28,13 +28,26 @@ mod_questionnaire_ui <- function(id){
       br(),
       # layout_columns(
 
-        numericInput(ns("age"),
-                       "How old are you?",
-                       NULL,
-                       min=10,
-                       max=110,
-                       step=1),
-        uiOutput(ns("cond_b0")),
+        # numericInput(ns("age"),
+        #                "How old are you?",
+        #                NULL,
+        #                min=10,
+        #                max=110,
+        #                step=1),
+      selectizeInput(ns("age"),
+                     "How old are you?",
+                     choices = c("18-39" =1,
+                                 "40-59"= 2,
+                                 "50-69" = 3,
+                                 "70+" = 4,
+                                 "Prefer not to say"=5),
+                     options = list(
+                       placeholder = 'Please select an option below',
+                       onInitialize = I('function() { this.setValue(""); }')
+                     )
+      ),
+      
+      uiOutput(ns("cond_b0")),
         br(),
 
         selectizeInput(ns("gender"),
@@ -138,7 +151,7 @@ mod_questionnaire_server <- function(id, user_id, site_id, sf_stud_geom, site_ty
     
     output$cond_b0<-renderUI({
       validate(
-        need(input$age >= 10 && input$age <= 110, "Provide your age - Age must be between 18 and 110."),
+        need(input$age != '', 'Select an age category'),
       )
     })
     
@@ -167,20 +180,20 @@ mod_questionnaire_server <- function(id, user_id, site_id, sf_stud_geom, site_ty
     output$cond_b5<-renderUI({
       if(site_type == "onshore"){
         validate(
-          need(input$age >= 10 && input$age <= 110, ""),
-          need(input$age, ''),
+          # need(input$age >= 10 && input$age <= 110, ""),
+          need(input$age != '', ''),
           need(input$gender != '', ''),
           need(input$edu != '', ''),
           need(input$work != '', ''),
-          need(input$length_liv != '', ''),
-          need(input$age >= input$length_liv, "You can't live longer in an area than you are old")
+          need(input$length_liv != '', '')
+          #need(input$age >= input$length_liv, "You can't live longer in an area than you are old")
         )
         actionButton(ns('sub_quest'), 'submit answers', style="color: black; background-color: #31c600; border-color: #31c600")
         
       }else{
         validate(
-          need(input$age >= 10 && input$age <= 110, ""),
-          need(input$age, ''),
+          # need(input$age >= 10 && input$age <= 110, ""),
+          need(input$age != '', ''),
           need(input$gender != '', ''),
           need(input$edu != '', ''),
           need(input$work != '', ''),
