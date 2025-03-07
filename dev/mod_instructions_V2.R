@@ -192,7 +192,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id,site_type){
           h5(HTML(paste0("<ul><li>Try to draw the areas as precise as possible.</li></ul>"))),
           h5(HTML(glue1)),
           h5(HTML(glue2)),
-          h5(HTML(paste0("<ul><li>You will see hte [ha] during you draw. After you finished drawing a ",target_geom,", you will get a feedback if the geometry is valid.</li></ul>"))),
+          h5(HTML(paste0("<ul><li>After you finished drawing a ",target_geom,", you will get a feedback if the geometry is valid.</li></ul>"))),
           # br(),
           tags$head(
             tags$style(HTML("
@@ -213,6 +213,8 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id,site_type){
 
         )
       })
+      
+      
       shinyalert(  title = "Training session",
                    text = paste0("You now have the possibility to explore the map and learn how to draw on the interactive map. This data won`t be stored."),
                    type = "info",
@@ -243,7 +245,6 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id,site_type){
           size = "l",
           title = "",
           h3(paste0("How draw a rectangle")),
-          h5(paste0("You can draw a maximum of {max_rectangles} rectangles on the map.")),
           h5("-click the rectangle button at the left side of the map"),
           h5("-click on the map where you want to place a corner of the rectangle, press and hold the left mouse key "),
           h5("-draw your rectangle and release the mouse"),
@@ -258,7 +259,6 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id,site_type){
           size = "l",
           title = "",
           h3(paste0("How draw polygons or rectangles")),
-          h5(paste0("You can draw a maximum of {max_rectangles} rectangles or polygons on the map.")),
           h4("Rectangles"),
           h5("These are simple geometries but less precise than polygons"),
           h5("-click the rectangle button on the left side of the map"),
@@ -800,7 +800,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id,site_type){
         
         if(nrow(updated_poly)==0 | nrow(existing_polygons) == 0){
           if(target_geom == "rectangle"){
-            del_all_text <- glue("
+            del_all_text <- glue(paste0("
           <h4>
     
               Draw at least one area on the map using the rectangle button.
@@ -810,9 +810,9 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id,site_type){
                 <img src='",target_geom,"_draw.jpg' alt='Edit buttons on map' style='width:40px;'>
               </li>
           </h5>
-        ")
+        "))
           }else{
-            del_all_text <- glue("
+            del_all_text <- glue(paste0("
           <h4>
     
               Draw at least one area on the map using the rectangle or polygon button.
@@ -822,7 +822,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id,site_type){
                 <img src='",target_geom,"_draw.jpg' alt='Edit buttons on map' style='width:40px;'>
               </li>
           </h5>
-        ")
+        "))
           }
 
           shinyalert(
@@ -847,7 +847,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id,site_type){
             }
           )
         }else{
-          del_text <- glue("
+          del_text <- glue(paste0("
             <h5>
               <li>
                 You can draw further areas, modify or delete these, using the buttons on the left side of the map.
@@ -856,7 +856,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id,site_type){
               </li>
 
           </h5>
-        ")
+        "))
           shinyalert(
             title = "Polygon Deleted",
             text = HTML(del_text),

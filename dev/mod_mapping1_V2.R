@@ -118,12 +118,49 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
     glue1<-glue("<ul><li>The minimum size of a drawn area is {A_min} ha or {A_football} soccer fields.</li></ul>")
     glue2<-glue("<ul><li>The maximum size of a drawn area is {A_max_km2} km2 (You need more than 1 hour to hike through the area)</li></ul>")
 
+    # output$es_quest_where<-renderUI(
+    #   tagList(
+    #     value_box(
+    #       title = "",
+    #       value = dplyr::select(rand_es_sel,contains(paste0("esQUEST_",var_lang))),
+    #       theme = value_box_theme(bg = orange, fg = "black"),
+    #       showcase = bs_icon("question-octagon-fill"),
+    #       
+    #     )
+    #   ),
+    #   value_box(
+    #     title= "",
+    #     value ="",
+    #     h5(HTML(paste0("
+    #       <ul>
+    #         <li>
+    #           Start drawing ", target_geom," on the map, using the following button.
+    #           <br>
+    #           <img src='",target_geom,"_draw.jpg' alt='Map drawing' style='width:40px;'>
+    #         </li>
+    #       </ul>
+    #     "))),
+    #     br(),
+    #     h5(HTML("<ul><li>Stay within the orange borders.</li></ul>")),
+    #     h5(HTML("<ul><li>Try to draw the areas as precise as possible.</li></ul>")),
+    #     h5(HTML(glue(paste0("<ul><li>Draw a <b>maximum of {max_rectangles}</b> ", target_geom,"</li></ul>")))),
+    #     h5(HTML(glue1)),
+    #     h5(HTML(glue2)),
+    #     h5(HTML(paste0("<ul><li>After you finished drawing a ",target_geom,", you will get a feedback if the geometry is valid.</li></ul>"))),
+    #     theme = value_box_theme(bg = "white", fg = "black"),
+    #     showcase = bs_icon("book"),
+    #   )
+    # )
+    
     output$es_quest_where<-renderUI(
       tagList(
         value_box(
           title = "",
           value = dplyr::select(rand_es_sel,contains(paste0("esQUEST_",var_lang))),
-          h5(HTML(paste0("
+          theme = value_box_theme(bg = orange, fg = "black"),
+          showcase = bs_icon("question-octagon-fill"),
+        ),
+        h5(HTML(paste0("
           <ul>
             <li>
               Start drawing ", target_geom," on the map, using the following button.
@@ -132,19 +169,17 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
             </li>
           </ul>
         "))),
-          br(),
-          h5(HTML("<ul><li>Stay within the orange borders.</li></ul>")),
-          h5(HTML("<ul><li>Try to draw the areas as precise as possible.</li></ul>")),
-          h5(HTML(glue(paste0("<ul><li>Draw a <b>maximum of {max_rectangles}</b> ", target_geom,"</li></ul>")))),
-          h5(HTML(glue1)),
-          h5(HTML(glue2)),
-          h5(HTML(paste0("<ul><li>You will see hte [ha] during you draw. After you finished drawing a ",target_geom,", you will get a feedback if the geometry is valid.</li></ul>"))),
-          theme = value_box_theme(bg = orange, fg = "black"),
-          showcase = bs_icon("question-octagon-fill"),
-          
-        )
+        br(),
+        h5(HTML("<ul><li>Stay within the orange borders.</li></ul>")),
+        h5(HTML("<ul><li>Try to draw the areas as precise as possible.</li></ul>")),
+        h5(HTML(glue(paste0("<ul><li>Draw a <b>maximum of {max_rectangles}</b> ", target_geom,"</li></ul>")))),
+        h5(HTML(glue1)),
+        h5(HTML(glue2)),
+        h5(HTML(paste0("<ul><li>You will see hte [ha] during you draw. After you finished drawing a ",target_geom,", you will get a feedback if the geometry is valid.</li></ul>")))
       )
     )
+    
+
     
     output$es_confidence<-renderUI(tagList(
       value_box(
@@ -181,7 +216,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         tagList(
           value_box(
             title = "",
-            value = paste0("How important is an easy access (by recreational boating, canoe) to your indicated areas, to benefit from ", dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang))),"?"),
+            value = paste0("How important is an easy access (e.g. by fishing boat, recreational boating, canoe) to your indicated areas, to benefit from ", dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang))),"?"),
             h5("0 = not important at all - 5 = very important"),
             theme = value_box_theme(bg = orange, fg = "black"),
             showcase = bs_icon("question-octagon-fill")
@@ -444,7 +479,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
                     leafletProxy("map") %>%
                       removeDrawToolbar() %>%
                       add_edit_toolbar(.)
-                    max_text <- glue("
+                    max_text <- glue(paste0("
                   <h4>
             
                       <b>Maximum of {max_rectangles}",target_geom," is reached</b>.
@@ -460,7 +495,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
                       <img src='edit_btn.jpg' alt='Edit buttons on map' style='width:40px;'>
                       </li>
                   </h5>
-                ")
+                "))
                     shinyalert(
                       title = paste0("Maximum number of ",target_geom, " reached"),
                       text = HTML(max_text),
@@ -500,7 +535,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
             
           } else if (intersects  & check_valid == TRUE) {
             #   
-            overlay_text <- glue("
+            overlay_text <- glue(paste0("
           <h4>
               Please remove the overlay of the last drawn ",target_geom,".
                </h3>
@@ -512,7 +547,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
                 <img src='edit_btn.jpg' alt='Edit buttons on map' style='width:40px;'>
               </li>
           </h5>
-        ")
+        "))
             shinyalert(
               title = "No overlay!",
               text = HTML(overlay_text),
@@ -537,7 +572,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
             
           } else if (!within_study_area & check_valid == TRUE) {
             # Display error popup alert for out of study area
-            out_text <- glue("
+            out_text <- glue(paste0("
           <h4>
     
               Please place your ",target_geom,"  inside the study area.
@@ -549,7 +584,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
                 <img src='edit_btn.jpg' alt='Edit buttons on map' style='width:40px;'>
               </li>
           </h5>
-        ")
+        "))
             shinyalert(
               title = "Out of Study Area!",
               text = HTML(out_text),
@@ -728,7 +763,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
 
             if(nrow(updated_poly)==0 | nrow(existing_polygons) == 0){
               if(target_geom == "rectangle"){
-                del_all_text <- glue("
+                del_all_text <- glue(paste0("
           <h4>
     
               Draw at least one area on the map using the rectangle button.
@@ -738,9 +773,9 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
                 <img src='",target_geom,"_draw.jpg' alt='Edit buttons on map' style='width:40px;'>
               </li>
           </h5>
-        ")
+        "))
               }else{
-                del_all_text <- glue("
+                del_all_text <- glue(paste0("
           <h4>
     
               Draw at least one area on the map using the rectangle or polygon button.
@@ -750,7 +785,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
                 <img src='",target_geom,"_draw.jpg' alt='Edit buttons on map' style='width:40px;'>
               </li>
           </h5>
-        ")
+        "))
               }
               shinyalert(
                 title = "Polygon Deleted",
@@ -772,7 +807,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
                 }
               )
             }else{
-              del_text <- glue("
+              del_text <- glue(paste0("
             <h5>
               <li>
                 You can draw further areas, modify or delete these, using the buttons on the left side of the map.
@@ -781,7 +816,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
               </li>
 
           </h5>
-        ")
+        "))
               shinyalert(
                 title = "Polygon Deleted",
                 text = HTML(del_text),

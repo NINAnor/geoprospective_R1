@@ -26,9 +26,10 @@ mod_dist_impact_ui <- function(id){
   ns <- NS(id)
   tagList(
     value_box(
-      title = "Impacts of wind energy on benefits of nature",
+      title = "",
       value = "",
-      h4("Imagine that you are visiting a certain location in the study area and that you can see and/or hear a wind turbine from there. According to you, how much are the following different benefits of nature affected by the visual, acoustic or combined impact of the wind turbine?"),
+      h3("Impacts of wind energy on benefits of nature"),
+      uiOutput(ns("dynamic_title")),
       theme = value_box_theme(bg = orange, fg = "black"),
       showcase = bs_icon("question-octagon-fill")
     ),
@@ -49,6 +50,14 @@ mod_dist_impact_server <- function(id, userID, site_id, stud_all,site_type){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
 
+    output$dynamic_title<-renderUI({
+      if(site_type == "onshore"){
+        h4("Imagine that you are visiting a certain location in the study area and that you can see and/or hear a wind turbine from there. According to you, how much are the following different benefits of nature affected by the visual, acoustic or combined impact of the wind turbine?")
+      }else{
+        h4("Imagine an offshore wind farm, how much are the following different benefits from seascapes be affected by the visual, acoustic or combined impact of an offshore wind turbine?")
+      }
+    })
+    
     ## change it afterwards to the correct es!!
     if(site_type=="onshore"){
       stud_es<-stud_all%>%filter(esID == "recr" | esID == "wild_hunt" | esID == "wild_col"| esID == "habitat"| esID == "sense"| esID == "aest")

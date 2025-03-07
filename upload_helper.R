@@ -11,23 +11,23 @@ bq_auth(
   path = "dev/gcs_keys/eu-wendy_key.json"
 )
 
-dataset<-"wendy_dev"
+dataset<-"wendy_prod"
 
 
 #### offshore geometry
 NOR_off<-st_read("C:/Users/reto.spielhofer/OneDrive - NINA/Documents/Projects/WENDY/6_PGIS_TOOL_variables/MARINE_ES/NOR_V2.gpkg")
 #simplify
 NOR_off_simple <- st_simplify(NOR_off, dTolerance = 300)  # Adjust tolerance as needed
-st_write(NOR_off_simple,"simple.gpkg")
+#st_write(NOR_off_simple,"simple.gpkg")
 nor_tab<-NOR_off_simple%>%dplyr::select(NAME)
 #NOR_offdet<-st_read("C:/Users/reto.spielhofer/OneDrive - NINA/Documents/Projects/WENDY/6_PGIS_TOOL_variables/MARINE_ES/NOR_V2.gpkg")
 
 
 nor_tab$siteAREAkm2<-as.integer(st_area(NOR_off_simple)/1000000)
-nor_tab$siteNAME<-"North sea & Norwegian sea"
-nor_tab$siteN_es <- as.integer(5)
+nor_tab$siteNAME<-"North- and Norwegian Sea"
+nor_tab$siteN_es <- as.integer(6)
 nor_tab$projID<-"wendy"
-nor_tab$siteID<-"NOR_test"
+nor_tab$siteID<-"NOR"
 nor_tab$siteSTATUS<-as.integer(1)
 nor_tab$siteCREATETIME<-Sys.time()
 nor_tab$siteCREATOR <-"r.spielhofer"
