@@ -56,6 +56,9 @@ rm(list = ls())
 
 project_id<-"eu-wendy" #eu-wendy, pareus
 env<-"dev" #c("dev","prod")
+site_id<-"NOR" #wendy: GRC, ESP, ITA, pareus: NO0601, SK021, FRA_test
+var_lang<-"en" #c("grk","en","ita","esp")
+
 if(project_id=="eu-wendy"){
   source("mod_questionnaire.R")
   source("mod_mapping1_V2.R")
@@ -71,11 +74,6 @@ if(project_id=="eu-wendy"){
   source("mod_ahp_single.R")
 
 }
-
-
-site_id<-"NOR" #wendy: GRC, ESP, ITA, pareus: NO0601, SK021, FRA_test
-var_lang<-"en" #c("grk","en","ita","esp")
-
 
 
 ###########################

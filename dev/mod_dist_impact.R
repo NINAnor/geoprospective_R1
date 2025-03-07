@@ -54,7 +54,7 @@ mod_dist_impact_server <- function(id, userID, site_id, stud_all,site_type){
       stud_es<-stud_all%>%filter(esID == "recr" | esID == "wild_hunt" | esID == "wild_col"| esID == "habitat"| esID == "sense"| esID == "aest")
 
     }else{
-      stud_es<-stud_all%>%filter(esID == "aest_off" | esID == "fish_wilf" | esID == "recr_off"| esID == "sense_off")
+      stud_es<-stud_all%>%filter(esID == "aest_off" | esID == "recr_off" | esID == "fish_wild"| esID == "fish_farm" | esID == "nursery_off")
       # shinyalert(  title = "Impacts of wind energy on nature benefits",
       #              text = "As a last part in this session, you are going to rate the impact of wind turbines on different nature benefits.",
       #              type = "info",
