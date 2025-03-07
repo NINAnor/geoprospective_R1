@@ -136,7 +136,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
     #         <li>
     #           Start drawing ", target_geom," on the map, using the following button.
     #           <br>
-    #           <img src='",target_geom,"_draw.jpg' alt='Map drawing' style='width:40px;'>
+    #           <img src='",target_geom,"_draw.png' alt='Map drawing' style='width:40px;'>
     #         </li>
     #       </ul>
     #     "))),
@@ -165,7 +165,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
             <li>
               Start drawing ", target_geom," on the map, using the following button.
               <br>
-              <img src='",target_geom,"_draw.jpg' alt='Map drawing' style='width:40px;'>
+              <img src='",target_geom,"_draw.png' alt='Map drawing' style='width:40px;'>
             </li>
           </ul>
         "))),
@@ -438,7 +438,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
               <li>
                 You can draw further ",target_geom,", modify or delete areas using the buttons on the left side of the map.
                 <br>
-                <img src='",target_geom,"_draw.jpg' alt='Edit buttons on map' style='width:40px;'>
+                <img src='",target_geom,"_draw.png' alt='Edit buttons on map' style='width:40px;'>
               </li>
               <li>
               Or you can finish mapping and evaluate the areas in the next step.
@@ -492,7 +492,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
                       <li>
                       Or with modifying, removing areas using the buttons on the left side of the map.
                       <br>
-                      <img src='edit_btn.jpg' alt='Edit buttons on map' style='width:40px;'>
+                      <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
                       </li>
                   </h5>
                 "))
@@ -544,7 +544,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
               <li>
                 You must modify or delete areas using the buttons on the left side of the map to continue.
                 <br>
-                <img src='edit_btn.jpg' alt='Edit buttons on map' style='width:40px;'>
+                <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
               </li>
           </h5>
         "))
@@ -581,7 +581,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
               <li>
                 You must modify or delete the last area using the buttons on the left side of the map to continue.
                 <br>
-                <img src='edit_btn.jpg' alt='Edit buttons on map' style='width:40px;'>
+                <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
               </li>
           </h5>
         "))
@@ -613,7 +613,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
               <li>
                 You must modify or delete the last drawn ",target_geom,"  using the buttons on the left side of the map to continue.
                 <br>
-                <img src='edit_btn.jpg' alt='Edit buttons on map' style='width:40px;'>
+                <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
               </li>
           </h5>
         ")
@@ -642,7 +642,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
               <li>
                 You must modify or delete the last polygon using the buttons on the left side of the map to continue.
                 <br>
-                <img src='edit_btn.jpg' alt='Edit buttons on map' style='width:40px;'>
+                <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
               </li>
           </h5>
         ")
@@ -673,7 +673,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
               <li>
                 You must modify or delete the last area using the buttons on the left side of the map to continue.
                 <br>
-                <img src='edit_btn.jpg' alt='Edit buttons on map' style='width:40px;'>
+                <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
               </li>
           </h5>
         ")
@@ -770,7 +770,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
             </h4>
             <h5>
               <li>
-                <img src='",target_geom,"_draw.jpg' alt='Edit buttons on map' style='width:40px;'>
+                <img src='",target_geom,"_draw.png' alt='Edit buttons on map' style='width:40px;'>
               </li>
           </h5>
         "))
@@ -782,7 +782,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
             </h4>
             <h5>
               <li>
-                <img src='",target_geom,"_draw.jpg' alt='Edit buttons on map' style='width:40px;'>
+                <img src='",target_geom,"_draw.png' alt='Edit buttons on map' style='width:40px;'>
               </li>
           </h5>
         "))
@@ -812,7 +812,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
               <li>
                 You can draw further areas, modify or delete these, using the buttons on the left side of the map.
                 <br>
-                <img src='",target_geom,"_draw.jpg' alt='Edit buttons on map' style='width:40px;'>
+                <img src='",target_geom,"_draw.png' alt='Edit buttons on map' style='width:40px;'>
               </li>
 
           </h5>

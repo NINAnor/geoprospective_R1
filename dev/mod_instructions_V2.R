@@ -184,7 +184,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id,site_type){
             <li>
               Start drawing ", target_geom," on the map, using the following button.
               <br>
-              <img src='",target_geom,"_draw.jpg' alt='Map drawing' style='width:40px;'>
+              <img src='",target_geom,"_draw.png' alt='Map drawing' style='width:40px;'>
             </li>
           </ul>
         "))),
@@ -439,7 +439,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id,site_type){
               <li>
                 You can draw further ",target_geom,", modify or delete areas using the buttons on the left side of the map.
                 <br>
-                <img src='",target_geom,"_draw.jpg' alt='Edit buttons on map' style='width:40px;'>
+                <img src='",target_geom,"_draw.png' alt='Edit buttons on map' style='width:40px;'>
               </li>
               <li>
               Or you can finish mapping and evaluate the areas in the next step.
@@ -493,7 +493,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id,site_type){
                       <li>
                       Or with modifying, removing areas using the buttons on the left side of the map.
                       <br>
-                      <img src='edit_btn.jpg' alt='Edit buttons on map' style='width:40px;'>
+                      <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
                       </li>
                   </h5>
                 "))
@@ -546,7 +546,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id,site_type){
               <li>
                 You must modify or delete areas using the buttons on the left side of the map to continue.
                 <br>
-                <img src='edit_btn.jpg' alt='Edit buttons on map' style='width:40px;'>
+                <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
               </li>
           </h5>
         "))
@@ -582,7 +582,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id,site_type){
               <li>
                 You must modify or delete the last area using the buttons on the left side of the map to continue.
                 <br>
-                <img src='edit_btn.jpg' alt='Edit buttons on map' style='width:40px;'>
+                <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
               </li>
           </h5>
         "))
@@ -614,7 +614,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id,site_type){
               <li>
                 You must modify or delete the last drawn ",target_geom,"  using the buttons on the left side of the map to continue.
                 <br>
-                <img src='edit_btn.jpg' alt='Edit buttons on map' style='width:40px;'>
+                <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
               </li>
           </h5>
         "))
@@ -642,7 +642,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id,site_type){
               <li>
                 You must modify or delete the last ",target_geom, " using the buttons on the left side of the map to continue.
                 <br>
-                <img src='edit_btn.jpg' alt='Edit buttons on map' style='width:40px;'>
+                <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
               </li>
           </h5>
         "))
@@ -673,7 +673,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id,site_type){
               <li>
                 You must modify or delete the last area using the buttons on the left side of the map to continue.
                 <br>
-                <img src='edit_btn.jpg' alt='Edit buttons on map' style='width:40px;'>
+                <img src='edit_btn.png' alt='Edit buttons on map' style='width:40px;'>
               </li>
           </h5>
         ")
@@ -807,7 +807,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id,site_type){
             </h4>
             <h5>
               <li>
-                <img src='",target_geom,"_draw.jpg' alt='Edit buttons on map' style='width:40px;'>
+                <img src='",target_geom,"_draw.png' alt='Edit buttons on map' style='width:40px;'>
               </li>
           </h5>
         "))
@@ -819,7 +819,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id,site_type){
             </h4>
             <h5>
               <li>
-                <img src='",target_geom,"_draw.jpg' alt='Edit buttons on map' style='width:40px;'>
+                <img src='",target_geom,"_draw.png' alt='Edit buttons on map' style='width:40px;'>
               </li>
           </h5>
         "))
@@ -852,7 +852,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id,site_type){
               <li>
                 You can draw further areas, modify or delete these, using the buttons on the left side of the map.
                 <br>
-                <img src='",target_geom,"_draw.jpg' alt='Edit buttons on map' style='width:40px;'>
+                <img src='",target_geom,"_draw.png' alt='Edit buttons on map' style='width:40px;'>
               </li>
 
           </h5>
