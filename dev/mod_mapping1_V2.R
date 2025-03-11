@@ -1026,7 +1026,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
         lapply(seq_along(drawn_sf$geometry), function(i) {
           sliderInput(
             inputId = ns(paste0("slider_", i)),
-            label = paste("Area ID:", i),
+            label = paste("Area ID: ", i),
             min = 0, max = 5, value = 3  # Default value set to 3, can be customized
           )
         })
