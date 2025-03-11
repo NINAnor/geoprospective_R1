@@ -790,6 +790,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
               shinyalert(
                 title = "Polygon Deleted",
                 text = HTML(del_all_text),
+                html = T,
                 type = "info",
                 showCancelButton = F,
                 confirmButtonText = "Draw at least one area",
@@ -820,6 +821,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
               shinyalert(
                 title = "Polygon Deleted",
                 text = HTML(del_text),
+                html = T,
                 type = "info",
                 showCancelButton = TRUE,
                 confirmButtonText = "Finish mapping - evaluate areas",

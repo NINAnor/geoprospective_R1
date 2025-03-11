@@ -799,6 +799,8 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id,site_type){
         
         
         if(nrow(updated_poly)==0 | nrow(existing_polygons) == 0){
+          print(nrow(updated_poly))
+          print(nrow(existing_polygons))
           if(target_geom == "rectangle"){
             del_all_text <- glue(paste0("
           <h4>
@@ -831,7 +833,7 @@ mod_instructions_server <- function(id,sf_stud_geom,userID,site_id,site_type){
             html = T,
             type = "info",
             showCancelButton = F,
-            confirmButtonText = "Draw area",
+            confirmButtonText = "Draw at least one area",
             #cancelButtonText = "Draw at least one rectangle",
             closeOnClickOutside = FALSE,
             callbackR = function(confirm) {

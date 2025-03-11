@@ -251,7 +251,7 @@ mod_questionnaire_server <- function(id, user_id, site_id, sf_stud_geom, site_ty
         req(grd)
         if(input$length_liv >0){
           
-          map_liv<- leaflet() %>%
+          map_liv<- leaflet(options = leafletOptions(zoomControl = TRUE)) %>%
             addProviderTiles(providers$OpenStreetMap.Mapnik, options = tileOptions(minZoom = 8, maxZoom = 15))%>%
             addFeatures(st_sf(grd), layerId = ~seq_len(length(grd)))
           
