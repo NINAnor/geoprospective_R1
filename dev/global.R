@@ -55,9 +55,9 @@ rm(list = ls())
 #### Global settings
 
 project_id<-"pareus" #eu-wendy, pareus
-env<-"dev" #c("dev","prod")
+env<-"prod" #c("dev","prod")
 site_id<-"SK021" #wendy: GRC, ESP, ITA, pareus: NO0601, SK021, FRA_test
-var_lang<-"en" #c("grk","en","ita","esp")
+var_lang<-"svk" #c("grk","en","ita","esp")
 
 if(project_id=="eu-wendy"){
   source("mod_questionnaire.R")

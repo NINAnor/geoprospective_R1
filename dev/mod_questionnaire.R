@@ -36,11 +36,13 @@ mod_questionnaire_ui <- function(id){
         #                step=1),
       selectizeInput(ns("age"),
                      "How old are you?",
-                     choices = c("18-39" =1,
-                                 "40-59"= 2,
-                                 "50-69" = 3,
-                                 "70+" = 4,
-                                 "Prefer not to say"=5),
+                     choices = c("18-29" =1,
+                                 "30-39"= 2,
+                                 "40-49" = 3,
+                                 "50-59" = 4,
+                                 "60-69" = 5,
+                                 "70+" = 6,
+                                 "Prefer not to say"=7),
                      options = list(
                        placeholder = 'Please select an option below',
                        onInitialize = I('function() { this.setValue(""); }')
