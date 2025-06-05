@@ -37,6 +37,7 @@ mod_delphi_round1_ui <- function(id){
                    label = "Explain me this nature benefit"),
       
       br(),
+      br(),
       # questions of importance
       uiOutput(ns("imp_text")),
       br(),
@@ -48,37 +49,41 @@ mod_delphi_round1_ui <- function(id){
       
       br(),
       # are you able to map the ES?
-      uiOutput(ns("map_poss")),
+      #uiOutput(ns("map_poss")),
+      uiOutput(ns("es_quest_where")),
       br(),
+      leafletOutput(ns("map")),
+      uiOutput(ns("rating"))
+      #br(),
       # if ES not mappable
-      conditionalPanel(
-        condition = "input.map_poss == 'No'", ns = ns ,
-        tagList(
-          value_box(
-            title = "",
-            value = "Would you trust an expert evaluation regarding suitable areas for this nature benefit?",
-            theme = value_box_theme(bg = orange, fg = "black"),
-            showcase = bs_icon("question-octagon-fill")
-          ),
-          selectizeInput(ns("expert_map"),label="" ,choices = c("Yes","No"),options = list(
-            placeholder = 'Please select an option below',
-            onInitialize = I('function() { this.setValue(""); }')))%>%
-            
-            shinyInput_label_embed(
-              icon("info") %>%
-                bs_embed_tooltip(title = "An expert evaluation could be either a physical model, including various indicators or expert judgements based on their knowledge",placement = "right")
-            ),
-          use_bs_tooltip()
-        )
-        
-        
-        # actionButton(ns("submit2"),"save")
-      ),
-      
-      conditionalPanel(
-        condition = "input.expert_map != ''", ns=ns,
-        actionButton(ns("confirm"), "Next task", style="color: black; background-color: #31c600; border-color: #31c600")
-      )
+      # conditionalPanel(
+      #   condition = "input.map_poss == 'No'", ns = ns ,
+      #   tagList(
+      #     value_box(
+      #       title = "",
+      #       value = "Would you trust an expert evaluation regarding suitable areas for this nature benefit?",
+      #       theme = value_box_theme(bg = orange, fg = "black"),
+      #       showcase = bs_icon("question-octagon-fill")
+      #     ),
+      #     selectizeInput(ns("expert_map"),label="" ,choices = c("Yes","No"),options = list(
+      #       placeholder = 'Please select an option below',
+      #       onInitialize = I('function() { this.setValue(""); }')))%>%
+      #       
+      #       shinyInput_label_embed(
+      #         icon("info") %>%
+      #           bs_embed_tooltip(title = "An expert evaluation could be either a physical model, including various indicators or expert judgements based on their knowledge",placement = "right")
+      #       ),
+      #     use_bs_tooltip()
+      #   )
+      #   
+      #   
+      #   # actionButton(ns("submit2"),"save")
+      # ),
+      # 
+      # conditionalPanel(
+      #   condition = "input.expert_map != ''", ns=ns,
+      #   actionButton(ns("confirm"), "Next task", style="color: black; background-color: #31c600; border-color: #31c600")
+      # )
     )
   )
 }
@@ -180,16 +185,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
     )
     
 
-    
-    output$es_confidence<-renderUI(tagList(
-      value_box(
-        title = "",
-        value = paste0("How confident do you feel that the areas you have indicated are suitable for ",dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang))),"?"),
-        h5("0 = not confident - 5 = very confident"),
-        theme = value_box_theme(bg = orange, fg = "black"),
-        showcase = bs_icon("question-octagon-fill")
-      )
-    ))
+
     
     
     # output$es_quest_how<-renderUI(tagList(
@@ -223,6 +219,17 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
           )
         ))
     }
+    
+    output$secure_Text<-renderUI(
+      tagList(
+        value_box(
+          title = "",
+          value = paste0("How confident are you about your specified areas to benefit from ", dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang))),"?"),
+          h5("0 = very unsure - 5 = very confident that these are good areas to benefit from the specified ecosystem service"),
+          theme = value_box_theme(bg = orange, fg = "black"),
+          showcase = bs_icon("question-octagon-fill")
+        )
+      ))
 
     
     output$blog_descr<-renderUI(
@@ -250,22 +257,22 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
     
     
     # UI rendered to ask if able to map ES
-    output$map_poss<-renderUI({
-      tagList(
-        value_box(
-          title = "",
-          value = paste0("Are you able to map areas that are well suited for ", dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang)))," according to you in the study area?"),
-          theme = value_box_theme(bg = orange, fg = "black"),
-          showcase = bs_icon("question-octagon-fill")
-        ),
-        selectizeInput(ns("map_poss"),label="",choices = c("Yes","No"),options = list(
-          placeholder = 'Please select an option below',
-          onInitialize = I('function() { this.setValue(""); }')
-        ))
-        
-      )
-      
-    })
+    # output$map_poss<-renderUI({
+    #   tagList(
+    #     value_box(
+    #       title = "",
+    #       value = paste0("Are you able to map areas that are well suited for ", dplyr::select(rand_es_sel,contains(paste0("esNAME_",var_lang)))," according to you in the study area?"),
+    #       theme = value_box_theme(bg = orange, fg = "black"),
+    #       showcase = bs_icon("question-octagon-fill")
+    #     ),
+    #     selectizeInput(ns("map_poss"),label="",choices = c("Yes","No"),options = list(
+    #       placeholder = 'Please select an option below',
+    #       onInitialize = I('function() { this.setValue(""); }')
+    #     ))
+    #     
+    #   )
+    #   
+    # })
     
     drawn_polygons <- reactiveVal(st_sf(
       leaflet_id = integer(1),  # Two rows (features)
@@ -349,19 +356,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
     })
 
     
-    observeEvent(input$map_poss,{
-      if(input$map_poss == "Yes"){
 
-        insertUI(selector =paste0("#",ns("map_poss")),
-                 where = "afterEnd",
-                 ui=tagList(
-                   uiOutput(ns("es_quest_where")),
-                   br(),
-                   leafletOutput(ns("map")),
-                   uiOutput(ns("rating"))
-                   
-                 )
-        )
         
         update_polygon_area_and_check <- function(polygon_sf, modified) {
           #print("-----------")
@@ -858,74 +853,26 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
           #existing_polygons<-existing_polygons%>%filter(leaflet_id != leaf_id)
         })
 
-      }#/if yes
-    })#/map_poss
-    
-    
-    ## if mapping not possible: (save results )
-    observeEvent(input$confirm,{
-      
-      if(input$expert_map !=""){
-        show_modal_spinner(color = green,text = "update data base")
-        train_param<-list(
-          esID = rand_es_sel$esID,
-          userID = userID,
-          siteID = site_id,
-          confidence = as.integer(NA),
-          imp_acc= as.integer(0),
-          imp_nat= as.integer(0),
-          imp_lulc = as.integer(0),
-          imp_own = as.integer(input$imp_own),
-          imp_other = as.integer(input$imp_other),
-          rel_training_A = as.numeric(0.000001),
-          n_poly = as.integer(0),
-          blog = "NA",
-          poss_mapping = "No",
-          expert_trust = input$expert_map,
-          mapping_order = as.numeric(order),
-          extrap_AUC = as.numeric(NA),
-          extrap_KAPPA = as.numeric(NA),
-          extrap_propC = as.numeric(NA),
-          # extrap_demIMP = as.numeric(0),
-          # extrap_accIMP = as.numeric(0),
-          # extrap_lulcIMP = as.numeric(0),
-          # extrap_natIMP = as.numeric(0),
-          mapTIME_h = as.numeric((Sys.time()-mapTIME_start)/3600)
-        )
-        train_param<-as.data.frame(train_param)
-        # insert_upload_job(table_con$project, table_con$dataset, "es_mappingR1", train_param)
-        es_mapping_tab = bq_table(project = project_id, dataset = dataset, table = 'es_mappingR1')
-        bq_table_upload(x = es_mapping_tab, values = train_param, create_disposition='CREATE_IF_NEEDED', write_disposition='WRITE_APPEND')
-        
-        removeUI(
-          selector = paste0("#",ns("expert_map"))
-        )
-        remove_modal_spinner()
-      }
-      
-      
-    })
-
     
 
     #remove mapping question as soon as decided
-    observeEvent(input$map_poss,{
-      if(input$map_poss !=""){
-        removeUI(
-          selector = paste0("#",ns("map_poss"))
-        )
-        removeUI(
-          selector =  paste0("div:has(> #",ns("imp_own"),")")
-        )
-
-        removeUI(
-          selector =  paste0("div:has(> #",ns("imp_other"),")")
-        )
-        removeUI(
-          selector = paste0("#",ns("imp_text")))
-        
-      }
-    })
+    # observeEvent(input$map_poss,{
+    #   if(input$map_poss !=""){
+    #     removeUI(
+    #       selector = paste0("#",ns("map_poss"))
+    #     )
+        # removeUI(
+        #   selector =  paste0("div:has(> #",ns("imp_own"),")")
+        # )
+        # 
+        # removeUI(
+        #   selector =  paste0("div:has(> #",ns("imp_other"),")")
+        # )
+        # removeUI(
+        #   selector = paste0("#",ns("imp_text")))
+    #     
+    #   }
+    # })
     
     ### confirm the drawings and render the sliders with the leaflet map
     
@@ -934,12 +881,6 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
       drawn_sf <- drawn_polygons()  # Retrieve the stored polygons
       output$rating<-renderUI( 
         tagList(
-          uiOutput(ns("es_confidence")),
-          sliderInput(ns("es_con"), "",
-                      min = 0, max = 5, value = 3),
-          # br(),
-          # uiOutput(ns("es_quest_how")),
-          br(),
           leafletOutput(ns("map_res")),
           br(),
           uiOutput(ns("slider_container")),
@@ -964,6 +905,9 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
                   )
               )
           ),
+          uiOutput(ns("secure_Text")),
+          sliderInput(ns("secure"), "",
+                      min = 0, max = 5, value = 3),
           br(),
           uiOutput(ns("cond_1"))
           # conditionalPanel(
@@ -972,6 +916,17 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
           # )
         )
       )
+      
+      ## remove initial questions
+      removeUI(
+        selector =  paste0("div:has(> #",ns("imp_own"),")")
+      )
+      
+      removeUI(
+        selector =  paste0("div:has(> #",ns("imp_other"),")")
+      )
+      removeUI(
+        selector = paste0("#",ns("imp_text")))
       
       ############
       output$cond_1<-renderUI({
@@ -1075,7 +1030,10 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
       removeUI(
         selector = paste0("#",ns("imp_accText")))
       removeUI(
-        selector = paste0("#",ns("es_confidence"))
+        selector = paste0("#",ns("secure_Text"))
+      )
+      removeUI(
+        selector = paste0("#",ns("secure"))
       )
       # removeUI(
       #   selector = paste0("#",ns("es_quest_how"))
@@ -1230,7 +1188,7 @@ mod_delphi_round1_server <- function(id, sf_stud_geom, rand_es_sel, order, userI
           esID = rand_es_sel$esID,
           userID = userID,
           siteID = site_id,
-          confidence = as.integer(input$es_con),
+          confidence = as.integer(input$secure),
           imp_acc= as.integer(input$imp_acc),
           imp_nat= as.integer(0),
           imp_lulc = as.integer(0),

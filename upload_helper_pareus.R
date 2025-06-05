@@ -5,8 +5,8 @@ library(dplyr)
 library(giscoR)
 library(ggplot2)
 
-dev <- "prod" #prod
-cntr_proj<-"SVK"
+dev <- "dev" #prod
+cntr_proj<-"FRA"
 
 
 # upload db
@@ -58,7 +58,10 @@ in_df$geometry<-st_as_text(in_geom$geometry)
 es_tab = bq_table(project = "pareus", dataset = dataset, table = 'study_site')
 bq_table_upload(x = es_tab, values = in_df, create_disposition='CREATE_IF_NEEDED', write_disposition='WRITE_APPEND')
 
-############## SVK
+## france has 2 id's FRL04 = Bouche du Rhone and
+## Slovakia has SK021
+
+############## from gisco
 in_geom<-gisco_get_nuts(year = "2021",
                          epsg = "4326",
                          cache = TRUE,
@@ -68,11 +71,11 @@ in_geom<-gisco_get_nuts(year = "2021",
                          resolution = "01",
                          spatialtype = "RG",
                          country = cntr_proj,
-                         nuts_id = c("SK021"),
+                         nuts_id = c("FRL04"),
                          nuts_level = "3")
 
 ##### establish df
-in_df <- data.frame(siteID="SK021",
+in_df <- data.frame(siteID="FRL04",
                     cntrID=cntr_proj, 
                     projID = "pareus",
                     stringsAsFactors=FALSE)
@@ -81,18 +84,14 @@ in_df$siteAREAkm2<-as.integer(st_area(in_geom)/1000000)
 in_df$siteNAME<-in_geom$NAME_LATN
 in_df$siteN_es <- as.integer(5)
 in_df$siteTYPE<-"onshore"
-in_df$siteLANG<-"svk"
+in_df$siteLANG<-"fra"
 in_df$siteSTATUS<-as.integer(1)
 in_df$siteCREATETIME<-Sys.time()
 in_df$siteCREATOR <-"r.spielhofer"
-in_df$INSTITUTION <-"ILEASAS"
+in_df$INSTITUTION <-"INRAE"
 # add geometry
 in_df$geometry<-st_as_text(in_geom$geometry)
 
 es_tab = bq_table(project = "pareus", dataset = dataset, table = 'study_site')
 bq_table_upload(x = es_tab, values = in_df, create_disposition='CREATE_IF_NEEDED', write_disposition='WRITE_APPEND')
-
-
-
-
 

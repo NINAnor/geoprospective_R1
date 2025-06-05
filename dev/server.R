@@ -261,7 +261,8 @@ function(input, output, session) {
   ## hide tabs
   observeEvent(input$tabs_content, {
     # num_tabs<-num_tabs()
-    rand_es_sel<-stud_es[sample(nrow(stud_es)),]
+    #random selection of es according to num tabs
+    rand_es_sel<-stud_es[sample(num_tabs),]
     pred<-pred()
     # rand_es_sel<-stud_es
     # sf_stud_geom<-sf_stud_geom()
