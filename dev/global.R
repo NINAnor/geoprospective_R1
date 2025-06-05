@@ -56,8 +56,8 @@ rm(list = ls())
 
 project_id<-"pareus" #eu-wendy, pareus
 env<-"dev" #c("dev","prod")
-site_id<-"SK021" #wendy: GRC, ESP, ITA, pareus: NO0601, SK021, FRA_test
-var_lang<-"svk" #c("grk","en","ita","esp")
+site_id<-"SK021" #wendy: GRC, ESP, ITA, pareus: NO0601, SK021, FRL04
+var_lang<-"fra" #c("grk","en","ita","esp")
 
 if(project_id=="eu-wendy"){
   source("mod_questionnaire.R")
@@ -121,14 +121,6 @@ con_admin<-data.frame(
   dataset = dataset,
   billing = project_id
 )
-
-
-# con_admin <- dbConnect(
-#   bigrquery::bigquery(),
-#   project = con_admin$project,
-#   dataset = con_admin$dataset,
-#   billing = con_admin$billing
-# )
 
 con_admin <- dbPool(
   bigrquery::bigquery(),
