@@ -1,0 +1,13 @@
+name: pareus_SVK_test
+title: pareus_SVK_test
+username: geoprospective
+account: geoprospective
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 14215628
+bundleId: 9926644
+url: https://geoprospective.shinyapps.io/pareus_SVK_test/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: env_var_FRA_test/acc.tif|env_var_FRA_test/dem.tif|env_var_FRA_test/int.tif|env_var_FRA_test/lulc.tif|env_var_FRA_test/model_performance.csv|env_var_NO0601/acc.tif|env_var_NO0601/dem.tif|env_var_NO0601/int.tif|env_var_NO0601/lulc.tif|env_var_NOR/acc.tif|env_var_NOR/dem.tif|env_var_NOR/int.tif|env_var_NOR/lulc.tif|gcs_keys/eu-wendy_key.json|mod_dist_impact.R|mod_instructions.R|mod_mapping1.R
