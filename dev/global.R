@@ -56,8 +56,8 @@ rm(list = ls())
 
 project_id<-"pareus" #eu-wendy, pareus
 env<-"dev" #c("dev","prod")
-site_id<-"FRL04" #wendy: GRC, ESP, ITA, pareus: NO0601, SK021, FRL04
-var_lang<-"fra" #c("grk","en","ita","esp")
+site_id<-"OVR" #wendy: GRC, ESP, ITA, pareus: NO0601, SK021, FRL04
+var_lang<-"en" #c("grk","en","ita","esp")
 
 if(project_id=="eu-wendy"){
   source("mod_questionnaire.R")
