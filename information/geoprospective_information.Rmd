@@ -1,0 +1,89 @@
+---
+title: "Geoprospective"
+subtitle: "A participatory mapping of ecosystem services"
+
+output: 
+  html_document:
+    css: styles.css
+    toc: true
+    toc_float: true
+    number_sections: true
+    theme: flatly  # Themes: flatly, lumen, spacelab, etc.
+---
+
+```{r setup, include=FALSE}
+library(ggplot2)
+library(dplyr)
+library(kableExtra)
+library(htmlwidgets)
+library(leaflet)
+library(leaflet.extras)
+```
+Pulished: [Reto Spielhofer - NINA](mailto:reto.spielhofer@nina.no).
+
+_Last updated on `r format(Sys.Date(), '%B %d, %Y')`._
+
+# What is this study about?
+The landscapes in which we live consist of a mix of different land-use such as for example urban settlements and natural areas including agriculture, forestry and natural protected areas. Landscapes change continuously, shaped by our activities as well as natural processes.
+
+Human activities may reduce the benefits we gain from nature, such as possibilites for berry-picking, outdoor recreation, flood protection or carbon sequestration. To ensure that we can keep on benefitting from the nature that is surrounding us, it is important to understand how and where people actually benefit from nature.
+
+_Geoprospective_ is a tool to participatory map ecosystem services. With their individual knowledge, norms and values different people delineate areas on a map, which they know are particularly good to benefit from specific ecosystem service. These people don't need to be experts in biology, ecology or geography, they just need to know outdoor areas from which they gain certain benefits. The tool anonymously collects and stores this data and then calculates a map for the whole study region that shows areas where people benefit more or less from nature.
+
+
+# Why do we map ecosystem service benefits?
+Maps of ecosystem services shows where are valuable areas for individual people or communities and which benefits they get from nature. Thus, this information is crucial for landscape and area planning and for project development to minimize impacts on areas that are valuable for people and nature. Imagine a new road is planned within a forest that many local people use for recreational or spiritual activities. A map, representing these values helps the project planners to think about measures to minimize the loss of the valuable areas or compensation strategies. If the map does not exist, the recreational value is can not be balanced against the value of a new road.
+
+Thus, Geoprospective does not only produce such important data basis, the tool also enables local people to represent their values in the map. Including this data augments acceptance and local anchoring of landscape planning and project siting decisions. 
+
+# How does the tool work
+
+The whole study consists of two mapping rounds. In each of the rounds the Geoprospective tool is applied to map your individual areas you benefit from nature. You are free to participate in either both or just the first mapping round.
+
+## First round
+
+As a first step, you are asked a few questions regarding your background and your familiarity with the study area.
+
+As a next step you will be trained how to draw polygons on the interactive map to show us your valuable areas to benefit from nature. 
+
+_You can use the map below to try out the drawing of the polygons or rectangles on the map. For this use the control panel on the left side of the map. (The training in the study will contain more detailed instructions.)_
+
+```{r, echo = FALSE}
+leaflet() %>%
+  setView(lng = 10.75, lat = 63.0, zoom = 7) %>%  # Center on Norway
+  addTiles() %>%
+  addDrawToolbar(
+    targetGroup = "drawn",
+    polylineOptions = FALSE,
+    rectangleOptions = TRUE,
+    circleOptions = FALSE,
+    markerOptions = FALSE,
+    circleMarkerOptions = FALSE,
+    polygonOptions = drawPolygonOptions(showArea = TRUE),
+    editOptions = editToolbarOptions()
+  ) %>%
+  addLayersControl(
+    overlayGroups = c("your areas"),
+    options = layersControlOptions(collapsed = FALSE)
+  )
+```
+
+
+After the training and introduction you are asked to delineate areas on the interactive maps for different nature benefits. You can rate the areas and give some explanations why they are important to you. Finally you will see your individual ecosystem service benefit map for the whole study area.
+
+The study closes with a few questions about ecosystem services in the study area. The whole procedure takes you approximately 30 minutes.
+Please notice that you **can't store** your answers during the questionnaire and come back later, so you must complete the exercise in one go.
+
+
+## Second round
+A few days after the first round, you will receive another link to enter the second round. You will then see your areas, mapped in the first round and areas which all other participants have mapped and their explanations why they have mapped these areas. With this new information we are ask you to reconsider your initially mapped areas. This will lead to a consensus based map, based on many study participants. The consensus will reflect on areas participants highly agree with each other that these are important areas to benefit from nature.
+
+
+
+# How can you contribute?
+To contribute in the study you must
+
+- be familiar with the study area as a resident, or tourist
+- be able to draw on an online computer map _(after introduction)_
+- read, understand and write in your local language
+

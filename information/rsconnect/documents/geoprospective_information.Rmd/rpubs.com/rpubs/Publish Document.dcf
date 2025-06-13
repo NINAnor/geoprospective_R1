@@ -1,0 +1,10 @@
+name: Publish Document
+title:
+username:
+account: rpubs
+server: rpubs.com
+hostUrl: rpubs.com
+appId: https://api.rpubs.com/api/v1/document/1321793/e7f394f2d5a4469295ff291254fd3087
+bundleId: https://api.rpubs.com/api/v1/document/1321793/e7f394f2d5a4469295ff291254fd3087
+url: http://rpubs.com/retospielhofer/1321793
+version: 1
